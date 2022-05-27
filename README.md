@@ -16,8 +16,10 @@ RUN THE CODE
 To install this code you will need to open your Shell and insert the following command:
 
 
-pip install . 
 
+
+   pip install .
+  
 
 
 To run this code you will need to use your Python and insert the following command:
