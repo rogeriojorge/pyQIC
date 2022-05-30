@@ -7,7 +7,7 @@ Various utility functions
 import logging
 import numpy as np
 import scipy.optimize
-from qsc.fourier_interpolation import fourier_interpolation
+from qic.fourier_interpolation import fourier_interpolation
 from scipy.interpolate import CubicSpline as spline
 
 #logging.basicConfig(level=logging.INFO)

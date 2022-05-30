@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-class Qsc():
+class Qic():
     """
     This is the main class for representing the quasisymmetric
     stellarator construction.
@@ -283,7 +283,7 @@ class Qsc():
         The QI configuration refers to section 8.2 of
         Plunk, Landreman, and Helander, Journal of Plasma Physics 85, 905850602 (2019)
 
-        You can specify any other arguments of the ``Qsc`` constructor
+        You can specify any other arguments of the ``qic`` constructor
         in ``kwargs``. You can also use ``kwargs`` to override any of
         the properties of the configurations from the papers. For
         instance, you can modify the value of ``etabar`` in the first
@@ -291,7 +291,7 @@ class Qsc():
 
         .. code-block::
 
-          q = qsc.Qsc.from_paper('r1 section 5.1', etabar=1.1)
+          q = qic.Qic.from_paper('r1 section 5.1', etabar=1.1)
         """
 
         def add_default_args(kwargs_old, **kwargs_new):
@@ -595,7 +595,7 @@ class Qsc():
             print("Axis shape not specified")
             # Calculate nNormal
         if nNormal==None:
-            stel = Qsc(rc=rc, rs=rs, zc=zc, zs=zs, nfp=nfp)
+            stel = Qic(rc=rc, rs=rs, zc=zc, zs=zs, nfp=nfp)
             nNormal = stel.iotaN - stel.iota
         else:
             nNormal = nNormal

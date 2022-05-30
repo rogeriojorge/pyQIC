@@ -7,7 +7,7 @@ off-axis cylindrical toroidal angle
 import numpy as np
 from scipy.optimize import root_scalar
 
-def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
+def Frenet_to_cylindrical_residual_func(phi0, phi_target, qic):
     """
     This function takes a point on the magnetic axis with a given
     toroidal angle phi0, computes the actual toroidal angle phi
@@ -20,13 +20,13 @@ def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
     """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
-    R0_at_phi0   = qsc.R0_func(phi0)
-    X_at_phi0    = qsc.X_spline(phi0)
-    Y_at_phi0    = qsc.Y_spline(phi0)
-    normal_R     = qsc.normal_R_spline(phi0)
-    normal_phi   = qsc.normal_phi_spline(phi0)
-    binormal_R   = qsc.binormal_R_spline(phi0)
-    binormal_phi = qsc.binormal_phi_spline(phi0)
+    R0_at_phi0   = qic.R0_func(phi0)
+    X_at_phi0    = qic.X_spline(phi0)
+    Y_at_phi0    = qic.Y_spline(phi0)
+    normal_R     = qic.normal_R_spline(phi0)
+    normal_phi   = qic.normal_phi_spline(phi0)
+    binormal_R   = qic.binormal_R_spline(phi0)
+    binormal_phi = qic.binormal_phi_spline(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -36,10 +36,10 @@ def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
     total_x = R0_at_phi0 * cosphi0 + X_at_phi0 * normal_x + Y_at_phi0 * binormal_x
     total_y = R0_at_phi0 * sinphi0 + X_at_phi0 * normal_y + Y_at_phi0 * binormal_y
 
-    if qsc.order != 'r1':
-        Z_at_phi0    = qsc.Z_spline(phi0)
-        tangent_R    = qsc.tangent_R_spline(phi0)
-        tangent_phi  = qsc.tangent_phi_spline(phi0)
+    if qic.order != 'r1':
+        Z_at_phi0    = qic.Z_spline(phi0)
+        tangent_R    = qic.tangent_R_spline(phi0)
+        tangent_phi  = qic.tangent_phi_spline(phi0)
 
         tangent_x = tangent_R * cosphi0 - tangent_phi * sinphi0
         tangent_y = tangent_R * sinphi0 + tangent_phi * cosphi0
@@ -53,7 +53,7 @@ def Frenet_to_cylindrical_residual_func(phi0, phi_target, qsc):
     if (Frenet_to_cylindrical_residual < -np.pi): Frenet_to_cylindrical_residual = Frenet_to_cylindrical_residual + 2*np.pi
     return Frenet_to_cylindrical_residual
 
-def Frenet_to_cylindrical_1_point(phi0, qsc):
+def Frenet_to_cylindrical_1_point(phi0, qic):
     """
     This function takes a point on the magnetic axis with a given
     toroidal angle phi0 and computes the cylindrical coordinate
@@ -64,17 +64,17 @@ def Frenet_to_cylindrical_1_point(phi0, qsc):
     """
     sinphi0 = np.sin(phi0)
     cosphi0 = np.cos(phi0)
-    R0_at_phi0   = qsc.R0_func(phi0)
-    z0_at_phi0   = qsc.Z0_func(phi0)
-    X_at_phi0    = qsc.X_spline(phi0)
-    Y_at_phi0    = qsc.Y_spline(phi0)
-    Z_at_phi0    = qsc.Z_spline(phi0)
-    normal_R     = qsc.normal_R_spline(phi0)
-    normal_phi   = qsc.normal_phi_spline(phi0)
-    normal_z     = qsc.normal_z_spline(phi0)
-    binormal_R   = qsc.binormal_R_spline(phi0)
-    binormal_phi = qsc.binormal_phi_spline(phi0)
-    binormal_z   = qsc.binormal_z_spline(phi0)
+    R0_at_phi0   = qic.R0_func(phi0)
+    z0_at_phi0   = qic.Z0_func(phi0)
+    X_at_phi0    = qic.X_spline(phi0)
+    Y_at_phi0    = qic.Y_spline(phi0)
+    Z_at_phi0    = qic.Z_spline(phi0)
+    normal_R     = qic.normal_R_spline(phi0)
+    normal_phi   = qic.normal_phi_spline(phi0)
+    normal_z     = qic.normal_z_spline(phi0)
+    binormal_R   = qic.binormal_R_spline(phi0)
+    binormal_phi = qic.binormal_phi_spline(phi0)
+    binormal_z   = qic.binormal_z_spline(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -86,10 +86,10 @@ def Frenet_to_cylindrical_1_point(phi0, qsc):
 
     total_z = z0_at_phi0           + X_at_phi0 * normal_z + Y_at_phi0 * binormal_z
 
-    if qsc.order != 'r1':
-        tangent_R   = qsc.tangent_R_spline(phi0)
-        tangent_phi = qsc.tangent_phi_spline(phi0)
-        tangent_z   = qsc.tangent_z_spline(phi0)
+    if qic.order != 'r1':
+        tangent_R   = qic.tangent_R_spline(phi0)
+        tangent_phi = qic.tangent_phi_spline(phi0)
+        tangent_z   = qic.tangent_z_spline(phi0)
 
         tangent_x = tangent_R * cosphi0 - tangent_phi * sinphi0
         tangent_y = tangent_R * sinphi0 + tangent_phi * cosphi0

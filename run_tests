@@ -10,11 +10,11 @@
 # root directory.
 
 # Example of running all tests for a specific module:
-#python -m unittest -v qsc.tests.test_newton
+#python -m unittest -v qic.tests.test_newton
 
 # Example of running a specific test that matches a pattern:
-#python -m unittest -v qsc.tests.test_grad_B_tensor.GradGradBTensorTests -k axisymm
-#python -m unittest -v qsc.tests.test_spectral_diff_matrix -k Fourier
+#python -m unittest -v qic.tests.test_grad_B_tensor.GradGradBTensorTests -k axisymm
+#python -m unittest -v qic.tests.test_spectral_diff_matrix -k Fourier
 
 # Run all tests:
 python -m unittest -v
