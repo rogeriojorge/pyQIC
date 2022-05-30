@@ -4,15 +4,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="qsc",
+    name="qic",
     version="0.0.5",
-    author="Matt Landreman",
-    author_email="matt.landreman@gmail.com",
-    description="Quasisymmetric Stellarator Construction",
+    author="Rogerio Jorge and Matt Landreman",
+    author_email="rogerio.jorge@tecnico.ulisboa.pt",
+    description="Quasi-isodynamic Stellarator Construction",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    url="https://github.com/landreman/pyQSC",
+    url="https://github.com/rogeriojorge/pyQICC",
     #install_requires=['numpy', 'scipy'],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -21,4 +21,4 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
 )
-#    packages=["qsc"],
+#    packages=["qic"],

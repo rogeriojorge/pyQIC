@@ -222,7 +222,7 @@ def create_subplot(ax, x_2D_plot, y_2D_plot, z_2D_plot, colormap, elev=90, azim=
     ax.elev = elev
     ax.azim = azim
 
-def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
+def create_field_lines(qic, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
     '''
     Function to compute the (X, Y, Z) coordinates of field lines at
     several alphas, where alpha = theta-iota*varphi with (theta,varphi)
@@ -230,7 +230,7 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
     from the scipy library to smooth out the lines
 
     Args:
-      qsc: instance of self
+      qic: instance of self
       alphas: array of field line labels alpha
       X_2D: 2D array for the x components of the surface
       Y_2D: 2D array for the y components of the surface
@@ -251,8 +251,8 @@ def create_field_lines(qsc, alphas, X_2D, Y_2D, Z_2D, phimax=2*np.pi, nphi=500):
     for i in range(len(alphas)):
         for j in range(len(phi_array)):
             phi_mod = np.mod(phi_array[j],2*np.pi)
-            varphi0=qsc.nu_spline(phi_array[j])+2*phi_array[j]-phi_mod
-            theta_fieldline=qsc.iota*varphi0+alphas[i]
+            varphi0=qic.nu_spline(phi_array[j])+2*phi_array[j]-phi_mod
+            theta_fieldline=qic.iota*varphi0+alphas[i]
             theta_fieldline_mod=np.mod(theta_fieldline,2*np.pi)
             fieldline_X[i,j] = X_2D_spline(phi_mod,theta_fieldline_mod)[0]
             fieldline_Y[i,j] = Y_2D_spline(phi_mod,theta_fieldline_mod)[0]

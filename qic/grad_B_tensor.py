@@ -19,7 +19,7 @@ def calculate_grad_B_tensor(self):
     The formula for the grad B tensor is eq (3.12) of
     Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
 
-    self should be an instance of Qsc with X1c, Y1s etc populated.
+    self should be an instance of qic with X1c, Y1s etc populated.
     """
 
     s = self # Shorthand
@@ -71,7 +71,7 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     Compute the components of the grad grad B tensor, and the scale
     length L grad grad B associated with the Frobenius norm of this
     tensor.
-    self should be an instance of Qsc with X1c, Y1s etc populated.
+    self should be an instance of Qic with X1c, Y1s etc populated.
     The grad grad B tensor in discussed around eq (3.13)
     Landreman (2021): Figures of merit for stellarators near the magnetic axis, JPP
     although an explicit formula is not given there.
