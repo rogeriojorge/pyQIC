@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    url="https://github.com/rogeriojorge/pyQICC",
+    url="https://github.com/rogeriojorge/pyQIC",
     #install_requires=['numpy', 'scipy'],
     classifiers=[
         "Programming Language :: Python :: 3",
