@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="qic",
-    version="0.0.5",
+    name="qicna",
+    version="0.0.1",
     author="Rogerio Jorge and Matt Landreman",
     author_email="rogerio.jorge@tecnico.ulisboa.pt",
     description="Quasi-isodynamic Stellarator Construction",
