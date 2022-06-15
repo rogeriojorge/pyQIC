@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-from qsc.qsc import Qsc
+from qic.qic import Qic
 import logging
 
 logging.basicConfig(level=logging.INFO)
