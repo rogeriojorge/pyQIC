@@ -17,20 +17,14 @@ USEFUL LINKS
 If you need more help click [here](https://landreman.github.io/pyQSC/getting_started.html#)
 
 
-RUN THE CODE
+INSTALLATION
 =
+To install the code you will need to follow the steps bellow:
+<br>
 
 To install this code you will need to open your Shell and insert the following command:
 ```
 pip install .
-```
-<br>
-
-To run this code you will need to use your Python and insert the following command:
-
-```
-from qic import Qic
-stel = Qic.from_paper('r2 section 5.2')
 ```
 <br>
 
@@ -40,6 +34,7 @@ Example:
 git clone _link_
 ``` 
 <br>
+
 
 Then intall the package to your local python environment with:
 ```
@@ -59,10 +54,14 @@ pip install numpy scipy matplotlib
 ``` 
 <br>
 
-Post-Installation
+RUN THE CODE
 =
 
-If the installation is successful, pyQIC will be added to your python environment. To use it in python, simply import the module as:
+To run this code you will need to use your Python and insert the following command:
+
 ```
->>> from qic import Qic
+from qic import Qic
+stel = Qic.from_paper('r2 section 5.2')
 ```
+<br>
+
