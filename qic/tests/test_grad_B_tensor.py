@@ -3,7 +3,7 @@
 import unittest
 import numpy as np
 import logging
-from qsc.qsc import Qsc
+from qic.qic import Qic
 
 logger = logging.getLogger(__name__)
 
