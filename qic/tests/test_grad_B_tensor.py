@@ -3,7 +3,7 @@
 import unittest
 import numpy as np
 import logging
-from qsc.qsc import Qsc
+from qic.qic import Qic
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         # Test the grad B tensor in axisymmetry, including symmetry in both indices
         Rmajor = np.random.rand() * 2 + 0.3
         B0 = np.random.rand() * 2 + 1.0
-        stel = Qsc(rc=[Rmajor, 0.], zs=[0, 0.], etabar=1.0, B0=B0)
+        stel = Qic(rc=[Rmajor, 0.], zs=[0, 0.], etabar=1.0, B0=B0)
         factor = stel.B0 / Rmajor
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical[0, 0], np.zeros(stel.nphi))
@@ -146,7 +146,7 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdx_cartesian, dBdx_cartesian.transpose(1, 0, 2))
 
         # Test the grad B tensor for another configuration, including symmetry in both indices
-        stel = Qsc.from_paper(1)
+        stel = Qic.from_paper(1)
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical, dBdx_cylindrical.transpose(1, 0, 2))
         dBdx_cartesian = stel.grad_B_tensor_cartesian()

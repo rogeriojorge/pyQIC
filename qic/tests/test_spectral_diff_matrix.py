@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-from qsc.spectral_diff_matrix import spectral_diff_matrix
+from qic.spectral_diff_matrix import spectral_diff_matrix
 
 class SpectralDiffMatrixTests(unittest.TestCase):
 
