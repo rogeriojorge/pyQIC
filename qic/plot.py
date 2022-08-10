@@ -305,10 +305,10 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
             for ph in range(fieldline_X.shape[1]):
                 [fieldline_X_rotated[th,ph], fieldline_Y_rotated[th,ph], fieldline_Z_rotated[th,ph]] = rx.apply(rz.apply(np.array([fieldline_X[th,ph], fieldline_Y[th,ph], fieldline_Z[th,ph]])))
         # Plot surfaces
-        mlab.mesh(x_2D_plot_rotated, y_2D_plot_rotated-shift_array[i], z_2D_plot_rotated, scalars=Bmag, colormap='viridis', opacity=0.8)
+        mlab.mesh(x_2D_plot_rotated, y_2D_plot_rotated-shift_array[i], z_2D_plot_rotated, scalars=Bmag, colormap='viridis', opacity=1.0)
         # Plot field lines
         for j in range(len(alphas)):
-            mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(1,1,1), line_width=0.002, tube_radius=0.008)
+            mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.002, tube_radius=0.008)
 
 def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25):
     '''
@@ -517,13 +517,13 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
                     # Show RZ plot
                     plt.show()
                 # Create 3D figure
-                fig_3d = mlab.figure(bgcolor=(1,1,1), size=(550,600))
+                fig_3d = mlab.figure(bgcolor=(1,1,1), size=(580,600))
                 # Create subplots
                 create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
                                     fieldline_X, fieldline_Y, fieldline_Z,
                                     Bmag, degrees_array_x, degrees_array_z, shift_array)
                 # Create a good camera angle
-                mlab.view(azimuth=0, elevation=0, distance=7.0, focalpoint=(0,0,0), figure=fig_3d)
+                mlab.view(azimuth=0, elevation=0, distance=8.0, focalpoint=(0,0,0), figure=fig_3d)
                 # Create the colorbar and change its properties
                 cb = mlab.colorbar(orientation='vertical', title='|B| [T]', nb_labels=7)
                 cb.scalar_bar.unconstrained_font_size = True
