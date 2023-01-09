@@ -310,12 +310,12 @@ def calculate_r2(self):
     self.B20_anomaly = B20 - self.B20_mean
     self.B20_residual = np.sqrt(np.sum((B20 - self.B20_mean) * (B20 - self.B20_mean) * d_l_d_phi) * normalizer) / B0
     self.B20_variation = np.max(B20) - np.min(B20)
-
-    # In QI, B2=B20+B2cQI*Cos(2*theta-2*alpha)+B2sQI*Sin(2*theta-2*alpha)
-    angle = self.alpha - (-self.helicity * self.nfp * self.varphi)
-    self.B2cQI = self.B2c_array * np.cos(2*angle) + self.B2s_array * np.sin(2*angle)
-    self.B2sQI = self.B2s_array * np.cos(2*angle) - self.B2c_array * np.sin(2*angle)
-
+ 
+    # In QI,   B2=B20+B2cQI*Cos(2*(theta-iota*phi+nu)) + B2sQI*Sin(2*(theta-iota*phi+nu)), nu=self.alpha + iota*phi
+    # In here, B2=B20+B2carray*Cos(2*(theta-N*phi))    + B2sarray*Sin(2*(theta-N*phi))
+    angle = self.alpha + (-self.helicity * self.nfp * self.varphi) # = nu-iotaN*phi
+    self.B2cQI = self.B2c_array * np.cos(2*angle) - self.B2s_array * np.sin(2*angle)
+    self.B2sQI = self.B2s_array * np.cos(2*angle) + self.B2c_array * np.sin(2*angle)
 
     self.G2 = G2
 
@@ -359,13 +359,13 @@ def calculate_r2(self):
     # self.B20_of_varphi = self.B20_spline(self.varphi-self.nu_spline(self.phi))
     if self.omn:
         d_B0_d_varphi = np.matmul(self.d_d_varphi, self.B0)
+        d_d_d_varphi = np.matmul(self.d_d_varphi, self.d)
         d_2_B0_d_varphi2 = np.matmul(self.d_d_varphi, d_B0_d_varphi)
-        k_factor = self.d * self.B0 / d_B0_d_varphi
-        d_dB0_d_varphi = np.matmul(self.d_d_varphi,k_factor) * d_B0_d_varphi + k_factor * d_2_B0_d_varphi2
-        self.B2QI_factor = k_factor * d_dB0_d_varphi * (1 - (3/2) * k_factor * d_2_B0_d_varphi2/d_dB0_d_varphi)
-        self.B20QI_deviation = self.B20   + self.B20[::-1]   + self.B2QI_factor
-        self.B2cQI_deviation = self.B2cQI + self.B2cQI[::-1] + self.B2QI_factor
-        self.B2sQI_deviation = self.B2sQI + self.B2sQI[::-1]
+        multiplicative_factor = self.d * self.B0 / d_B0_d_varphi / d_B0_d_varphi /4
+        self.B2QI_factor = multiplicative_factor * (2*d_B0_d_varphi * (self.d*d_B0_d_varphi+self.B0*d_d_d_varphi) - self.B0*self.d*d_2_B0_d_varphi2)
+        self.B20QI_deviation = self.B20   - self.B20[::-1]   # B20(phi) = B20(-phi) -> not sure about this one. If this leads to stellarator-symmetry, why in QS B20=constant?
+        self.B2cQI_deviation = self.B2cQI - self.B2QI_factor # B2c(phi) = (1/4)*(B0^2 d^2 / B0')'
+        self.B2sQI_deviation = self.B2sQI + self.B2sQI[::-1] # B2s(phi) =-B20(-phi)
         self.B20QI_deviation_max = max(abs(self.B20QI_deviation))
         self.B2cQI_deviation_max = max(abs(self.B2cQI_deviation))
         self.B2sQI_deviation_max = max(abs(self.B2sQI_deviation))
