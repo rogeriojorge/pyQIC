@@ -27,21 +27,21 @@ def init_axis(self):
     rc  = self.rc
     rs  = self.rs
     nfp = self.nfp
-    if omn and np.max(np.abs(self.rs))>0:
-        # if len(rs)>6:
-        #     rc[6]=-(1 + rs[2] + rs[4] + (rs[2] + 4 * rs[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
-        # elif len(rs)>4:
-        #     rs[4]=-(1 + rs[2] + 4 * rs[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
-        # else:
-        rs[2]= 1 / (1 + 4 * nfp * nfp)
-    else:
-        if omn:
-            if len(rc)>6:
-                rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
-            elif len(rc)>4:
-                rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
-            else:
-                rc[2]=-1 / (1 + 4 * nfp * nfp)
+    # if omn and np.max(np.abs(self.rs))>0:
+    #     # if len(rs)>6:
+    #     #     rc[6]=-(1 + rs[2] + rs[4] + (rs[2] + 4 * rs[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
+    #     # elif len(rs)>4:
+    #     #     rs[4]=-(1 + rs[2] + 4 * rs[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
+    #     # else:
+    #     rs[2]= 1 / (1 + 4 * nfp * nfp)
+    # else:
+    if omn:
+        if len(rc)>6:
+            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
+        elif len(rc)>4:
+            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
+        else:
+            rc[2]=-1 / (1 + 4 * nfp * nfp)
 
     # Shorthand:
     nphi = self.nphi
