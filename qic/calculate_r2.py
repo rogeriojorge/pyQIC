@@ -302,8 +302,8 @@ def calculate_r2(self):
     #             - 0.25 * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs))
     B20 = B0 * (curvature * X20 - B0_over_abs_G0 * np.matmul(d_d_varphi, Z20)) + (3/(4*B0)) * (B1c*B1c + B1s*B1s)\
         + (B0/G0)*(G2 + iota * I2) - 0.25 * B0 * curvature * curvature * (X1c*X1c + X1s*X1s)\
-        - 0.25 * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs)
-
+        - 0.25 * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs) * B0
+ 
     d_l_d_phi = self.d_l_d_phi
     normalizer = 1 / np.sum(d_l_d_phi)
     self.B20_mean = np.sum(B20 * d_l_d_phi) * normalizer
@@ -311,9 +311,9 @@ def calculate_r2(self):
     self.B20_residual = np.sqrt(np.sum((B20 - self.B20_mean) * (B20 - self.B20_mean) * d_l_d_phi) * normalizer) / B0
     self.B20_variation = np.max(B20) - np.min(B20)
  
-    # In QI,   B2=B20+B2cQI*Cos(2*(theta-iota*phi+nu)) + B2sQI*Sin(2*(theta-iota*phi+nu)), nu=self.alpha + iota*phi
+    # In QI,   B2=B20+B2cQI*Cos(2*(theta-iota*phi+nu)) + B2sQI*Sin(2*(theta-iota*phi+nu)), nu= iota*phi - self.alpha
     # In here, B2=B20+B2carray*Cos(2*(theta-N*phi))    + B2sarray*Sin(2*(theta-N*phi))
-    angle = self.alpha + (-self.helicity * self.nfp * self.varphi) # = nu-iotaN*phi
+    angle = - self.alpha + (-self.helicity * self.nfp * self.varphi) # = nu-iotaN*phi
     self.B2cQI = self.B2c_array * np.cos(2*angle) - self.B2s_array * np.sin(2*angle)
     self.B2sQI = self.B2s_array * np.cos(2*angle) + self.B2c_array * np.sin(2*angle)
 
@@ -363,9 +363,9 @@ def calculate_r2(self):
         d_2_B0_d_varphi2 = np.matmul(self.d_d_varphi, d_B0_d_varphi)
         multiplicative_factor = self.d * self.B0 / d_B0_d_varphi / d_B0_d_varphi /4
         self.B2QI_factor = multiplicative_factor * (2*d_B0_d_varphi * (self.d*d_B0_d_varphi+self.B0*d_d_d_varphi) - self.B0*self.d*d_2_B0_d_varphi2)
-        self.B20QI_deviation = self.B20   - self.B20[::-1]   # B20(phi) = B20(-phi) -> not sure about this one. If this leads to stellarator-symmetry, why in QS B20=constant?
+        self.B20QI_deviation = self.B20   - self.B20[::-1]   # B20(phi) = B20(-phi)
         self.B2cQI_deviation = self.B2cQI - self.B2QI_factor # B2c(phi) = (1/4)*(B0^2 d^2 / B0')'
-        self.B2sQI_deviation = self.B2sQI + self.B2sQI[::-1] # B2s(phi) =-B20(-phi)
+        self.B2sQI_deviation = self.B2sQI + self.B2sQI[::-1] # B2s(phi) =-B2s(-phi)
         self.B20QI_deviation_max = max(abs(self.B20QI_deviation))
         self.B2cQI_deviation_max = max(abs(self.B2cQI_deviation))
         self.B2sQI_deviation_max = max(abs(self.B2sQI_deviation))
