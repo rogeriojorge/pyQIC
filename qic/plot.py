@@ -34,7 +34,7 @@ def plot(self, newfigure=True, show=True, savefig=None):
         nrows = 4
         ncols = 8
         if self.omn:
-            nrows=5
+            nrows=6
     elif self.order == 'r3':
         nrows = 6
         ncols = 8
