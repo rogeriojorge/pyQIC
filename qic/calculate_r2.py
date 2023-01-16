@@ -316,6 +316,8 @@ def calculate_r2(self):
     angle = - self.alpha + (-self.helicity * self.nfp * self.varphi) # = nu-iotaN*phi
     self.B2cQI = self.B2c_array * np.cos(2*angle) - self.B2s_array * np.sin(2*angle)
     self.B2sQI = self.B2s_array * np.cos(2*angle) + self.B2c_array * np.sin(2*angle)
+    self.B2cQI_spline = self.convert_to_spline(self.B2cQI)
+    self.B2sQI_spline = self.convert_to_spline(self.B2sQI)
 
     self.G2 = G2
 
@@ -362,10 +364,12 @@ def calculate_r2(self):
         d_d_d_varphi = np.matmul(self.d_d_varphi, self.d)
         d_2_B0_d_varphi2 = np.matmul(self.d_d_varphi, d_B0_d_varphi)
         multiplicative_factor = self.d * self.B0 / d_B0_d_varphi / d_B0_d_varphi /4
-        self.B2QI_factor = multiplicative_factor * (2*d_B0_d_varphi * (self.d*d_B0_d_varphi+self.B0*d_d_d_varphi) - self.B0*self.d*d_2_B0_d_varphi2)
-        self.B20QI_deviation = self.B20   - self.B20[::-1]   # B20(phi) = B20(-phi)
-        self.B2cQI_deviation = self.B2cQI - self.B2QI_factor # B2c(phi) = (1/4)*(B0^2 d^2 / B0')'
-        self.B2sQI_deviation = self.B2sQI + self.B2sQI[::-1] # B2s(phi) =-B2s(-phi)
+        multiplicative_factor = multiplicative_factor
+        self.B2cQI_factor = multiplicative_factor * (2*d_B0_d_varphi * (self.d*d_B0_d_varphi+self.B0*d_d_d_varphi) - self.B0*self.d*d_2_B0_d_varphi2)
+        self.B2cQI_factor_spline = self.convert_to_spline(self.B2cQI_factor)
+        self.B20QI_deviation = self.B20_spline(self.phi) - self.B20_spline(-self.phi)   # B20(phi) = B20(-phi)
+        self.B2cQI_deviation = self.B2cQI_spline(self.phi) - self.B2cQI_factor_spline(self.phi) # B2c(phi) = (1/4)*(B0^2 d^2 / B0')'
+        self.B2sQI_deviation = self.B2sQI_spline(self.phi) + self.B2sQI_spline(-self.phi) # B2s(phi) =-B2s(-phi)
         self.B20QI_deviation_max = max(abs(self.B20QI_deviation))
         self.B2cQI_deviation_max = max(abs(self.B2cQI_deviation))
         self.B2sQI_deviation_max = max(abs(self.B2sQI_deviation))
