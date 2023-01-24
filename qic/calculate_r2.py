@@ -116,9 +116,18 @@ def calculate_r2(self):
 
     # X2s = B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2s) - 2*iota_N*Z2c + B0_over_abs_G0 * ( abs_G0_over_B0*abs_G0_over_B0*self.B2s_array/B0 + (qc * qs + rc * rs)/2)) / curvature
     if self.omn:
-        # X2s = self.B2s_array
-        X2s = np.array(sum([self.B2s_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2s_svals))])) \
-            + np.array(sum([self.B2s_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2s_cvals))]))
+        # If the length of the input array B2s_svals is equal to nphi, then interpret it as B2s on the phi grid
+        if np.size(self.B2s_svals) == self.nphi:
+            X2s = self.B2s_svals
+        else:
+            X2s = np.array(sum([self.B2s_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2s_svals))]))
+        # If the length of the input array B2s_cvals is equal to nphi, then interpret it as B2s on the phi grid
+        if np.size(self.B2s_cvals) == self.nphi:
+            X2s = X2s + self.B2s_cvals
+        else:
+            X2s = X2s + np.array(sum([self.B2s_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2s_cvals))]))
+        # X2s = np.array(sum([self.B2s_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2s_cvals))])) \
+        #     + np.array(sum([self.B2s_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2s_svals))]))
         # self.B2s_array = X2s * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2s) - 2*iota_N*Z2c - B0_over_abs_G0 * ( \
         #     + 3 * G0 * G0 * B1c * B1s / (2 * B0**4) - X1c * X1s / 2 * (curvature * abs_G0_over_B0)**2 - (qc * qs + rc * rs)/2))
         self.B2s_array = 3 * B1c * B1s / (2 * B0) \
@@ -133,8 +142,18 @@ def calculate_r2(self):
     #        + abs_G0_over_B0*abs_G0_over_B0*etabar*etabar/2 - (qc * qc - qs * qs + rc * rc - rs * rs)/4)) / curvature
     if self.omn:
         # X2c = self.B2c_array
-        X2c = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))])) \
-            + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
+        # If the length of the input array B2c_svals is equal to nphi, then interpret it as B2c on the phi grid
+        if np.size(self.B2c_svals) == self.nphi:
+            X2c = self.B2c_svals
+        else:
+            X2c = np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
+        # If the length of the input array B2c_cvals is equal to nphi, then interpret it as B2c on the phi grid
+        if np.size(self.B2c_cvals) == self.nphi:
+            X2c = X2c + self.B2c_cvals
+        else:
+            X2c = X2c + np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))]))
+        # X2c = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))])) \
+        #     + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
         # self.B2c_array = X2c * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * ( \
         #     + 3 * G0 * G0 * (B1c*B1c-B1s*B1s)/(4*B0**4) - (X1c*X1c - X1s*X1s)/4*(curvature*abs_G0_over_B0)**2 \
         #     - (qc * qc - qs * qs + rc * rc - rs * rs)/4))
