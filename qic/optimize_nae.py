@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy import integrate as integ
 from scipy import optimize
 from .util import mu0
+from .fourier_interpolation import fourier_interpolation
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -53,16 +54,86 @@ def opt_fun_stel(x_iter, stel, x_param_label, fun_opt, info = {'Nfeval':0}, res_
     res = fun_opt(stel, extras)
     if verbose:
         print(f"{info['Nfeval']} -", x_iter)
-        print(f"\N{GREEK CAPITAL LETTER DELTA}B2c = {stel.B2cQI_deviation_max:.4f},",
-            # f"1/rc = {1/stel.r_singularity:.2f},",
-            # f"1/L\N{GREEK CAPITAL LETTER DELTA}B = {np.max(stel.inv_L_grad_B):.2f},",
-            f"Residual = {res:.4f}")
+        if stel.order == 'r2':
+            print(f"\N{GREEK CAPITAL LETTER DELTA}B2c = {stel.B2cQI_deviation_max:.4f},",
+                # f"1/rc = {1/stel.r_singularity:.2f},",
+                # f"1/L\N{GREEK CAPITAL LETTER DELTA}B = {np.max(stel.inv_L_grad_B):.2f},",
+                f"Residual = {res:.4f}")
+        else: 
+            print(f"Residual = {res:.4f}")
     res_history.append(res) # Attach residual value to history
     return res
 
 def fun(stel, extras):
     # Second order QI quality residual for B2c (simple case as an example)
     res = stel.B2cQI_deviation_max
+    return res
+
+def min_geo_qi_consistency(stel, order = 1):
+    """
+    Function that computes the consistency conditions of a first order construction with 
+    second order QI at the points phi=0,pi/nfp, and returns the mismatch.
+
+    stel = the stellarator construction, Qic.
+    order = order of the zeroes of curvature at the points where the consistency conditions
+        are to be evaluated. This determines the number of constraints.
+    
+    """
+    # Define various quantities obtained from Qic
+    d_d_varphi = stel.d_d_varphi
+    B0 = stel.B0
+    dB0 = np.matmul(d_d_varphi, B0)
+    B0_over_abs_G0 = stel.B0 / np.abs(stel.G0)
+    abs_G0_over_B0 = 1 / B0_over_abs_G0
+    dldphi = abs_G0_over_B0
+    X1c = stel.X1c
+    X1s = stel.X1s
+    Y1s = stel.Y1s
+    Y1c = stel.Y1c
+    iota_N = stel.iotaN
+    torsion = stel.torsion
+
+    # Construct second order quantities (like in calculate_r2), but only needing
+    # order = 'r1' quantities
+    V2 = 2 * (Y1s * Y1c + X1s * X1c)
+    V3 = X1c * X1c + Y1c * Y1c - Y1s * Y1s - X1s * X1s
+
+    factor = - B0_over_abs_G0 / 8
+    Z2s = factor*(np.matmul(d_d_varphi,V2) - 2 * iota_N * V3)
+    dZ2s = np.matmul(d_d_varphi,Z2s)
+    Z2c = factor*(np.matmul(d_d_varphi,V3) + 2 * iota_N * V2)
+    dZ2c = np.matmul(d_d_varphi,Z2c)
+
+    qs = np.matmul(d_d_varphi,X1s) - iota_N * X1c - Y1s * torsion * abs_G0_over_B0
+    qc = np.matmul(d_d_varphi,X1c) + iota_N * X1s - Y1c * torsion * abs_G0_over_B0
+    rs = np.matmul(d_d_varphi,Y1s) - iota_N * Y1c + X1s * torsion * abs_G0_over_B0
+    rc = np.matmul(d_d_varphi,Y1c) + iota_N * Y1s + X1c * torsion * abs_G0_over_B0
+
+    # Construct the expressions necessary for the conditions
+    Tc = B0/dldphi*(dZ2c + 2*iota_N*Z2s + (qc*qc-qs*qs+rc*rc-rs*rs)/4/dldphi)
+    Ts = B0/dldphi*(dZ2s - 2*iota_N*Z2c + (qc*qs+rc*rs)/2/dldphi)
+
+    angle = stel.alpha - (-stel.helicity * stel.nfp * stel.varphi)
+    c2a1 = np.cos(2*angle)
+    s2a1 = np.sin(2*angle)
+
+    # It is unnecessary to compute this everywhere, but the way implemented this is the 
+    # easy way
+    cond_1st = (Tc*c2a1 + Ts*s2a1 + B0*B0*np.matmul(d_d_varphi,stel.d*stel.d/dB0)/4)
+    pos = [0, np.pi] # Not necessary to impose it at 0, but it makes it easier to construct X2s and X2c later
+    # Interpolate to the points required (especially because the original grid is shifted)
+    cond_1st_eval= fourier_interpolation(cond_1st, pos-stel.phi_shift*stel.d_phi*stel.nfp)
+    res = np.sum(cond_1st_eval*cond_1st_eval)
+    der_cond = cond_1st
+    # For higher order zeroes, we have additional conditions
+    if order and order>1:
+        for i in range(order-1):
+            der_cond = np.matmul(d_d_varphi,der_cond)
+            der_cond_eval = fourier_interpolation(der_cond, pos-stel.phi_shift*stel.d_phi*stel.nfp)
+            res_add = np.sum(der_cond_eval*der_cond_eval)
+            res += res_add
+
+    # Return the mismatch
     return res
 
 def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 200, maxfev  = 200, method = 'Nelder-Mead', scale = 0, extras = [], thresh = 1.5):
@@ -133,5 +204,5 @@ def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 2
         plt.ylabel('Objective function')
         plt.show()
     
-    # Returns the exit flag of the optimisation
-    return opt.message
+    # Returns the residual in the optimisation
+    return opt.fun

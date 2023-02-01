@@ -184,7 +184,10 @@ def init_axis(self):
         if not self.d_over_curvature == 0:
             self.d = self.d_over_curvature * curvature
         else:
-            self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
+            if np.size(self.d_over_curvature_cvals) == self.nphi:
+                self.d = self.d_over_curvature_cvals * curvature
+            else:
+                self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
         self.d -= self.k_second_order_SS * nfp * self.B0_vals[1] * np.sin(nfp * varphi) / B0
         self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi) for i in range(len(self.d_cvals))]))
         self.d += np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.d_svals))]))

@@ -5,6 +5,7 @@ This module contains the calculation for the O(r^2) solution
 import logging
 import numpy as np
 from .util import mu0
+from .optimize_nae import min_geo_qi_consistency
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -426,3 +427,130 @@ def calculate_r2(self):
         self.Y2c_untwisted = self.Y2s * (-sinangle) + self.Y2c * cosangle
         self.Z2s_untwisted = self.Z2s *   cosangle  + self.Z2c * sinangle
         self.Z2c_untwisted = self.Z2s * (-sinangle) + self.Z2c * cosangle
+
+def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", X2s_in = 0, fun_opt = min_geo_qi_consistency):
+    """
+    Construct a configuration that is QI to second order around the magnetic well minimum in stellarator symmetry, 
+    for a fixed axis and B0. This is a bare minimum, and things may be easily changed)
+     - order: the order of the zeroes of curvature, important for the QI constraint
+     - verbose: non-zero to print the steps of the optimisation
+     - params: if decided to input parameters chosen to satisfy the 2nd order qi (only used if they belong
+        to the scope of inputs defined). The default is empty, and the function uses only d_bar degrees of freedom (the number
+        is prescribed by the size of the input array in self, provided a minimal length)
+     - method: method used for the optimisation
+     - X2s_in: degree of freedom at second order in a precise QI to second order
+     - fun_opt: by default the search minimises min_geo_qi_consistency, which measures how well the constriants are satisfied
+        for QI at second order. This allow us to use other functions where other features may also be sought, like reasonable 
+        elongation
+    """
+    logger.debug('Constructing QI to O(r^2)')
+
+    # Change d_bar parameters to find a consistent O(r^2) QI configuration
+    if not params:
+        params = []
+        num_param = 2*order+2
+        if self.d_over_curvature_cvals == []:
+            params += ['d_over_curvaturec({})'.format(j) for j in range(num_param)]
+            d_over_curvature_cvals = np.zeros(num_param)
+            if not self.d_over_curvature == 0:
+                d_over_curvature_cvals[0] = self.d_over_curvature
+            else: 
+                d_over_curvature_cvals[0] = 0.5
+            self.d_over_curvature_cvals == d_over_curvature_cvals
+            self._set_names()
+            self.calculate()
+        if not self.d_over_curvature_cvals == []:
+            if np.size(self.d_over_curvature_cvals) >= num_param:
+                params += ['d_over_curvaturec({})'.format(j) for j in range(np.size(self.d_over_curvature_cvals))]
+            else:
+                params += ['d_over_curvaturec({})'.format(j) for j in range(num_param)]
+                d_over_curvature_cvals = np.zeros(num_param)
+                d_over_curvature_cvals[0:np.size(self.d_over_curvature_cvals)] = self.d_over_curvature_cvals
+                self.d_over_curvature_cvals == d_over_curvature_cvals
+                self._set_names()
+                self.calculate()
+    else:
+        new_params = []
+        for ind, label in enumerate(params):
+            # Check if parameter exists
+            if not(label in self.names):
+                print('The label ',label, 'does not exist, and will be ignored.')
+            else:
+                new_params.append(label)
+        params = new_params
+
+    # Optimisation is performed
+    self.order = "r1" # To leave unnecessary computations out (the way the code is written it does unnecessary things anyway)
+    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 1000, maxfev = 1000, extras = order) # Order is passed to the function
+
+    # Find the X2s and X2c necessary
+    X2c, X2s = evaluate_X2c_X2s_QI(self, X2s_in)
+
+    # Redefine the configuration (not sure why this is needed; when I try to change X2c and X2s only, and then run stel.calculate() with order 'r2', the solution for alpha is different, any clue?)
+    self.__init__(omn_method = self.omn_method, delta=self.delta, p_buffer=self.p_buffer, k_buffer=self.k_buffer, rc=self.rc,zs=self.zs, nfp=self.nfp, B0_vals=self.B0_vals, nphi=self.nphi, omn=True, order='r2', d_over_curvature_cvals=self.d_over_curvature_cvals, B2c_svals=X2c, B2s_cvals=X2s)
+
+    return self.B2cQI_deviation_max
+
+
+
+
+def evaluate_X2c_X2s_QI(self, X2s_in = 0):
+    """
+    Construct X2c and X2s (inputs for second order construction) consistent with a configuration that is QI to
+    second order. This only works if the residual of min_geo_qi_consistency is 0 (or numerically very small)
+    """
+    # Check condition
+    if min_geo_qi_consistency(self)>0.01:
+        print('The QI condition at the turning points does not seem to be satisfied, and thus the second order construction will fail!')
+    
+    # Define necessary ingredients
+    d_d_varphi = self.d_d_varphi
+    B0 = self.B0
+    dB0 = np.matmul(d_d_varphi, B0)
+    B0_over_abs_G0 = self.B0 / np.abs(self.G0)
+    abs_G0_over_B0 = 1 / B0_over_abs_G0
+    dldphi = abs_G0_over_B0
+    X1c = self.X1c
+    X1s = self.X1s
+    Y1s = self.Y1s
+    Y1c = self.Y1c
+    iota_N = self.iotaN
+    torsion = self.torsion
+    curvature = self.curvature
+
+    # Compute some second order quantites
+    V2 = 2 * (Y1s * Y1c + X1s * X1c)
+    V3 = X1c * X1c + Y1c * Y1c - Y1s * Y1s - X1s * X1s
+
+    factor = - B0_over_abs_G0 / 8
+    Z2s = factor*(np.matmul(d_d_varphi,V2) - 2 * iota_N * V3)
+    dZ2s = np.matmul(d_d_varphi,Z2s)
+    Z2c = factor*(np.matmul(d_d_varphi,V3) + 2 * iota_N * V2)
+    dZ2c = np.matmul(d_d_varphi,Z2c)
+
+    qs = np.matmul(d_d_varphi,X1s) - iota_N * X1c - Y1s * torsion * abs_G0_over_B0
+    qc = np.matmul(d_d_varphi,X1c) + iota_N * X1s - Y1c * torsion * abs_G0_over_B0
+    rs = np.matmul(d_d_varphi,Y1s) - iota_N * Y1c + X1s * torsion * abs_G0_over_B0
+    rc = np.matmul(d_d_varphi,Y1c) + iota_N * Y1s + X1c * torsion * abs_G0_over_B0
+
+    Tc = B0/dldphi*(dZ2c + 2*iota_N*Z2s + (qc*qc-qs*qs+rc*rc-rs*rs)/4/dldphi)
+    Ts = B0/dldphi*(dZ2s - 2*iota_N*Z2c + (qc*qs+rc*rs)/2/dldphi)
+
+    angle = self.alpha - (-self.helicity * self.nfp * self.varphi)
+    c2a1 = np.cos(2*angle)
+    s2a1 = np.sin(2*angle)
+
+    # Construct the consistent X2c and X2s
+    X2c_tilde = (Tc*c2a1 + Ts*s2a1 + B0*B0*np.matmul(d_d_varphi,self.d*self.d/dB0)/4)/B0/curvature
+    if X2s_in == 0 or np.size(X2s_in) == self.nphi:
+        X2s_tilde = X2s_in  # Needds to be checked for the right even parity
+    else:
+        X2s_tilde = 0 # For simplicity for the time being
+
+    X2c = X2c_tilde*c2a1 + X2s_tilde*s2a1
+    X2s = X2c_tilde*s2a1 - X2s_tilde*c2a1
+
+    return X2c, X2s
+
+
+

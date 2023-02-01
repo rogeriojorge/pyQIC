@@ -24,14 +24,15 @@ class Qic():
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor, \
         Bfield_cylindrical, Bfield_cartesian, grad_B_tensor_cartesian, \
         grad_grad_B_tensor_cylindrical, grad_grad_B_tensor_cartesian
-    from .calculate_r2 import calculate_r2
+    from .calculate_r2 import calculate_r2, construct_qi_r2
     from .calculate_r3 import calculate_r3
     from .mercier import mercier
     from .plot import plot, get_boundary, B_fieldline, B_contour, plot_axis
     from .r_singularity import calculate_r_singularity
     from .plot import plot, plot_boundary, get_boundary, B_fieldline, B_contour, plot_axis, B_densityplot
+    from .fourier_interpolation import fourier_interpolation
     from .Frenet_to_cylindrical import Frenet_to_cylindrical, to_RZ
-    from .optimize_nae import optimise_params
+    from .optimize_nae import optimise_params, min_geo_qi_consistency
     from .to_vmec import to_vmec
     from .util import B_mag
     
