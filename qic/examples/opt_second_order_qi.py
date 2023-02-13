@@ -1,10 +1,52 @@
 # Example of the optimisation of d_bar for second order QI
-
+import os
+import shutil
 from qic import Qic
 import numpy as np
+from pathlib import Path
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from scipy import optimize, interpolate
+this_path = Path(__file__).parent.resolve()
+
+# Print the resulting stellarator solution
+def print_results(stel):
+    out_txt  = f'    rc      = [{",".join([str(elem) for elem in stel.rc])}]\n'
+    out_txt += f'    zs      = [{",".join([str(elem) for elem in stel.zs])}]\n'
+    out_txt += f'    B0_vals = [{",".join([str(elem) for elem in stel.B0_vals])}]\n'
+    out_txt += f'    omn_method = "{stel.omn_method}"\n'
+    out_txt += f'    k_buffer = {stel.k_buffer}\n'
+    out_txt += f'    p_buffer = {stel.p_buffer}\n'
+    out_txt += f'    d_over_curvature_cvals = [{",".join([str(elem) for elem in stel.d_over_curvature_cvals])}]\n'
+    out_txt += f'    delta   = {stel.delta}\n'
+    out_txt += f'    d_svals = [{",".join([str(elem) for elem in stel.d_svals])}]\n'
+    out_txt += f'    nfp     = {stel.nfp}\n'
+    out_txt += f'    iota    = {stel.iota}\n'
+    if not stel.order=='r1':
+        out_txt += f'    X2s_svals = [{",".join([str(elem) for elem in stel.B2s_svals])}]\n'
+        out_txt += f'    X2c_cvals = [{",".join([str(elem) for elem in stel.B2c_cvals])}]\n'
+        out_txt += f'    X2s_cvals = [{",".join([str(elem) for elem in stel.B2s_cvals])}]\n'
+        out_txt += f'    X2c_svals = [{",".join([str(elem) for elem in stel.B2c_svals])}]\n'
+        out_txt += f'    p2      = {stel.p2}\n'
+        if not stel.p2==0:
+            out_txt += f'    # DMerc mean  = {np.mean(stel.DMerc_times_r2)}\n'
+            out_txt += f'    # DWell mean  = {np.mean(stel.DWell_times_r2)}\n'
+            out_txt += f'    # DGeod mean  = {np.mean(stel.DGeod_times_r2)}\n'
+        out_txt += f'    # B20QI_deviation_max = {stel.B20QI_deviation_max}\n'
+        out_txt += f'    # B2cQI_deviation_max = {stel.B2cQI_deviation_max}\n'
+        out_txt += f'    # B2sQI_deviation_max = {stel.B2sQI_deviation_max}\n'
+        out_txt += f'    # Max |X20| = {max(abs(stel.X20))}\n'
+        out_txt += f'    # Max |Y20| = {max(abs(stel.Y20))}\n'
+        if stel.order == 'r3':
+            out_txt += f'    # Max |X3c1| = {max(abs(stel.X3c1))}\n'
+        out_txt += f'    # gradgradB inverse length: {stel.grad_grad_B_inverse_scale_length}\n'
+        out_txt += f'    # d2_volume_d_psi2 = {stel.d2_volume_d_psi2}\n'
+    out_txt += f'    # max curvature_d(0) = {stel.d_curvature_d_varphi_at_0}\n'
+    out_txt += f'    # max d_d(0) = {stel.d_d_d_varphi_at_0}\n'
+    out_txt += f'    # max gradB inverse length: {np.max(stel.inv_L_grad_B)}\n'
+    out_txt += f'    # Max elongation = {stel.max_elongation}\n'
+    print(out_txt)
+    return out_txt
 
 # Define a function that in addition to the condition of second order QI, it also requires some elongation constraint
 def geo_condition_and_elongation(stel, order):
@@ -16,7 +58,7 @@ def geo_condition_and_elongation(stel, order):
     return stel.min_geo_qi_consistency(order = order) + res
 
 # Some arbitrary initial case with an appropriate axis (with order 1 curvature)
-nphi = 301
+nphi = 201
 order = 'r1'
 nfp=1
 rc      = [ 1.0,0.0,-0.3,0.0,0.01,0.0,0.001 ]
@@ -34,7 +76,7 @@ stel = Qic(omn_method = omn_method, delta=delta, p_buffer=p_buffer, k_buffer=k_b
 
 # Optimise for d_bar without worrying about d_bar crossing the zero and elongation becoming too large
 res = stel.construct_qi_r2(verbose=1)
-stel.plot()
+# stel.plot()
 
 # Optimise for d_bar, but taking into account elongation
 stel = Qic(omn_method = omn_method, delta=delta, p_buffer=p_buffer, k_buffer=k_buffer, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, 
@@ -43,4 +85,5 @@ params = ['d_over_curvaturec(0)','d_over_curvaturec(1)','d_over_curvaturec(2)','
 # Just to show that it can be done externally telling what parameters to use
 res = stel.construct_qi_r2(verbose=1, method="Nelder-Mead", params=params,fun_opt = geo_condition_and_elongation)
 res = stel.construct_qi_r2(verbose=1, method="BFGS", params=params,fun_opt = geo_condition_and_elongation) # Refine the solution
-stel.plot()
+# stel.plot()
+print_results(stel)
