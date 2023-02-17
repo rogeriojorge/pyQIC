@@ -233,8 +233,8 @@ def r1_diagnostics(self):
         cosangle = np.cos(angle)
         B1sQI    = 0    # B=B0*(1+d cos(theta-alpha)), B1cQI = B0*d
         B1cQI    = self.B0 * self.d
-        self.B1c = -(B1cQI * cosangle - B1sQI * sinangle)
-        self.B1s = -(B1sQI * cosangle + B1cQI * sinangle)
+        self.B1c = (B1cQI * cosangle - B1sQI * sinangle)
+        self.B1s = (B1sQI * cosangle + B1cQI * sinangle)
     else:
         self.alpha_tilde = self.alpha
         self.cos_alpha_tilde_spline = self.convert_to_spline(np.cos(self.alpha))
@@ -245,10 +245,10 @@ def r1_diagnostics(self):
     # X = X1c*cos(theta-N*varphi)+X1s*sin(theta-N*varphi)
     # theta=0 -> X(theta=0)=X1c*cos(N*varphi)-X1s*sin(N*varphi)
     # theta=0 -> Y(theta=0)=Y1c*cos(N*varphi)-Y1s*sin(N*varphi)
-    self.X1c = self.B1c / (self.curvature * self.B0)
-    self.X1s = self.B1s / (self.curvature * self.B0)
-    self.Y1s = self.sG * self.Bbar * self.curvature * ( self.B1c + self.B1s * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)# + 1e-30)
-    self.Y1c = self.sG * self.Bbar * self.curvature * (-self.B1s + self.B1c * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)# + 1e-30)
+    self.X1c = self.B1c / (self.curvature * self.B0) * (self.sign_curvature_change)
+    self.X1s = self.B1s / (self.curvature * self.B0) * (self.sign_curvature_change)
+    self.Y1s = self.sG * self.Bbar * self.curvature * ( self.B1c + self.B1s * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s) * (self.sign_curvature_change)# + 1e-30) 
+    self.Y1c = self.sG * self.Bbar * self.curvature * (-self.B1s + self.B1c * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s) * (self.sign_curvature_change)# + 1e-30)
 
     # self.X1c = self.convert_to_spline(self.B1c / (self.curvature * self.B0))(self.phi - self.phi_shift*self.d_phi)
     # self.X1s = self.convert_to_spline(self.B1s / (self.curvature * self.B0))(self.phi - self.phi_shift*self.d_phi)
