@@ -27,22 +27,17 @@ def init_axis(self):
     rc  = self.rc
     rs  = self.rs
     nfp = self.nfp
-    # if omn and np.max(np.abs(self.rs))>0:
-    #     # if len(rs)>6:
-    #     #     rc[6]=-(1 + rs[2] + rs[4] + (rs[2] + 4 * rs[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
-    #     # elif len(rs)>4:
-    #     #     rs[4]=-(1 + rs[2] + 4 * rs[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
-    #     # else:
-    #     rs[2]= 1 / (1 + 4 * nfp * nfp)
-    # else:
     if omn:
-        if len(rc)>6:
-            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
-        elif len(rc)>4:
-            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
-        else:
-            rc[2]=-1 / (1 + 4 * nfp * nfp)
-
+        ### Setting higher order rc to make sure kappa has first order zeros
+        ###  at phi=0 and phi=pi/nfp
+        # if len(rc)>6:
+        #     rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
+        # elif len(rc)>4:
+        #     rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
+        # else:
+        #     rc[2]=-1 / (1 + 4 * nfp * nfp)
+        rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1 + 49*nfp*nfp))
+        rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1+64*nfp*nfp))
     # Shorthand:
     nphi = self.nphi
     nfp = self.nfp

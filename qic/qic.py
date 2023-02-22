@@ -45,8 +45,9 @@ class Qic():
         """
         # First, force {rc, zs, rs, zc} to have the same length, for
         # simplicity.
-        nfourier = np.max([len(rc), len(zs), len(rs), len(zc)])
+        nfourier = np.max([len(rc), len(zs), len(rs), len(zc),10])
         self.nfourier = nfourier
+        #nmaxsizeR = np.max([nfourier,10])
         self.rc = np.zeros(nfourier)
         self.zs = np.zeros(nfourier)
         self.rs = np.zeros(nfourier)
