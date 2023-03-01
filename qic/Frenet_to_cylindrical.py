@@ -165,6 +165,27 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
             
     return R_2D, Z_2D, phi0_2D
 
+def Frenet_to_cylindrical_1stOrder(self, r, ntheta=20):
+    """
+    Function to convert the near-axis coordinate system to
+    a cylindrical one for a surface at a particular radius,
+    outputing the following arrays: R(theta,varphi),
+    phi(theta,varphi) and Z(theta,varphi) with R,phi,Z cylindrical
+    coordinates and theta and varphi Boozer coordinates
+    
+    It uses the 1st order method described in Landreman, Sengupta,
+    Plunk (2019), section 5.3
+
+    Args:
+        r:  near-axis radius r of the desired boundary surface
+        ntheta: resolution in the poloidal angle theta
+    """
+    R1c = (-self.binormal_cylindrical[:,2] * self.X1c_untwisted + self.normal_cylindrical[:,2] * self.Y1c_untwisted) * self.d_l_d_phi / self.R0
+    R1s = (-self.binormal_cylindrical[:,2] * self.X1s_untwisted + self.normal_cylindrical[:,2]*self.Y1s_untwisted)*self.d_l_d_phi/self.R0
+    Z1c = (self.binormal_cylindrical[:,0] * self.X1c_untwisted - self.normal_cylindrical[:,0]*self.Y1c_untwisted)*self.d_l_d_phi/self.R0
+    Z1s = (self.binormal_cylindrical[:,0]*self.X1s_untwisted - self.normal_cylindrical[:,0]*self.Y1s_untwisted)*self.d_l_d_phi/self.R0
+    
+    return R1c, R1s, Z1c, Z1s
 
 def to_RZ(self,points):
     """

@@ -246,9 +246,9 @@ def r1_diagnostics(self):
     # theta=0 -> X(theta=0)=X1c*cos(N*varphi)-X1s*sin(N*varphi)
     # theta=0 -> Y(theta=0)=Y1c*cos(N*varphi)-Y1s*sin(N*varphi)
     self.X1c = self.B1c / (self.curvature * self.B0)# * (self.sign_curvature_change)
-    self.X1s = self.B1s / (self.curvature * self.B0)# * (self.sign_curvature_change)
-    self.Y1s = self.sG * self.Bbar * self.curvature * ( self.B1c + self.B1s * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)# * (self.sign_curvature_change)# + 1e-30) 
-    self.Y1c = self.sG * self.Bbar * self.curvature * (-self.B1s + self.B1c * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)# * (self.sign_curvature_change)# + 1e-30)
+    self.X1s = self.B1s / (self.curvature * self.B0)#* (self.sign_curvature_change)
+    self.Y1s = self.sG * self.Bbar * self.curvature * ( self.B1c + self.B1s * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)#* (self.sign_curvature_change)# + 1e-30) 
+    self.Y1c = self.sG * self.Bbar * self.curvature * (-self.B1s + self.B1c * self.sigma) / (self.B1c * self.B1c + self.B1s * self.B1s)#* (self.sign_curvature_change)# + 1e-30)
 
     # self.X1c = self.convert_to_spline(self.B1c / (self.curvature * self.B0))(self.phi - self.phi_shift*self.d_phi)
     # self.X1s = self.convert_to_spline(self.B1s / (self.curvature * self.B0))(self.phi - self.phi_shift*self.d_phi)
