@@ -24,7 +24,7 @@ class Qic():
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor, \
         Bfield_cylindrical, Bfield_cartesian, grad_B_tensor_cartesian, \
         grad_grad_B_tensor_cylindrical, grad_grad_B_tensor_cartesian
-    from .calculate_r2 import calculate_r2, construct_qi_r2
+    from .calculate_r2 import calculate_r2, construct_qi_r2, evaluate_X2c_X2s_QI
     from .calculate_r3 import calculate_r3
     from .mercier import mercier
     from .plot import plot, get_boundary, B_fieldline, B_contour, plot_axis
@@ -38,8 +38,8 @@ class Qic():
     
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  B0_vals=[], B0_svals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
-                 omn = False, omn_method='buffer', k_buffer=1, p_buffer=2, delta  = np.pi/5, k_second_order_SS = 0, I2=0., sG=1, spsi=1, nphi=31,
-                 B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = []):
+                 omn = False, omn_method='buffer', k_buffer=1, p_buffer=2, delta  = np.pi/5, k_second_order_SS = 0.0, I2=0., sG=1, spsi=1, nphi=31,
+                 B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = [], d_over_curvature_spline = []):
         """
         Create a near-axis stellarator.
         """
@@ -65,6 +65,7 @@ class Qic():
         self.k_second_order_SS = k_second_order_SS
         self.d_over_curvature = d_over_curvature
         self.d_over_curvature_cvals = d_over_curvature_cvals
+        self.d_over_curvature_spline = d_over_curvature_spline
 
         # Force nphi to be odd:
         if np.mod(nphi, 2) == 0:
@@ -85,30 +86,30 @@ class Qic():
             phi_shift=1/3
         self.phi_shift = phi_shift
         self.phi = phi + self.phi_shift*self.d_phi
-        if B0_vals==[]:
+        if len(B0_vals)==0:
             self.B0_vals = [B0]
-            self.B0_well_depth = 0
+            self.B0_well_depth = 0.0
         else:
             self.B0_vals = B0_vals
             self.B0_well_depth = B0_vals[1]
         self.B0 =  np.array(sum([self.B0_vals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.B0_vals))]))
         self.B0_svals = B0_svals
         self.B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.B0_svals))]))
-        if d_cvals==[] and d_svals == [] and d_over_curvature_cvals == [] and d_over_curvature == 0:
+        if len(d_cvals)==0 and len(d_svals) == 0 and len(d_over_curvature_cvals) == 0 and len(d_over_curvature_spline) == 0 and d_over_curvature == 0:
             self.d_cvals = [etabar]
             self.d_svals = d_svals
         else:
             self.d_cvals = d_cvals
             self.d_svals = d_svals
             if self.d_cvals == []:
-                self.etabar = 0
-                self.d_cvals = [0]
+                self.etabar = 0.0
+                self.d_cvals = [0.0]
             else:
                 self.etabar = d_cvals[0]
-        if d_over_curvature_cvals == [] and not d_over_curvature == 0:
+        if len(d_over_curvature_cvals) == 0 and len(d_over_curvature_spline) == 0 and not d_over_curvature == 0:
             self.d_over_curvature_cvals == [d_over_curvature]
-        if not d_over_curvature_cvals == [] and not d_over_curvature == 0:
-            raise ValueError('Only one of d_over_curvature_cvals or d_over_curvature should be specified.')
+        if not len(d_over_curvature_cvals) == 0 and not len(d_over_curvature_spline) == 0 and not d_over_curvature == 0:
+            raise ValueError('Only one of d_over_curvature_cvals, d_over_curvature_spline or d_over_curvature should be specified.')
         self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.d_cvals))]))
         self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.d_svals))]))
         self.alpha_cvals = alpha_cvals
@@ -121,28 +122,28 @@ class Qic():
         self.sG = sG
         self.spsi = spsi
         self.nphi = nphi
-        if B2c_cvals==[] and B2c_svals == []:
+        if len(B2c_cvals)==0 and len(B2c_svals) == 0:
             self.B2c_cvals = [B2c]
             self.B2c_svals = B2c_svals
             self.B2c = B2c
         else:
             self.B2c_cvals = B2c_cvals
             self.B2c_svals = B2c_svals
-            if self.B2c_cvals == []:
+            if len(self.B2c_cvals) == 0:
                 self.B2c = 0
-                self.B2c_cvals = [0]
+                self.B2c_cvals = [0.0]
             else:
-                self.B2c = B2c_cvals[0]
-        if B2s_cvals==[] and B2s_svals == []:
+                self.B2c = B2c_cvals[0.0]
+        if len(B2s_cvals)==0 and len(B2s_svals) == 0:
             self.B2s_cvals = [B2s]
             self.B2s_svals = B2s_svals
             self.B2s = B2s
         else:
             self.B2s_cvals = B2s_cvals
             self.B2s_svals = B2s_svals
-            if self.B2s_cvals == []:
+            if len(self.B2s_cvals) == 0:
                 self.B2s = 0
-                self.B2s_cvals = [0]
+                self.B2s_cvals = [0.0]
             else:
                 self.B2s = B2s_cvals[0]
         self.p2 = p2
@@ -197,8 +198,7 @@ class Qic():
         return np.concatenate((self.rc, self.zs, self.rs, self.zc,
                                np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.delta]),
                                self.B0_vals, self.B0_svals, self.d_cvals, self.d_svals, self.alpha_cvals, self.alpha_svals,
-                               self.B2c_cvals, self.B2c_svals, self.B2s_cvals, self.B2s_svals, self.d_over_curvature_cvals,
-                               np.array([self.k_second_order_SS,self.d_over_curvature])))
+                               self.B2c_cvals, self.B2c_svals, self.B2s_cvals, self.B2s_svals, self.d_over_curvature_cvals, self.d_over_curvature_spline, np.array([self.k_second_order_SS,self.d_over_curvature])))
 
     def set_dofs(self, x):
         """
@@ -208,7 +208,7 @@ class Qic():
         assert len(x) == self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals)\
                        + len(self.alpha_cvals) + len(self.alpha_svals)\
                        + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals)\
-                       + len(self.d_over_curvature_cvals) + 2
+                       + len(self.d_over_curvature_cvals) + len(self.d_over_curvature_spline) + 2
         self.rc = x[self.nfourier * 0 : self.nfourier * 1]
         self.zs = x[self.nfourier * 1 : self.nfourier * 2]
         self.rs = x[self.nfourier * 2 : self.nfourier * 3]
@@ -220,19 +220,34 @@ class Qic():
         self.p2 = x[self.nfourier * 4 + 4]
         self.I2 = x[self.nfourier * 4 + 5]
         self.delta = x[self.nfourier * 4 + 6]
-        self.B0_vals  = x[self.nfourier * 4 + 6 + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + 1]
-        self.B0_svals = x[self.nfourier * 4 + 6 + len(self.B0_vals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + 1]
-        self.d_cvals  = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + 1]
-        self.d_svals  = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + 1]
-        self.alpha_cvals = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1]
-        self.alpha_svals = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + 1]
-        self.B2c_cvals   = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + 1]
-        self.B2c_svals   = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + 1]
-        self.B2s_cvals   = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + 1]
-        self.B2s_svals               = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals) + 1]
-        self.d_over_curvature_cvals  = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals) + 1 : self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals) + len(self.d_over_curvature_cvals) + 1]
-        self.k_second_order_SS       = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals) + len(self.d_over_curvature_cvals) + 1]
-        self.d_over_curvature        = x[self.nfourier * 4 + 6 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals) + len(self.alpha_cvals) + len(self.alpha_svals) + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals) + len(self.d_over_curvature_cvals) + 2]
+        sz_params = self.nfourier * 4 + 6
+        self.B0_vals  = x[sz_params + 1 : sz_params + len(self.B0_vals) + 1]
+        sz_params += len(self.B0_vals)
+        self.B0_svals = x[sz_params + 1 : sz_params + len(self.B0_svals) + 1]
+        sz_params += len(self.B0_svals)
+        self.d_cvals  = x[sz_params + 1 : sz_params + len(self.d_cvals) + 1]
+        sz_params += len(self.d_cvals)
+        self.d_svals  = x[sz_params + 1 : sz_params + len(self.d_svals) + 1]
+        sz_params += len(self.d_svals)
+        self.alpha_cvals = x[sz_params + 1 : sz_params + len(self.alpha_cvals) + 1]
+        sz_params += len(self.alpha_cvals)
+        self.alpha_svals = x[sz_params + 1 : sz_params + len(self.alpha_svals) + 1]
+        sz_params += len(self.alpha_svals)
+        self.B2c_cvals   = x[sz_params + 1 : sz_params + len(self.B2c_cvals) + 1]
+        sz_params += len(self.B2c_cvals)
+        self.B2c_svals   = x[sz_params + 1 : sz_params + len(self.B2c_svals) + 1]
+        sz_params += len(self.B2c_svals)
+        self.B2s_cvals   = x[sz_params + 1 : sz_params + len(self.B2s_cvals) + 1]
+        sz_params += len(self.B2s_cvals)
+        self.B2s_svals               = x[sz_params + 1 : sz_params + len(self.B2s_svals) + 1]
+        sz_params += len(self.B2s_svals)
+        self.d_over_curvature_cvals  = x[sz_params + 1 : sz_params + len(self.d_over_curvature_cvals) + 1]
+        sz_params += len(self.d_over_curvature_cvals)
+        self.d_over_curvature_spline = x[sz_params + 1 : sz_params + len(self.d_over_curvature_spline) + 1]
+        sz_params += len(self.d_over_curvature_spline)
+        self.k_second_order_SS       = x[sz_params + 1]
+        sz_params += 1
+        self.d_over_curvature        = x[sz_params + 1]
         # Set new B0, d, alpha, B1 and B2
         if len(self.B0_vals)>1:
             self.B0_well_depth = self.B0_vals[1]
@@ -269,6 +284,7 @@ class Qic():
         names += ['B2sc({})'.format(j) for j in range(len(self.B2s_cvals))]
         names += ['B2ss({})'.format(j) for j in range(len(self.B2s_svals))]
         names += ['d_over_curvaturec({})'.format(j) for j in range(len(self.d_over_curvature_cvals))]
+        names += ['d_over_curvature_spline({})'.format(j) for j in range(len(self.d_over_curvature_spline))]
         names += ['k_second_order_SS','d_over_curvature']
         self.names = names
 

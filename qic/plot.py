@@ -154,7 +154,7 @@ def plot(self, newfigure=True, show=True, savefig=None):
             subplot('B2c_array')
             subplot('B2s_array')
     if self.omn:
-        subplot('d')
+        subplot('d_over_curvature', data = self.d/self.curvature)
         subplot('gamma')
     if self.order != 'r1':
         if self.order != 'r2':

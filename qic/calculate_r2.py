@@ -481,13 +481,13 @@ def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", 
 
     # Optimisation is performed
     self.order = "r1" # To leave unnecessary computations out (the way the code is written it does unnecessary things anyway)
-    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 1000, maxfev = 1000, extras = order) # Order is passed to the function
+    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 4000, maxfev = 4000, extras = order) # Order is passed to the function
 
     # Find the X2s and X2c necessary
     X2c, X2s = evaluate_X2c_X2s_QI(self, X2s_in)
 
     # Redefine the configuration (not sure why this is needed; when I try to change X2c and X2s only, and then run stel.calculate() with order 'r2', the solution for alpha is different, any clue?)
-    self.__init__(omn_method = self.omn_method, delta=self.delta, p_buffer=self.p_buffer, k_buffer=self.k_buffer, rc=self.rc,zs=self.zs, nfp=self.nfp, B0_vals=self.B0_vals, nphi=self.nphi, omn=True, order='r2', d_over_curvature_cvals=self.d_over_curvature_cvals, B2c_svals=X2c, B2s_cvals=X2s)
+    self.__init__(omn_method = self.omn_method, delta=self.delta, p_buffer=self.p_buffer, k_buffer=self.k_buffer, rc=self.rc,zs=self.zs, nfp=self.nfp, B0_vals=self.B0_vals, nphi=self.nphi, omn=True, order='r2', d_over_curvature_cvals=self.d_over_curvature_cvals,d_over_curvature_spline=self.d_over_curvature_spline, B2c_svals=X2c, B2s_cvals=X2s)
 
     return self.B2cQI_deviation_max
 

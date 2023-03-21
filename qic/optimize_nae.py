@@ -131,6 +131,7 @@ def min_geo_qi_consistency(stel, order = 1):
             der_cond = np.matmul(d_d_varphi,der_cond)
             der_cond_eval = fourier_interpolation(der_cond, pos-stel.phi_shift*stel.d_phi*stel.nfp)
             res_add = np.sum(der_cond_eval*der_cond_eval)
+            print(res_add)
             res += res_add
 
     # Return the mismatch
@@ -204,5 +205,5 @@ def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 2
         plt.ylabel('Objective function')
         plt.show()
     
-    # Returns the residual in the optimisation
-    return opt.fun
+    # Returns the optimisation state message
+    return opt.message
