@@ -428,7 +428,7 @@ def calculate_r2(self):
         self.Z2s_untwisted = self.Z2s *   cosangle  + self.Z2c * sinangle
         self.Z2c_untwisted = self.Z2s * (-sinangle) + self.Z2c * cosangle
 
-def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", X2s_in = 0, fun_opt = min_geo_qi_consistency):
+def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", X2s_in = 0, fun_opt = min_geo_qi_consistency, maxiter = 1000, maxfev = 1000, show=False):
     """
     Construct a configuration that is QI to second order around the magnetic well minimum in stellarator symmetry, 
     for a fixed axis and B0. This is a bare minimum, and things may be easily changed)
@@ -481,7 +481,7 @@ def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", 
 
     # Optimisation is performed
     self.order = "r1" # To leave unnecessary computations out (the way the code is written it does unnecessary things anyway)
-    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 1000, maxfev = 1000, extras = order) # Order is passed to the function
+    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = maxiter, maxfev = maxfev, extras = order, show=show) # Order is passed to the function
 
     # Find the X2s and X2c necessary
     X2c, X2s = evaluate_X2c_X2s_QI(self, X2s_in)

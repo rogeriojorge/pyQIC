@@ -54,13 +54,13 @@ def opt_fun_stel(x_iter, stel, x_param_label, fun_opt, info = {'Nfeval':0}, res_
     res = fun_opt(stel, extras)
     if verbose:
         print(f"{info['Nfeval']} -", x_iter)
-        if stel.order == 'r2':
+        if stel.order == 'r2' or stel.order == 'r3':
             print(f"\N{GREEK CAPITAL LETTER DELTA}B2c = {stel.B2cQI_deviation_max:.4f},",
                 # f"1/rc = {1/stel.r_singularity:.2f},",
                 # f"1/L\N{GREEK CAPITAL LETTER DELTA}B = {np.max(stel.inv_L_grad_B):.2f},",
-                f"Residual = {res:.4f}")
+                f"Residual = {res}")
         else: 
-            print(f"Residual = {res:.4f}")
+            print(f"Residual = {res}")
     res_history.append(res) # Attach residual value to history
     return res
 
@@ -136,7 +136,7 @@ def min_geo_qi_consistency(stel, order = 1):
     # Return the mismatch
     return res
 
-def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 200, maxfev  = 200, method = 'Nelder-Mead', scale = 0, extras = [], thresh = 1.5):
+def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 200, maxfev  = 200, method = 'Nelder-Mead', scale = 0, extras = [], thresh = 1.5, show=False):
     """
     Method that optimises stel wrt x_param_label for minimising the function fun_opt.
 
@@ -199,6 +199,7 @@ def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 2
     # Plot the residual history if verbose
     if verbose:
         print(opt.x)
+    if show:
         plt.plot(res_history)
         plt.xlabel('Nb. Iterations')
         plt.ylabel('Objective function')
