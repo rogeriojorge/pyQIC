@@ -186,7 +186,7 @@ def init_axis(self):
         if not self.d_over_curvature == 0:
             self.d = self.d_over_curvature * curvature
         elif not len(self.d_over_curvature_cvals)==0:
-            print(self.d_over_curvature_cvals)
+            # print(self.d_over_curvature_cvals)
             if np.size(self.d_over_curvature_cvals) == self.nphi:
                 self.d = self.d_over_curvature_cvals * curvature
             else:

@@ -133,7 +133,7 @@ class Qic():
                 self.B2c = 0
                 self.B2c_cvals = [0.0]
             else:
-                self.B2c = B2c_cvals[0.0]
+                self.B2c = B2c_cvals[0]
         if len(B2s_cvals)==0 and len(B2s_svals) == 0:
             self.B2s_cvals = [B2s]
             self.B2s_svals = B2s_svals
