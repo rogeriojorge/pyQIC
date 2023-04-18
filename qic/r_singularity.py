@@ -21,6 +21,7 @@ def calculate_r_singularity(self, high_order=False):
     s = self
     
     X1c = s.X1c
+    X1s = s.X1s
     Y1s = s.Y1s
     Y1c = s.Y1c
 
@@ -57,6 +58,7 @@ def calculate_r_singularity(self, high_order=False):
     B2c = s.B2c
 
     d_X1c_d_varphi = s.d_X1c_d_varphi
+    d_X1s_d_varphi = s.d_X1s_d_varphi
     d_Y1s_d_varphi = s.d_Y1s_d_varphi
     d_Y1c_d_varphi = s.d_Y1c_d_varphi
 
@@ -87,42 +89,72 @@ def calculate_r_singularity(self, high_order=False):
     # Write sqrt(g) = r * [g0 + r*g1c*cos(theta) + (r^2)*(g20 + g2s*sin(2*theta) + g2c*cos(2*theta) + ...]
     # The coefficients are evaluated in "20200322-02 Max r for Garren Boozer.nb", in the section "Order r^2 construction, quasisymmetry"
 
-    g0 = lp * X1c * Y1s
+    g0 = lp * (X1c * Y1s - X1s * Y1c)
 
     #g1s = -2*X20*Y1c + 2*X2c*Y1c + 2*X2s*Y1s + 2*X1c*Y20 - 2*X1c*Y2c
     # g1s vanishes for quasisymmetry.
 
-    g1c = lp*(-2*X2s*Y1c + 2*X20*Y1s + 2*X2c*Y1s + 2*X1c*Y2s - X1c*X1c*Y1s*curvature)
+    # g1c = lp*(-2*X2s*Y1c + 2*X20*Y1s + 2*X2c*Y1s + 2*X1c*Y2s - X1c*X1c*Y1s*curvature)
+    g1c = lp*(-2*X2s*Y1c + 2*X20*Y1s + 2*X2c*Y1s + 2*X1c*Y2s - X1c**2*Y1s*curvature + X1s*(-2*Y20 - 2*Y2c + X1c*Y1c*curvature))
 
-    g20 = -4*lp*X2s*Y2c + 4*lp*X2c*Y2s + lp*X1c*X2s*Y1c*curvature - \
-        2*lp*X1c*X20*Y1s*curvature - lp*X1c*X2c*Y1s*curvature - \
-        lp*X1c*X1c*Y2s*curvature + 2*lp*Y1c*Y1s*Z2c*torsion - \
-        lp*X1c*X1c*Z2s*torsion - lp*Y1c*Y1c*Z2s*torsion + lp*Y1s*Y1s*Z2s*torsion - \
-        Y1s*Z20*d_X1c_d_varphi - Y1s*Z2c*d_X1c_d_varphi + \
-        Y1c*Z2s*d_X1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi - \
-        X1c*Z20*d_Y1s_d_varphi + X1c*Z2c*d_Y1s_d_varphi + \
-        X1c*Y1s*d_Z20_d_varphi
+    # g1s = lp*(-2*X20*Y1c + 2*X2c*Y1c + 2*X2s*Y1s + 2*X1c*Y20 - 2*X1c*Y2c)
+    g1s = lp*(-2*X20*Y1c + 2*X2c*Y1c + 2*X1c*Y20 - 2*X1c*Y2c + 2*X2s*Y1s - 2*X1s*Y2s + X1s**2*Y1c*curvature - X1c*X1s*Y1s*curvature)
+
+    # g20 = -4*lp*X2s*Y2c + 4*lp*X2c*Y2s + lp*X1c*X2s*Y1c*curvature - \
+    #     2*lp*X1c*X20*Y1s*curvature - lp*X1c*X2c*Y1s*curvature - \
+    #     lp*X1c*X1c*Y2s*curvature + 2*lp*Y1c*Y1s*Z2c*torsion - \
+    #     lp*X1c*X1c*Z2s*torsion - lp*Y1c*Y1c*Z2s*torsion + lp*Y1s*Y1s*Z2s*torsion - \
+    #     Y1s*Z20*d_X1c_d_varphi - Y1s*Z2c*d_X1c_d_varphi + \
+    #     Y1c*Z2s*d_X1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi - \
+    #     X1c*Z20*d_Y1s_d_varphi + X1c*Z2c*d_Y1s_d_varphi + \
+    #     X1c*Y1s*d_Z20_d_varphi
+
+    g20 = lp*(2*X20*X1s*Y1c*curvature + 2*X1c*X1s*Y2c*curvature - 2*X1c*X20*Y1s*curvature - \
+            X1c**2*Y2s*curvature + X1s**2*Y2s*curvature + X2c*(4*Y2s - (X1s*Y1c + X1c*Y1s)*curvature) +\
+            X2s*(-4*Y2c + (X1c*Y1c - X1s*Y1s)*curvature) + 2*X1c*X1s*Z2c*torsion + 2*Y1c*Y1s*Z2c*torsion -\
+            X1c**2*Z2s*torsion + X1s**2*Z2s*torsion - Y1c**2*Z2s*torsion + Y1s**2*Z2s*torsion) + \
+            Y1c*Z2s*d_X1c_d_varphi + Y1c*Z20*d_X1s_d_varphi - Y1c*Z2c*d_X1s_d_varphi + X1s*Z20*d_Y1c_d_varphi + \
+            X1s*Z2c*d_Y1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi - X1c*Z20*d_Y1s_d_varphi + X1c*Z2c*d_Y1s_d_varphi + \
+            X1s*Z2s*d_Y1s_d_varphi - X1s*Y1c*d_Z20_d_varphi - Y1s*(Z20*d_X1c_d_varphi + Z2c*d_X1c_d_varphi + \
+            Z2s*d_X1s_d_varphi - X1c*d_Z20_d_varphi)
     
-    g2c = -4*lp*X2s*Y20 + 4*lp*X20*Y2s + \
-        lp*X1c*X2s*Y1c*curvature - lp*X1c*X20*Y1s*curvature - \
-        2*lp*X1c*X2c*Y1s*curvature - lp*X1c*X1c*Y2s*curvature + \
-        2*lp*Y1c*Y1s*Z20*torsion - lp*X1c*X1c*Z2s*torsion - \
-        lp*Y1c*Y1c*Z2s*torsion - lp*Y1s*Y1s*Z2s*torsion - \
-        Y1s*Z20*d_X1c_d_varphi - Y1s*Z2c*d_X1c_d_varphi + \
-        Y1c*Z2s*d_X1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi + \
-        X1c*Z20*d_Y1s_d_varphi - X1c*Z2c*d_Y1s_d_varphi + \
-        X1c*Y1s*d_Z2c_d_varphi
+    # g2c = -4*lp*X2s*Y20 + 4*lp*X20*Y2s + \
+    #     lp*X1c*X2s*Y1c*curvature - lp*X1c*X20*Y1s*curvature - \
+    #     2*lp*X1c*X2c*Y1s*curvature - lp*X1c*X1c*Y2s*curvature + \
+    #     2*lp*Y1c*Y1s*Z20*torsion - lp*X1c*X1c*Z2s*torsion - \
+    #     lp*Y1c*Y1c*Z2s*torsion - lp*Y1s*Y1s*Z2s*torsion - \
+    #     Y1s*Z20*d_X1c_d_varphi - Y1s*Z2c*d_X1c_d_varphi + \
+    #     Y1c*Z2s*d_X1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi + \
+    #     X1c*Z20*d_Y1s_d_varphi - X1c*Z2c*d_Y1s_d_varphi + \
+    #     X1c*Y1s*d_Z2c_d_varphi
+
+    g2c = -lp*(-2*X2c*X1s*Y1c*curvature - 2*X1c*X1s*Y20*curvature + 2*X1c*X2c*Y1s*curvature + \
+            X1c**2*Y2s*curvature + X1s**2*Y2s*curvature + X20*(-4*Y2s + X1s*Y1c*curvature + X1c*Y1s*curvature) + \
+            X2s*(4*Y20 - (X1c*Y1c + X1s*Y1s)*curvature) - 2*X1c*X1s*Z20*torsion - 2*Y1c*Y1s*Z20*torsion + X1c**2*Z2s*torsion + \
+            X1s**2*Z2s*torsion + Y1c**2*Z2s*torsion + Y1s**2*Z2s*torsion) + Y1c*Z2s*d_X1c_d_varphi - Y1c*Z20*d_X1s_d_varphi + \
+            Y1c*Z2c*d_X1s_d_varphi + X1s*Z20*d_Y1c_d_varphi + X1s*Z2c*d_Y1c_d_varphi - X1c*Z2s*d_Y1c_d_varphi + \
+            X1c*Z20*d_Y1s_d_varphi - X1c*Z2c*d_Y1s_d_varphi - X1s*Z2s*d_Y1s_d_varphi - X1s*Y1c*d_Z2c_d_varphi + \
+            Y1s*(-Z20*d_X1c_d_varphi - Z2c*d_X1c_d_varphi + Z2s*d_X1s_d_varphi + X1c*d_Z2c_d_varphi)
     
-    g2s = 4*lp*X2c*Y20 - 4*lp*X20*Y2c + \
-        lp*X1c*X20*Y1c*curvature - lp*X1c*X2c*Y1c*curvature - \
-        2*lp*X1c*X2s*Y1s*curvature - lp*X1c*X1c*Y20*curvature + \
-        lp*X1c*X1c*Y2c*curvature - lp*X1c*X1c*Z20*torsion - \
-        lp*Y1c*Y1c*Z20*torsion + lp*Y1s*Y1s*Z20*torsion + \
-        lp*X1c*X1c*Z2c*torsion + lp*Y1c*Y1c*Z2c*torsion + \
-        lp*Y1s*Y1s*Z2c*torsion + Y1c*Z20*d_X1c_d_varphi - \
-        Y1c*Z2c*d_X1c_d_varphi - Y1s*Z2s*d_X1c_d_varphi - \
-        X1c*Z20*d_Y1c_d_varphi + X1c*Z2c*d_Y1c_d_varphi - \
-        X1c*Z2s*d_Y1s_d_varphi + X1c*Y1s*d_Z2s_d_varphi
+    # g2s = 4*lp*X2c*Y20 - 4*lp*X20*Y2c + \
+    #     lp*X1c*X20*Y1c*curvature - lp*X1c*X2c*Y1c*curvature - \
+    #     2*lp*X1c*X2s*Y1s*curvature - lp*X1c*X1c*Y20*curvature + \
+    #     lp*X1c*X1c*Y2c*curvature - lp*X1c*X1c*Z20*torsion - \
+    #     lp*Y1c*Y1c*Z20*torsion + lp*Y1s*Y1s*Z20*torsion + \
+    #     lp*X1c*X1c*Z2c*torsion + lp*Y1c*Y1c*Z2c*torsion + \
+    #     lp*Y1s*Y1s*Z2c*torsion + Y1c*Z20*d_X1c_d_varphi - \
+    #     Y1c*Z2c*d_X1c_d_varphi - Y1s*Z2s*d_X1c_d_varphi - \
+    #     X1c*Z20*d_Y1c_d_varphi + X1c*Z2c*d_Y1c_d_varphi - \
+    #     X1c*Z2s*d_Y1s_d_varphi + X1c*Y1s*d_Z2s_d_varphi
+
+    g2s = lp*(2*X1s*X2s*Y1c*curvature - X1c**2*Y20*curvature + X1s**2*Y20*curvature + X1c**2*Y2c*curvature + \
+            X1s**2*Y2c*curvature - 2*X1c*X2s*Y1s*curvature + X20*(-4*Y2c + X1c*Y1c*curvature - X1s*Y1s*curvature) + \
+            X2c*(4*Y20 - (X1c*Y1c + X1s*Y1s)*curvature) - X1c**2*Z20*torsion + X1s**2*Z20*torsion - Y1c**2*Z20*torsion + \
+            Y1s**2*Z20*torsion + X1c**2*Z2c*torsion + X1s**2*Z2c*torsion + Y1c**2*Z2c*torsion + Y1s**2*Z2c*torsion) - \
+            Y1s*Z2s*d_X1c_d_varphi - Y1s*Z20*d_X1s_d_varphi - Y1s*Z2c*d_X1s_d_varphi - X1c*Z20*d_Y1c_d_varphi + \
+            X1c*Z2c*d_Y1c_d_varphi + X1s*Z2s*d_Y1c_d_varphi + X1s*Z20*d_Y1s_d_varphi + X1s*Z2c*d_Y1s_d_varphi - \
+            X1c*Z2s*d_Y1s_d_varphi + X1c*Y1s*d_Z2s_d_varphi + Y1c*(Z20*d_X1c_d_varphi - Z2c*d_X1c_d_varphi + \
+            Z2s*d_X1s_d_varphi - X1s*d_Z2s_d_varphi)
     
     if high_order:
         g3s1 = lp*(2*X20*X20*Y1c*curvature + X2c*X2c*Y1c*curvature + X2s*X2s*Y1c*curvature - X1c*X2s*Y2s*curvature + \
@@ -268,15 +300,15 @@ def calculate_r_singularity(self, high_order=False):
     # We end up with the form in "20200322-01 Max r for GarrenBoozer.docx":
     # K0 + K2s*sin(2*theta) + K2c*cos(2*theta) + K4s*sin(4*theta) + K4c*cos(4*theta) = 0.
 
-    K0 = 2*g1c*g1c*g20 - 3*g1c*g1c*g2c + 8*g0*g2c*g2c + 8*g0*g2s*g2s
+    K0 = 2*(g1c*g1c + g1s*g1s)*g20 - 3*(g1c*g1c - g1s*g1s)*g2c + 8*g0*g2c*g2c + 8*g0*g2s*g2s - 6*g1c*g1s*g2s
 
-    K2s = 2*g1c*g1c*g2s
+    K2s = 2*(g1c*g1c + g1s*g1s)*g2s - 4*g1s*g1c*g20
 
-    K2c = -2*g1c*g1c*g20 + 2*g1c*g1c*g2c
+    K2c = -2*(g1c*g1c - g1s*g1s)*g20 + 2*(g1c*g1c + g1s*g1s)*g2c
 
-    K4s = g1c*g1c*g2s - 16*g0*g2c*g2s
+    K4s = (g1c*g1c - g1s*g1s)*g2s - 16*g0*g2c*g2s + 2*g1c*g1s*g2c
 
-    K4c = g1c*g1c*g2c - 8*g0*g2c*g2c + 8*g0*g2s*g2s
+    K4c = (g1c*g1c - g1s*g1s)*g2c - 8*g0*g2c*g2c + 8*g0*g2s*g2s - 2*g1s*g1c*g2s
 
     coefficients = np.zeros((nphi,5))
     
@@ -408,8 +440,8 @@ def calculate_r_singularity(self, high_order=False):
                 denominator = 2 * (g2s[jphi] * cos2theta - g2c[jphi] * sin2theta)
                 if np.abs(denominator) > 1e-8:
                     # This method cannot be used if we would need to divide by 0
-                    rr = g1c[jphi] * sintheta / denominator
-                    residual = g0[jphi] + rr * g1c[jphi] * costheta + rr * rr * (g20[jphi] + g2s[jphi] * sin2theta + g2c[jphi] * cos2theta) # Residual in the equation sqrt(g)=0.
+                    rr = (g1c[jphi] * sintheta - g1s[jphi] * costheta) / denominator
+                    residual = g0[jphi] + rr * (g1c[jphi] * costheta + g1s[jphi] * sintheta) + rr * rr * (g20[jphi] + g2s[jphi] * sin2theta + g2c[jphi] * cos2theta) # Residual in the equation sqrt(g)=0.
                     logger.debug("    Linear method: rr={}  residual={}".format(rr, residual))
                     if (rr>0) and np.abs(residual) < 1e-5:
                         linear_solutions = [rr]
@@ -417,12 +449,12 @@ def calculate_r_singularity(self, high_order=False):
                 # Use the more complicated method to determine rr by solving a quadratic equation.
                 quadratic_solutions = []
                 quadratic_A = g20[jphi] + g2s[jphi] * sin2theta + g2c[jphi] * cos2theta
-                quadratic_B = costheta * g1c[jphi]
+                quadratic_B = costheta * g1c[jphi] + sintheta * g1s[jphi]
                 quadratic_C = g0[jphi]
                 radicand = quadratic_B * quadratic_B - 4 * quadratic_A * quadratic_C
                 if np.abs(quadratic_A) < 1e-13:
                     rr = -quadratic_C / quadratic_B
-                    residual = -g1c[jphi] * sintheta + 2 * rr * (g2s[jphi] * cos2theta - g2c[jphi] * sin2theta) # Residual in the equation d sqrt(g) / d theta = 0.
+                    residual = -g1c[jphi] * sintheta + g1s[jphi] * costheta + 2 * rr * (g2s[jphi] * cos2theta - g2c[jphi] * sin2theta) # Residual in the equation d sqrt(g) / d theta = 0.
                     logger.debug("    Quadratic method but A is small: A={} rr={}  residual={}".format(quadratic_A, rr, residual))
                     if rr > 0 and np.abs(residual) < 1e-5:
                         quadratic_solutions.append(rr)
@@ -433,7 +465,7 @@ def calculate_r_singularity(self, high_order=False):
                         radical = np.sqrt(radicand)
                         for sign_quadratic in [-1, 1]:
                             rr = (-quadratic_B + sign_quadratic * radical) / (2 * quadratic_A) # This is the quadratic formula.
-                            residual = -g1c[jphi] * sintheta + 2 * rr * (g2s[jphi] * cos2theta - g2c[jphi] * sin2theta) # Residual in the equation d sqrt(g) / d theta = 0.
+                            residual = -g1c[jphi] * sintheta + g1s[jphi] * costheta + 2 * rr * (g2s[jphi] * cos2theta - g2c[jphi] * sin2theta) # Residual in the equation d sqrt(g) / d theta = 0.
                             logger.debug("    Quadratic method: A={} B={} C={} radicand={}, radical={}  rr={}  residual={}".format(quadratic_A, quadratic_B, quadratic_C, quadratic_B * quadratic_B - 4 * quadratic_A * quadratic_C, radical, rr, residual))
                             if (rr>0) and np.abs(residual) < 1e-5:
                                 quadratic_solutions.append(rr)
