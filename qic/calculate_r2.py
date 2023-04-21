@@ -44,7 +44,10 @@ def calculate_r2(self):
 
     if self.omn:
         # If in QI, the magnetic field is specified in terms of varphi instead of phi
-        integral_one_over_B0_squared_over_varphi = np.sum(1 / (B0 * B0)) / nphi
+        # This was wrong!!! Everything is defined in the cylindrical grid phi (varphi
+        # is constructed thereof)
+        integral_one_over_B0_squared_over_varphi = np.sum(self.d_l_d_phi / (abs(G0) * B0)) / nphi
+        # integral_one_over_B0_squared_over_varphi = np.sum(1 / (B0 * B0)) / nphi
         # B2 in QI has an alpha and theta instead of vartheta
         B2cPlunk = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))]))
         B2cPlunk = B2cPlunk + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
@@ -70,8 +73,11 @@ def calculate_r2(self):
     if np.all(rhs_beta_0_equation == np.zeros((1,nphi))[0]):
         beta_0 = np.zeros((1,nphi))[0]
     else:
-        beta_0 = np.linalg.solve(d_d_varphi, rhs_beta_0_equation)
-        beta_0 = beta_0 - beta_0[0] # Fix to be zero at origin
+        DMred = d_d_varphi[1:,1:]   # The differentiation matrix has a linearly dependent row, focus on submatrix
+        beta_0 = np.linalg.solve(DMred,rhs_beta_0_equation[1:])   # Invert differentiation matrix: as if first entry a zero, need to add it later
+        beta_0 = np.insert(beta_0,0,0)  # Fix to be zero at origin (add entry)
+        # beta_0 = np.linalg.solve(d_d_varphi, rhs_beta_0_equation)
+        # beta_0 = beta_0 - beta_0[0] # Fix to be zero at origin
 
     ## Calculate beta_1
     # beta_1c = 0
