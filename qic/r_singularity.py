@@ -157,6 +157,7 @@ def calculate_r_singularity(self, high_order=False):
             Z2s*d_X1s_d_varphi - X1s*d_Z2s_d_varphi)
     
     if high_order:
+        # I have not updated these expressions
         g3s1 = lp*(2*X20*X20*Y1c*curvature + X2c*X2c*Y1c*curvature + X2s*X2s*Y1c*curvature - X1c*X2s*Y2s*curvature + \
                    2*Y1c*Z20*Z20*curvature - 3*Y1c*Z20*Z2c*curvature + Y1c*Z2c*Z2c*curvature - 3*Y1s*Z20*Z2s*curvature + \
                    Y1c*Z2s*Z2s*curvature - 2*Y1c*Y20*Z20*torsion - Y1c*Y2c*Z20*torsion - Y1s*Y2s*Z20*torsion + \

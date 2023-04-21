@@ -131,7 +131,7 @@ class Qic():
             self.B2c_svals = B2c_svals
             if len(self.B2c_cvals) == 0:
                 self.B2c = 0
-                self.B2c_cvals = [0.0]
+                self.B2c_cvals = [0]
             else:
                 self.B2c = B2c_cvals[0]
         if len(B2s_cvals)==0 and len(B2s_svals) == 0:
@@ -502,6 +502,38 @@ class Qic():
                              B2c=0.6916862277166693,
                              nphi=99,
                              order='r3')
+        elif name == "QI NFP2 Katia" or name == "QI NFP2 DirectConstruction":
+            rc      = [ 1.0,0.0,-1/17 ]
+            zs      = [ 0.0,0.8/2.04,0.01/2.04 ]
+            rs      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
+            zc      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
+            sigma0  =  0.0
+            B0_vals = [ 1.0,0.15 ]
+            omn_method ='non-zone'
+            k_buffer = 2
+            d_over_curvature   = 0.73
+            d_svals = [ 0.0,0.0,0.0,0.0 ]
+            delta   = 0.0
+            nfp     = 2
+            nphi    = 201
+            add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature)
+        
+        elif name == "QI NFP3 Katia" or name == "QI NFP3 DirectConstruction":
+            rc      = [ 1.0,  9.075485257221899e-02, -2.058279495912439e-02, -1.106766494783158e-02, -1.644390251809640e-03 ]
+            zs      = [ 0.0,0.36,0.02,0.01 ]
+            rs      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
+            zc      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
+            sigma0  =  0.0
+            B0_vals = [1,0.25]
+            omn_method ='non-zone'
+            k_buffer = 2
+            d_over_curvature   = 0.73
+            d_svals = [ 0.0,0.0,0.0,0.0 ]
+            delta   = 0.0
+            nfp     = 3
+            nphi    = 201
+            add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature)
+       
         else:
             raise ValueError('Unrecognized configuration name')
 
