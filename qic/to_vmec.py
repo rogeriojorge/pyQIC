@@ -91,7 +91,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     file_object.write("  PMASS_TYPE = '"+pmass_type+"'\n")
     file_object.write('  AM = '+str(am)[1:-1]+'\n')
     file_object.write('!----- Free Boundary Parameters -----\n')
-    file_object.write('  LFREEB = F')
+    file_object.write('  LFREEB = F\n')
     file_object.write('!----- Current/Iota Parameters -----\n')
     file_object.write('  CURTOR = '+str(curtor)+'\n')
     file_object.write('  NCURR = '+str(ncurr)+'\n')
