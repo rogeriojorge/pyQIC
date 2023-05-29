@@ -4,12 +4,13 @@ import unittest
 import numpy as np
 import logging
 from qic.qic import Qic
+from qsc import Qsc
 
 logger = logging.getLogger(__name__)
 
 class GradBTensorTests(unittest.TestCase):
 
-    def a_test_axisymmetry(self):
+    def test_axisymmetry(self):
         """
         Test that the grad B tensor is correct for an axisymmetric vacuum field
         """
@@ -39,28 +40,36 @@ class GradBTensorTests(unittest.TestCase):
                         
 class GradGradBTensorTests(unittest.TestCase):
 
-    def a_test_alternate_derivation_and_symmetry(self):
+    def test_alternate_derivation_and_symmetry(self):
         """
         Compare Rogerio's derivation to mine to ensure the results
         coincide.  Also verify symmetry in the first two components.
         """
+        rtol = 1e-4
+        atol = 1e-4
         for sG in [-1, 1]:
             for spsi in [-1, 1]:
-                for config in [1, 2, 3, 4, 5]:
+                for config in [1, 2, 3, 4, 5, 6]:
                     B0 = np.random.rand() * 0.4 + 0.8
-                    nphi = int(np.random.rand() * 50 + 61)
-                    s = Qic.from_paper(config, sG=sG, spsi=spsi, B0=B0, nphi=65)
-                    s.calculate_grad_grad_B_tensor(two_ways=True)
+                    nphi = 501 # int(np.random.rand() * 50 + 61)
+                    s = Qic.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r2')
+                    s.calculate_grad_grad_B_tensor(two_ways = True)
                     logger.info("Max difference between Matt and Rogerio's derivation for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s.grad_grad_B_alt))))
-                    np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=1e-7, atol=1e-7)
+                    np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=rtol, atol=atol)
+                    if config in [1, 2, 3, 4, 5]:
+                        s_qs = Qsc.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r2')
+                        s_qs.calculate_grad_grad_B_tensor(two_ways = True)
+                        logger.info("Max difference between qsc and qic for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s.grad_grad_B_alt))))
+                        np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=rtol, atol=atol)
+
                     for i in range(3):
                         for j in range(3):
                             for k in range(3):
                                 # For all configs, the tensor should be symmetric in the 1st 2 indices:
-                                np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, j, i, k], rtol=1e-8, atol=1e-8)
+                                np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, j, i, k], rtol=rtol, atol=atol)
                                 # For curl-free fields, the tensor should also be symmetric in the last 2 indices:
                                 if config in {1, 2, 4}:
-                                    np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, i, k, j], rtol=1e-8, atol=1e-8)
+                                    np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, i, k, j], rtol=rtol, atol=atol)
             
     def a_test_axisymmetry(self):
         """

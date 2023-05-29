@@ -373,7 +373,7 @@ class Qic():
             delta   = 0.1 * 2*np.pi
             nphi    = 151
             add_default_args(kwargs, rc=rc, zs=zs, nfp=1, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta)
-        elif name == "QI r1 Jorge" or name == "QI NFP1 r1 Jorge" or name == "QI Jorge":
+        elif name == "QI r1 Jorge" or name == "QI NFP1 r1 Jorge" or name == "QI Jorge" or name == 6:
             """ The configuration from Jorge et al (2022) """
             rc      = [ 1.0,0.0,-0.4056622889934463,0.0,0.07747378220100756,0.0,-0.007803860877024245,0.0,0.0,0.0,0.0,0.0,0.0 ]
             zs      = [ 0.0,0.0,-0.24769666390049602,0.0,0.06767352436978152,0.0,-0.006980621303449165,0.0,-0.0006816270917189934,0.0,-1.4512784317099981e-05,0.0,-2.839050532138523e-06 ]

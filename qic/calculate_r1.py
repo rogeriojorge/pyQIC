@@ -131,7 +131,7 @@ def _residual(self, x):
         self.gamma = iota + self.helicity * self.nfp - np.matmul(self.d_d_varphi, self.alpha)
     r = np.matmul(self.d_d_varphi, sigma) + self.gamma * \
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
-        - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
+        - 2 * self.etabar_squared_over_curvature_squared * (- self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
 
     sigma_at_0 = self.interpolateTo0 @ sigma
@@ -233,8 +233,8 @@ def r1_diagnostics(self):
         cosangle = np.cos(angle)
         B1sQI    = 0    # B=B0*(1+d cos(theta-alpha)), B1cQI = B0*d
         B1cQI    = self.B0 * self.d
-        self.B1c = -(B1cQI * cosangle - B1sQI * sinangle)
-        self.B1s = -(B1sQI * cosangle + B1cQI * sinangle)
+        self.B1c = (B1cQI * cosangle - B1sQI * sinangle)
+        self.B1s = (B1sQI * cosangle + B1cQI * sinangle)
     else:
         self.alpha_tilde = self.alpha
         self.cos_alpha_tilde_spline = self.convert_to_spline(np.cos(self.alpha))
