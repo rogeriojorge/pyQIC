@@ -49,7 +49,7 @@ class GradGradBTensorTests(unittest.TestCase):
         atol = 1e-4
         for sG in [-1, 1]:
             for spsi in [-1, 1]:
-                for config in [1, 2, 3, 4, 5, 6]:
+                for config in [1, 2, 3, 4, 5, 6, "QI NFP1 r2", "QI NFP2 r2"]:
                     B0 = np.random.rand() * 0.4 + 0.8
                     nphi = 501 # int(np.random.rand() * 50 + 61)
                     s = Qic.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r2')
@@ -59,7 +59,7 @@ class GradGradBTensorTests(unittest.TestCase):
                     if config in [1, 2, 3, 4, 5]:
                         s_qs = Qsc.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r2')
                         s_qs.calculate_grad_grad_B_tensor(two_ways = True)
-                        logger.info("Max difference between qsc and qic for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s.grad_grad_B_alt))))
+                        logger.info("Max difference between qsc and qic for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s_qs.grad_grad_B))))
                         np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=rtol, atol=atol)
 
                     for i in range(3):
@@ -188,13 +188,15 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_5, dBdxdx_cartesian)
 
         # Test the grad B tensor for yet another configuration, including symmetry in both indices
-        stel = Qic.from_paper("QI NFP1 r2", nphi=451)
+        stel = Qic.from_paper("QI NFP2 r2", nphi=551)
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical, dBdx_cylindrical.transpose(1, 0, 2), decimal=2)
         dBdx_cartesian = stel.grad_B_tensor_cartesian()
         np.testing.assert_almost_equal(dBdx_cartesian, dBdx_cartesian.transpose(1, 0, 2), decimal=2)
 
         # Test the grad grad B tensor, including symmetry in three indices
+        stel.calculate_grad_grad_B_tensor(two_ways=True)
+        # dBdxdx_cylindrical = np.transpose(stel.grad_grad_B_alt,(1,2,3,0))
         dBdxdx_cylindrical = stel.grad_grad_B_tensor_cylindrical()
         np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B, (1, 2, 3, 0)), dBdxdx_cylindrical)
         dBdxdx_cylindrical_transpose_1 = dBdxdx_cylindrical.transpose(0, 2, 1, 3)
@@ -202,6 +204,11 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         dBdxdx_cylindrical_transpose_3 = dBdxdx_cylindrical.transpose(1, 2, 0, 3)
         dBdxdx_cylindrical_transpose_4 = dBdxdx_cylindrical.transpose(2, 0, 1, 3)
         dBdxdx_cylindrical_transpose_5 = dBdxdx_cylindrical.transpose(2, 1, 0, 3)
+        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_1[0,0,2])/dBdxdx_cylindrical[0,0,2]))
+        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_2[0,0,2])/dBdxdx_cylindrical[0,0,2]))
+        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_3[0,0,2])/dBdxdx_cylindrical[0,0,2]))
+        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_4[0,0,2])/dBdxdx_cylindrical[0,0,2]))
+        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_5[0,0,2])/dBdxdx_cylindrical[0,0,2]))
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_1, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_2, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_3, dBdxdx_cylindrical, decimal=4)
@@ -214,6 +221,11 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         dBdxdx_cartesian_transpose_3 = dBdxdx_cartesian.transpose(1, 2, 0, 3)
         dBdxdx_cartesian_transpose_4 = dBdxdx_cartesian.transpose(2, 0, 1, 3)
         dBdxdx_cartesian_transpose_5 = dBdxdx_cartesian.transpose(2, 1, 0, 3)
+        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_1[0,0,2])/dBdxdx_cartesian[0,0,2]))
+        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_2[0,0,2])/dBdxdx_cartesian[0,0,2]))
+        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_3[0,0,2])/dBdxdx_cartesian[0,0,2]))
+        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_4[0,0,2])/dBdxdx_cartesian[0,0,2]))
+        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_5[0,0,2])/dBdxdx_cartesian[0,0,2]))
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_1, dBdxdx_cartesian, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_2, dBdxdx_cartesian, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_3, dBdxdx_cartesian, decimal=4)
