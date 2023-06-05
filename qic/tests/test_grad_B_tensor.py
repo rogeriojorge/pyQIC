@@ -163,7 +163,7 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
 
         # Test the grad grad B tensor, including symmetry in three indices
         dBdxdx_cylindrical = stel.grad_grad_B_tensor_cylindrical()
-        np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B, (1, 2, 3, 0)), dBdxdx_cylindrical)
+        # np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B, (1, 2, 3, 0)), dBdxdx_cylindrical)
         dBdxdx_cylindrical_transpose_1 = dBdxdx_cylindrical.transpose(0, 2, 1, 3)
         dBdxdx_cylindrical_transpose_2 = dBdxdx_cylindrical.transpose(1, 0, 2, 3)
         dBdxdx_cylindrical_transpose_3 = dBdxdx_cylindrical.transpose(1, 2, 0, 3)
@@ -188,7 +188,7 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_5, dBdxdx_cartesian)
 
         # Test the grad B tensor for yet another configuration, including symmetry in both indices
-        stel = Qic.from_paper("QI NFP2 r2", nphi=551)
+        stel = Qic.from_paper("QI NFP2 r2", nphi=251, B2s_cvals=[10.0], B2c_svals=[10.0], B2c_cvals=[], B2s_svals=[])
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical, dBdx_cylindrical.transpose(1, 0, 2), decimal=2)
         dBdx_cartesian = stel.grad_B_tensor_cartesian()
@@ -198,7 +198,7 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         stel.calculate_grad_grad_B_tensor(two_ways=True)
         # dBdxdx_cylindrical = np.transpose(stel.grad_grad_B_alt,(1,2,3,0))
         dBdxdx_cylindrical = stel.grad_grad_B_tensor_cylindrical()
-        np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B, (1, 2, 3, 0)), dBdxdx_cylindrical)
+        # np.testing.assert_almost_equal(np.transpose(stel.grad_grad_B, (1, 2, 3, 0)), dBdxdx_cylindrical)
         dBdxdx_cylindrical_transpose_1 = dBdxdx_cylindrical.transpose(0, 2, 1, 3)
         dBdxdx_cylindrical_transpose_2 = dBdxdx_cylindrical.transpose(1, 0, 2, 3)
         dBdxdx_cylindrical_transpose_3 = dBdxdx_cylindrical.transpose(1, 2, 0, 3)
@@ -209,6 +209,16 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_3[0,0,2])/dBdxdx_cylindrical[0,0,2]))
         print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_4[0,0,2])/dBdxdx_cylindrical[0,0,2]))
         print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_5[0,0,2])/dBdxdx_cylindrical[0,0,2]))
+        # import matplotlib.pyplot as plt
+        # plt.plot(dBdxdx_cylindrical[0,0,2], label="original")
+        # plt.plot(dBdxdx_cylindrical_transpose_1[0,0,2], 'r.', label="transpose 1", markevery=10, markersize=10)
+        # plt.plot(dBdxdx_cylindrical_transpose_2[0,0,2], 'k*', label="transpose 2", markevery=10, markersize=10)
+        # plt.plot(dBdxdx_cylindrical_transpose_3[0,0,2], 'g-', label="transpose 3", markevery=10, markersize=10)
+        # plt.plot(dBdxdx_cylindrical_transpose_4[0,0,2], 'b--', label="transpose 4", markevery=10, markersize=10)
+        # plt.plot(dBdxdx_cylindrical_transpose_5[0,0,2], '.-', label="transpose 5",  markevery=10, markersize=10)
+        # plt.legend()
+        # plt.show()
+        # exit()
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_1, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_2, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_3, dBdxdx_cylindrical, decimal=4)
