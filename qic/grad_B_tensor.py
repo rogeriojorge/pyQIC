@@ -157,7 +157,7 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     # The elements that follow are computed in the Mathematica notebook "20200407-01 Grad grad B tensor near axis"
     # and then formatted for fortran by the python script process_grad_grad_B_tensor_code
 
-    # The order is (normal, binormal, tangent). So element 123 means nbt.
+    # The order is (normal, binormal, tangent). So element 012 means nbt.
 
     # Element111
     grad_grad_B[:,0,0,0]=(B0**6*lprime*lprime*(8*iota_N0*X2c*Y1c*Y1s + 4*iota_N0*X2s*(-Y1c*Y1c + Y1s*Y1s) - \
@@ -386,10 +386,6 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     grad_grad_B[:,2,2,2]=(sG*B0*B0*B0*lprime*(-2*Bbar*sG*B0*lprime*lprime*curvature*curvature + (2*Bbar*sG*d_B0_d_varphi**2)/B0 +\
         B0 * (d_B0_d_varphi*(-(X1s*d_Y1c_d_varphi) + X1c*d_Y1s_d_varphi) + Y1s * (d_B0_d_varphi*d_X1c_d_varphi + X1c*d2_B0_d_varphi2) -\
         Y1c * (d_B0_d_varphi*d_X1s_d_varphi + X1s*d2_B0_d_varphi2))))/(Bbar*G0*G0*G0)
-
-
-
-
 
     self.grad_grad_B = grad_grad_B
 

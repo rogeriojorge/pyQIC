@@ -161,9 +161,9 @@ def calculate_r2(self):
             X2c = X2c + np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))]))
         # X2c = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))])) \
         #     + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
-        # self.B2c_array = X2c * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * ( \
-        #     + 3 * G0 * G0 * (B1c*B1c-B1s*B1s)/(4*B0**4) - (X1c*X1c - X1s*X1s)/4*(curvature*abs_G0_over_B0)**2 \
-        #     - (qc * qc - qs * qs + rc * rc - rs * rs)/4))
+        self.B2c_array_alt = X2c * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * ( \
+            + 3 * G0 * G0 * (B1c*B1c-B1s*B1s)/(4*B0**4) - (X1c*X1c - X1s*X1s)/4*(curvature*abs_G0_over_B0)**2 \
+            - (qc * qc - qs * qs + rc * rc - rs * rs)/4))
         self.B2c_array = (1/(4*B0)) * (3 * B1c * B1c - 3 * B1s * B1s + B0_over_abs_G0 * B0_over_abs_G0 \
                                       * ( B0 * B0 * (-qc * qc + qs * qs - rc * rc + rs * rs) \
                                         + G0 * G0 * curvature * (curvature * (-X1c * X1c + X1s * X1s) + 4 * X2c)
@@ -379,6 +379,8 @@ def calculate_r2(self):
     self.beta_1s = beta_1s
     self.beta_1c = beta_1c
     self.B20 = B20
+    self.B2c = self.B2c_array
+    self.B2s = self.B2s_array
     self.B20_spline = self.convert_to_spline(self.B20)
     self.B2c_spline = self.convert_to_spline(self.B2c_array)
     self.B2s_spline = self.convert_to_spline(self.B2s_array)
