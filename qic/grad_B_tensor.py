@@ -121,8 +121,8 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     p2 = s.p2
 
     B20 = s.B20
-    B2s = s.B2s
-    B2c = s.B2c
+    B2s = s.B2s_array
+    B2c = s.B2c_array
 
     d_B0_d_varphi = np.matmul(s.d_d_varphi, B0)
 
