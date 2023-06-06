@@ -50,9 +50,14 @@ class GradGradBTensorTests(unittest.TestCase):
         for sG in [-1, 1]:
             for spsi in [-1, 1]:
                 for config in [1, 2, 3, 4, 5, 6, "QI NFP1 r2", "QI NFP2 r2"]:
-                    B0 = np.random.rand() * 0.4 + 0.8
-                    nphi = 501 # int(np.random.rand() * 50 + 61)
-                    s = Qic.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r2')
+                    nphi = 531 # int(np.random.rand() * 50 + 61)
+                    if config in ["QI NFP1 r2", "QI NFP2 r2"]:
+                        s = Qic.from_paper(config, sG=sG, spsi= spsi, nphi=nphi, order = 'r3')
+                        B0_vals = np.array(s.B0_vals) * np.random.uniform(0.97, 1.03, len(s.B0_vals))
+                        s = Qic.from_paper(config, sG=sG, spsi= spsi, B0_vals=B0_vals, nphi=nphi, order = 'r3')
+                    else:
+                        B0 = np.random.rand() * 0.4 + 0.8
+                        s = Qic.from_paper(config, sG=sG, spsi= spsi, B0=B0, nphi=nphi, order = 'r3')
                     s.calculate_grad_grad_B_tensor(two_ways = True)
                     logger.info("Max difference between Matt and Rogerio's derivation for config {} is {}".format(config, np.max(np.abs(s.grad_grad_B - s.grad_grad_B_alt))))
                     np.testing.assert_allclose(s.grad_grad_B, s.grad_grad_B_alt, rtol=rtol, atol=atol)
@@ -66,10 +71,10 @@ class GradGradBTensorTests(unittest.TestCase):
                         for j in range(3):
                             for k in range(3):
                                 # For all configs, the tensor should be symmetric in the 1st 2 indices:
-                                np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, j, i, k], rtol=rtol, atol=atol)
+                                np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, j, i, k], atol=atol, rtol=rtol)
                                 # For curl-free fields, the tensor should also be symmetric in the last 2 indices:
-                                if config in {1, 2, 4}:
-                                    np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, i, k, j], rtol=rtol, atol=atol)
+                                if config in {1, 2, 4, "QI NFP1 r2", "QI NFP2 r2"}:
+                                    np.testing.assert_allclose(s.grad_grad_B_tensor_cylindrical()[i, j, k, :], s.grad_grad_B_tensor_cylindrical()[i, k, j, :], rtol=rtol, atol=atol)
             
     def a_test_axisymmetry(self):
         """
@@ -204,21 +209,6 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         dBdxdx_cylindrical_transpose_3 = dBdxdx_cylindrical.transpose(1, 2, 0, 3)
         dBdxdx_cylindrical_transpose_4 = dBdxdx_cylindrical.transpose(2, 0, 1, 3)
         dBdxdx_cylindrical_transpose_5 = dBdxdx_cylindrical.transpose(2, 1, 0, 3)
-        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_1[0,0,2])/dBdxdx_cylindrical[0,0,2]))
-        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_2[0,0,2])/dBdxdx_cylindrical[0,0,2]))
-        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_3[0,0,2])/dBdxdx_cylindrical[0,0,2]))
-        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_4[0,0,2])/dBdxdx_cylindrical[0,0,2]))
-        print(np.max((dBdxdx_cylindrical[0,0,2]-dBdxdx_cylindrical_transpose_5[0,0,2])/dBdxdx_cylindrical[0,0,2]))
-        # import matplotlib.pyplot as plt
-        # plt.plot(dBdxdx_cylindrical[0,0,2], label="original")
-        # plt.plot(dBdxdx_cylindrical_transpose_1[0,0,2], 'r.', label="transpose 1", markevery=10, markersize=10)
-        # plt.plot(dBdxdx_cylindrical_transpose_2[0,0,2], 'k*', label="transpose 2", markevery=10, markersize=10)
-        # plt.plot(dBdxdx_cylindrical_transpose_3[0,0,2], 'g-', label="transpose 3", markevery=10, markersize=10)
-        # plt.plot(dBdxdx_cylindrical_transpose_4[0,0,2], 'b--', label="transpose 4", markevery=10, markersize=10)
-        # plt.plot(dBdxdx_cylindrical_transpose_5[0,0,2], '.-', label="transpose 5",  markevery=10, markersize=10)
-        # plt.legend()
-        # plt.show()
-        # exit()
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_1, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_2, dBdxdx_cylindrical, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cylindrical_transpose_3, dBdxdx_cylindrical, decimal=4)
@@ -231,11 +221,6 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         dBdxdx_cartesian_transpose_3 = dBdxdx_cartesian.transpose(1, 2, 0, 3)
         dBdxdx_cartesian_transpose_4 = dBdxdx_cartesian.transpose(2, 0, 1, 3)
         dBdxdx_cartesian_transpose_5 = dBdxdx_cartesian.transpose(2, 1, 0, 3)
-        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_1[0,0,2])/dBdxdx_cartesian[0,0,2]))
-        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_2[0,0,2])/dBdxdx_cartesian[0,0,2]))
-        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_3[0,0,2])/dBdxdx_cartesian[0,0,2]))
-        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_4[0,0,2])/dBdxdx_cartesian[0,0,2]))
-        print(np.max((dBdxdx_cartesian[0,0,2]-dBdxdx_cartesian_transpose_5[0,0,2])/dBdxdx_cartesian[0,0,2]))
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_1, dBdxdx_cartesian, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_2, dBdxdx_cartesian, decimal=4)
         np.testing.assert_almost_equal(dBdxdx_cartesian_transpose_3, dBdxdx_cartesian, decimal=4)
