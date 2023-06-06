@@ -735,7 +735,52 @@ def grad_grad_B_tensor_cylindrical(self):
     vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
     where R, phi and Z are the standard cylindrical coordinates.
     '''
-    return np.transpose(self.grad_grad_B,(1,2,3,0))
+
+    # The order is (normal, binormal, tangent). So element 123 means nbt.
+    # Element111
+    # grad_grad_B[:,0,0,0]
+    grad_grad_B = self.grad_grad_B
+    
+    t = self.tangent_cylindrical.transpose()
+    n = self.normal_cylindrical.transpose()
+    b = self.binormal_cylindrical.transpose()
+
+    grad_grad_B_tensor_cylindrical = np.array([[[
+                              grad_grad_B[:,0,0,0] * n[i] * n[j] * n[k] \
+                            + grad_grad_B[:,0,0,1] * n[i] * n[j] * b[k] \
+                            + grad_grad_B[:,0,0,2] * n[i] * n[j] * t[k] \
+                            + grad_grad_B[:,0,1,0] * n[i] * b[j] * n[k] \
+                            + grad_grad_B[:,0,1,1] * n[i] * b[j] * b[k] \
+                            + grad_grad_B[:,0,1,2] * n[i] * b[j] * t[k] \
+                            + grad_grad_B[:,0,2,0] * n[i] * t[j] * n[k] \
+                            + grad_grad_B[:,0,2,1] * n[i] * t[j] * b[k] \
+                            + grad_grad_B[:,0,2,2] * n[i] * t[j] * t[k] \
+                            + grad_grad_B[:,1,0,0] * b[i] * n[j] * n[k] \
+                            + grad_grad_B[:,1,0,1] * b[i] * n[j] * b[k] \
+                            + grad_grad_B[:,1,0,2] * b[i] * n[j] * t[k] \
+                            + grad_grad_B[:,1,1,0] * b[i] * b[j] * n[k] \
+                            + grad_grad_B[:,1,1,1] * b[i] * b[j] * b[k] \
+                            + grad_grad_B[:,1,1,2] * b[i] * b[j] * t[k] \
+                            + grad_grad_B[:,1,2,0] * b[i] * t[j] * n[k] \
+                            + grad_grad_B[:,1,2,1] * b[i] * t[j] * b[k] \
+                            + grad_grad_B[:,1,2,2] * b[i] * t[j] * t[k] \
+                            + grad_grad_B[:,2,0,0] * t[i] * n[j] * n[k] \
+                            + grad_grad_B[:,2,0,1] * t[i] * n[j] * b[k] \
+                            + grad_grad_B[:,2,0,2] * t[i] * n[j] * t[k] \
+                            + grad_grad_B[:,2,1,0] * t[i] * b[j] * n[k] \
+                            + grad_grad_B[:,2,1,1] * t[i] * b[j] * b[k] \
+                            + grad_grad_B[:,2,1,2] * t[i] * b[j] * t[k] \
+                            + grad_grad_B[:,2,2,0] * t[i] * t[j] * n[k] \
+                            + grad_grad_B[:,2,2,1] * t[i] * t[j] * b[k] \
+                            + grad_grad_B[:,2,2,2] * t[i] * t[j] * t[k]
+                        for i in range(3)] for j in range(3)] for k in range(3)])
+    # self.grad_grad_B_tensor_cylindrical_array = np.reshape(self.grad_grad_B_tensor_cylindrical, 27 * self.nphi)
+
+    # grad_grad_B_tensor_cylindrical = np.transpose(self.grad_grad_B,(1,2,3,0))
+    # print('*'*80)
+    # print(grad_grad_B_tensor_cylindrical.shape)
+    # print('*'*80)
+    return grad_grad_B_tensor_cylindrical
 
 def grad_grad_B_tensor_cartesian(self):
     '''

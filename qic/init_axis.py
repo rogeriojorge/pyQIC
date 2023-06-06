@@ -183,6 +183,7 @@ def init_axis(self):
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
         
+        self.d = np.zeros(nphi)
         if not self.d_over_curvature == 0:
             self.d = self.d_over_curvature * curvature
         elif not len(self.d_over_curvature_cvals)==0:
@@ -191,7 +192,7 @@ def init_axis(self):
                 self.d = self.d_over_curvature_cvals * curvature
             else:
                 self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
-        else:
+        elif not len(self.d_over_curvature_spline)==0:
             N_points = len(self.d_over_curvature_spline)
             x_in = np.linspace(0,1,N_points)*np.pi/self.nfp
             y_in = self.d_over_curvature_spline
