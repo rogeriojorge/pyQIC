@@ -379,8 +379,8 @@ def calculate_r2(self):
     self.beta_1s = beta_1s
     self.beta_1c = beta_1c
     self.B20 = B20
-    self.B2c = self.B2c_array
-    self.B2s = self.B2s_array
+    # self.B2c = self.B2c_array
+    # self.B2s = self.B2s_array
     self.B20_spline = self.convert_to_spline(self.B20)
     self.B2c_spline = self.convert_to_spline(self.B2c_array)
     self.B2s_spline = self.convert_to_spline(self.B2s_array)

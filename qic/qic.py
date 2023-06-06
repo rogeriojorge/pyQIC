@@ -195,10 +195,12 @@ class Qic():
         Return a 1D numpy vector of all possible optimizable
         degrees-of-freedom, for simsopt.
         """
-        return np.concatenate((self.rc, self.zs, self.rs, self.zc,
+        dofs = np.concatenate((self.rc, self.zs, self.rs, self.zc,
                                np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.delta]),
                                self.B0_vals, self.B0_svals, self.d_cvals, self.d_svals, self.alpha_cvals, self.alpha_svals,
                                self.B2c_cvals, self.B2c_svals, self.B2s_cvals, self.B2s_svals, self.d_over_curvature_cvals, self.d_over_curvature_spline, np.array([self.k_second_order_SS,self.d_over_curvature])))
+        assert dofs.ndim == 1 and dofs.size != 1
+        return dofs
 
     def set_dofs(self, x):
         """
