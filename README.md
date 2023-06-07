@@ -14,7 +14,7 @@ Requirements
 
 USEFUL LINKS
 =
-If you need more help click [here](https://landreman.github.io/pyQSC/getting_started.html#)
+If you need more help regarding near-axis stellarators, you can check the documentation for the quasi-symmetric version of pyQIC: click [here](https://landreman.github.io/pyQSC/getting_started.html#)
 
 
 INSTALLATION
@@ -22,24 +22,18 @@ INSTALLATION
 To install the code you will need to follow the steps bellow:
 <br>
 
-To install this code you will need to open your Shell and insert the following command:
-```
-pip install .
-```
-<br>
-
 First of all you need to copy the folders and the files with the "git clone" command followed by the github repository's link.
 Example:
 ```
-git clone _link_
+git clone https://github.com/rogeriojorge/pyQIC.git
 ``` 
 <br>
 
 
-Then intall the package to your local python environment with:
+Then, install the package to your local python environment with:
 ```
 cd pyQIC
-pip install -e
+pip install -e .
 ```
 <br>
 
