@@ -774,12 +774,6 @@ def grad_grad_B_tensor_cylindrical(self):
                             + grad_grad_B[:,2,2,1] * t[i] * t[j] * b[k] \
                             + grad_grad_B[:,2,2,2] * t[i] * t[j] * t[k]
                         for i in range(3)] for j in range(3)] for k in range(3)])
-    # self.grad_grad_B_tensor_cylindrical_array = np.reshape(self.grad_grad_B_tensor_cylindrical, 27 * self.nphi)
-
-    # grad_grad_B_tensor_cylindrical = np.transpose(self.grad_grad_B,(1,2,3,0))
-    # print('*'*80)
-    # print(grad_grad_B_tensor_cylindrical.shape)
-    # print('*'*80)
     return grad_grad_B_tensor_cylindrical
 
 def grad_grad_B_tensor_cartesian(self):
