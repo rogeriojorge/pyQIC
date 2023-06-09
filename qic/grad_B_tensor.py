@@ -54,7 +54,7 @@ def calculate_grad_B_tensor(self):
                             + tensor.bb * b[i] * b[j] \
                             + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
                             + tensor.tt * t[i] * t[j]
-                        for i in range(3)] for j in range(3)])
+                        for j in range(3)] for i in range(3)])
     self.grad_B_tensor_cylindrical_array = np.reshape(self.grad_B_tensor_cylindrical, 9 * self.nphi)
 
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
@@ -773,7 +773,7 @@ def grad_grad_B_tensor_cylindrical(self):
                             + grad_grad_B[:,2,2,0] * t[i] * t[j] * n[k] \
                             + grad_grad_B[:,2,2,1] * t[i] * t[j] * b[k] \
                             + grad_grad_B[:,2,2,2] * t[i] * t[j] * t[k]
-                        for i in range(3)] for j in range(3)] for k in range(3)])
+                        for k in range(3)] for j in range(3)] for i in range(3)])
     return grad_grad_B_tensor_cylindrical
 
 def grad_grad_B_tensor_cartesian(self):
