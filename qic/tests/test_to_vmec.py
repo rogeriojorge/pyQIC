@@ -95,12 +95,12 @@ class ToVmecTests(unittest.TestCase):
         logger = logging.getLogger('qic.qic')
         logger.setLevel(1)
         self.cases=(
-                    # "r1 section 5.1","r1 section 5.2","r1 section 5.3",\
-                    # "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4",
-                    # "r2 section 5.5",
-                    # "QI r1 Plunk",
-                    # "QI r1 Jorge",
-                    # "QI NFP1 r2",
+                    "r1 section 5.1","r1 section 5.2","r1 section 5.3",\
+                    "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4",
+                    "r2 section 5.5",
+                    "QI r1 Plunk",
+                    "QI r1 Jorge",
+                    "QI NFP1 r2",
                     "QI NFP2 r2",
                     )
 
