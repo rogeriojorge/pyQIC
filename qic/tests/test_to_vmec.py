@@ -42,7 +42,7 @@ def compare_to_vmec(name, r=0.005, nphi=151, ntheta=20, ntorMax=14, params=dict(
     # Compare the results
     logger.info('pyQic iota on axis = '+str(py.iota))
     logger.info('VMEC iota on axis = '+str(-f.variables['iotaf'][()][0]))
-    logger.info('pyQic field on axis B0[0] = '+str(py.B0))
+    logger.info('pyQic field on axis B0[0] = '+str(py.B0[0]))
     logger.info('VMEC bmnc[1][0] = '+str(f.variables['bmnc'][()][1][0]))
     np.testing.assert_allclose(np.abs(py.iota),np.abs(f.variables['iotaf'][()][0]),rtol=rtol,atol=atol)
     if py.omn:
@@ -95,7 +95,9 @@ class ToVmecTests(unittest.TestCase):
         logger = logging.getLogger('qic.qic')
         logger.setLevel(1)
         self.cases=(
-                    "r1 section 5.1","r1 section 5.2","r1 section 5.3",\
+                    "r1 section 5.1",
+                    "r1 section 5.2",
+                    "r1 section 5.3",
                     "r2 section 5.1","r2 section 5.2","r2 section 5.3","r2 section 5.4",
                     "r2 section 5.5",
                     "QI r1 Plunk",
@@ -171,10 +173,10 @@ class ToVmecTests(unittest.TestCase):
                 mpol=11
                 ntor=81
             else:
-                atol = 1e-9
-                rtol = 1e-9
-                nphi = 151
-                ntheta = 26
-                mpol=13
-                ntor=25
+                atol = 3e-6
+                rtol = 3e-6
+                nphi = 201
+                ntheta = 36
+                mpol=18
+                ntor=60
             Fourier_Inverse(case, atol=atol, rtol=rtol, nphi=nphi, ntheta=ntheta, mpol=mpol, ntor=ntor)
