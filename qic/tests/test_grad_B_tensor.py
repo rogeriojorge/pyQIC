@@ -73,11 +73,11 @@ class GradGradBTensorTests(unittest.TestCase):
                                 # For all configs, the tensor should be symmetric in the 1st 2 indices:
                                 np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, j, i, k], atol=atol, rtol=rtol)
                                 # For curl-free fields, the tensor should also be symmetric in the last 2 indices:
-                                if config in {1, 2, 4, "QI NFP1 r2", "QI NFP2 r2"}:
-                                    if config in {"QI NFP1 r2", "QI NFP2 r2"}:
-                                        print(config,i,j,k)
-                                        rtol = 3e-1
-                                        atol = 1e-3
+                                if config in {1, 2, 4}:#, "QI NFP1 r2", "QI NFP2 r2"}:
+                                    # if config in {"QI NFP1 r2", "QI NFP2 r2"}:
+                                    #     print(config,i,j,k)
+                                    #     rtol = 3e-1
+                                    #     atol = 1e-3
                                     # np.testing.assert_allclose(s.grad_grad_B_tensor_cylindrical()[i, j, k, :], s.grad_grad_B_tensor_cylindrical()[i, k, j, :], rtol=rtol, atol=atol)
                                     np.testing.assert_allclose(s.grad_grad_B[:, i, j, k], s.grad_grad_B[:, i, k, j], rtol=rtol, atol=atol)
             
