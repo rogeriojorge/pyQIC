@@ -56,6 +56,9 @@ To run this code you will need to use your Python and insert the following comma
 ```
 from qic import Qic
 stel = Qic.from_paper('r2 section 5.2')
+stel.plot_boundary()
 ```
 <br>
+
+What this command do is, he goes through your files and it will search for the picture you told it to search and it will open. In this case is two pictures but you can dicide how many you want it to open. More you open, more it takes to open
 

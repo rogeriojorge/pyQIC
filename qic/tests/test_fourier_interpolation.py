@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-from qsc.fourier_interpolation import fourier_interpolation
+from qic.fourier_interpolation import fourier_interpolation
 
 class FourierInterpolationTests(unittest.TestCase):
 

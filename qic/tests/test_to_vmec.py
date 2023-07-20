@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from qsc.util import to_Fourier
+from qic.util import to_Fourier
 import unittest
 import os
 from scipy.io import netcdf
 import numpy as np
 import logging
-from qsc.qsc import Qsc
+from qic.qic import Qic
 from mpi4py import MPI
 import vmec
 
@@ -22,10 +22,10 @@ def compare_to_vmec(name, r=0.005, nphi=151):
     # Add the directory of this file to the specified filename:
     inputFile="input."+str(name).replace(" ","")
     abs_filename = os.path.join(os.path.dirname(__file__), inputFile)
-    # Run pyQsc and create a VMEC input file
-    logger.info('Creating pyQSC configuration')
+    # Run pyQic and create a VMEC input file
+    logger.info('Creating pyQIC configuration')
     order = 'r2' if name[1] == '2' else 'r1'
-    py = Qsc.from_paper(name, nphi=nphi, order=order)
+    py = Qic.from_paper(name, nphi=nphi, order=order)
     logger.info('Outputing to VMEC')
     py.to_vmec(inputFile,r)
     # Run VMEC
@@ -39,7 +39,7 @@ def compare_to_vmec(name, r=0.005, nphi=151):
     woutFile="wout_"+str(name).replace(" ","")+".nc"
     f = netcdf.netcdf_file(woutFile, 'r')
     # Compare the results
-    logger.info('pyQSC iota on axis = '+str(py.iota))
+    logger.info('pyQIC iota on axis = '+str(py.iota))
     logger.info('VMEC iota on axis = '+str(-f.variables['iotaf'][()][0]))
     logger.info('pyQSC field on axis = '+str(py.B0))
     logger.info('VMEC bmnc[1][0] = '+str(f.variables['bmnc'][()][1][0]))
@@ -55,7 +55,7 @@ def Fourier_Inverse(name, r = 0.05, ntheta = 26, nphi = 51, mpol = 13, ntor = 25
     at the same surface
     """
     logger.info('Creating pyQSC configuration')
-    py = Qsc.from_paper(name, nphi=nphi)
+    py = Qic.from_paper(name, nphi=nphi)
 
     logger.info('Calculating old R_2D and Z_2D')
     R_2D, Z_2D, phi0_2D = py.Frenet_to_cylindrical(r, ntheta)
