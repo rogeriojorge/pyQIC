@@ -10,6 +10,7 @@ import matplotlib.colors as clr
 from matplotlib.colors import LightSource
 import matplotlib.ticker as tck
 from .util import to_Fourier
+from .Frenet_to_cylindrical import Frenet_to_cylindrical_1stOrder
 
 def plot(self, newfigure=True, show=True, savefig=None):
     """
@@ -310,7 +311,7 @@ def create_subplot_mayavi(mlab, R, alphas, x_2D_plot, y_2D_plot, z_2D_plot,
         for j in range(len(alphas)):
             mlab.plot3d(fieldline_X_rotated[j], fieldline_Y_rotated[j]-shift_array[i], fieldline_Z_rotated[j], color=(0,0,0), line_width=0.002, tube_radius=0.008)
 
-def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25):
+def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, ntor=25,firstOrderSurface=False):
     '''
     Function that, for a given near-axis radial coordinate r, outputs
     the [X,Y,Z,R] components of the boundary. The resolution along the toroidal
@@ -325,13 +326,78 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
       mpol: resolution in poloidal Fourier space
       ntor: resolution in toroidal Fourier space
     '''
+    #firstOrderSurface = True
+   
+    if firstOrderSurface == True:
+        R1c, R1s, Z1c, Z1s = Frenet_to_cylindrical_1stOrder(self,r,ntheta)
+        self.R1c = R1c
+        self.R1s = R1s
+        self.Z1s = Z1s
+        self.Z1c = Z1c
+        rbc1 = np.zeros((2*ntor+1,1))
+        rbs1 = np.zeros((2*ntor+1,1))
+        zbc1 = np.zeros((2*ntor+1,1))
+        zbs1 = np.zeros((2*ntor+1,1))
+
+        rbc1[ntor] = np.mean(R1c)
+        rbs1[ntor] = np.mean(R1s)
+        zbc1[ntor] = np.mean(Z1c)
+        zbs1[ntor] = np.mean(Z1s)
+ 
+        for n in range(0, ntor-1):
+            # RBC
+            half_sum = np.mean(R1c * np.cos(self.nfp*(n+1)*self.phi))
+            half_difference = np.mean(R1s * np.sin(self.nfp*(n+1)*self.phi))
+            rbc1[ntor+n+1] = half_sum + half_difference
+            rbc1[ntor-n-1] = half_sum - half_difference
+        
+            # ZBC
+            half_sum = np.mean(Z1c * np.cos((n+1)*self.nfp*self.phi))
+            half_difference = np.mean(Z1s * np.sin((n+1)*self.nfp*self.phi))
+            zbc1[ntor+n+1] = half_sum + half_difference
+            zbc1[ntor-n-1] = half_sum - half_difference
+        
+            # RBS
+            half_sum = np.mean(R1s * np.cos(self.nfp*(n+1)*self.phi))
+            half_difference = -np.mean(R1c * np.sin(self.nfp*(n+1)*self.phi))
+            rbs1[ntor+n+1] = half_sum + half_difference
+            rbs1[ntor-n-1] = half_sum - half_difference
+        
+            # ZBS
+            half_sum = np.mean(Z1s * np.cos(self.nfp*(n+1)*self.phi))
+            half_difference = -np.mean(Z1c * np.sin(self.nfp*(n+1)*self.phi))
+            zbs1[ntor+n+1] = half_sum + half_difference
+            zbs1[ntor-n-1] = half_sum - half_difference
+    
+        rbc1 = rbc1 * r
+        rbs1 = rbs1 * r
+        zbc1 = zbc1 * r
+        zbs1 = zbs1 * r
+        
+        ### only valid for stellarator symmetry 
+        RBC = np.zeros((int(2 * ntor + 1), int(mpol + 1)))
+        RBS = np.zeros((int(2 * ntor + 1), int(mpol + 1)))
+        ZBC = np.zeros((int(2 * ntor + 1), int(mpol + 1)))
+        ZBS = np.zeros((int(2 * ntor + 1), int(mpol + 1)))
+
+        RBC[:,1] = rbc1.transpose()
+        RBS[:,1] = rbs1.transpose()
+        ZBC[:,1] = zbc1.transpose()
+        ZBS[:,1] = -zbs1.transpose()
+        
+        RBC[ntor:ntor+self.nfourier,0] = self.rc
+        RBS[ntor:ntor+self.nfourier,0] = self.rs
+        ZBC[ntor:ntor+self.nfourier,0] = self.zc
+        ZBS[ntor:ntor+self.nfourier,0] = self.zs
+    else:
+    
     # Get surface shape at fixed off-axis toroidal angle phi
-    R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta=ntheta_fourier)
+        R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta=ntheta_fourier)
     # Get Fourier coefficients in order to plot with arbitrary resolution
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol=mpol, ntor=ntor, lasym=self.lasym)
-    if not self.lasym:
-        RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
-        ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
+        RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol=mpol, ntor=ntor, lasym=self.lasym)
+        if not self.lasym:
+            RBS = np.zeros((int(2*ntor+1),int(mpol+1)))
+            ZBC = np.zeros((int(2*ntor+1),int(mpol+1)))
 
     theta1D = np.linspace(0, 2*np.pi, ntheta)
     phi1D = np.linspace(0, 2*np.pi, nphi)
@@ -353,7 +419,7 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
 
 def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections=8,
          fieldlines=False, savefig=None, colormap=None, azim_default=None, threeD=True, n_field_lines=1,
-         show=True, **kwargs):
+         show=True,firstOrderSurface=False, **kwargs):
     """
     Plot the boundary of the near-axis configuration. There are two main ways of
     running this function.
@@ -401,7 +467,7 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
     .. image:: poloidalplot.png
        :width: 200
     """
-    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier)
+    x_2D_plot, y_2D_plot, z_2D_plot, R_2D_plot = self.get_boundary(r=r, ntheta=ntheta, nphi=nphi, ntheta_fourier=ntheta_fourier,firstOrderSurface=firstOrderSurface)
     phi = np.linspace(0, 2 * np.pi, nphi)  # Endpoint = true and no nfp factor, because this is what is used in get_boundary()
     R_2D_spline = interp1d(phi, R_2D_plot, axis=1)
     z_2D_spline = interp1d(phi, z_2D_plot, axis=1)

@@ -27,7 +27,8 @@ def init_axis(self):
     rc  = self.rc
     rs  = self.rs
     nfp = self.nfp
-    if omn:
+    zs  = self.zs 
+    #if omn:
         ### Setting higher order rc to make sure kappa has first order zeros
         ###  at phi=0 and phi=pi/nfp
         # if len(rc)>6:
@@ -36,8 +37,17 @@ def init_axis(self):
         #     rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
         # else:
         #     rc[2]=-1 / (1 + 4 * nfp * nfp)
-        rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1 + 49*nfp*nfp))
-        rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1+64*nfp*nfp))
+#        rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1 + 49*nfp*nfp))
+  #      rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1+64*nfp*nfp))
+    ### Conditions on rc and zs for half-helicity magnetic axis:
+    ###
+#    if half_helicity :
+    rc[9] = -(rc[1]*(1+ nfp*nfp) + rc[3]*(1+9*nfp*nfp) + rc[5]*(1+ 25*nfp*nfp) + rc[7]*(1+49*nfp*nfp))/(1+81*nfp*nfp)
+    rc[10] = -(1+ rc[2]*(1+4*nfp*nfp) + rc[4]*(1+16*nfp*nfp) + rc[6]*(1+ 36*nfp*nfp) + rc[8]*(1+64*nfp*nfp))/(1+100*nfp*nfp)
+
+    zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
+        + zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp))
+
     # Shorthand:
     nphi = self.nphi
     nfp = self.nfp
@@ -113,13 +123,15 @@ def init_axis(self):
         nfp_phi_length = int(np.ceil(self.nphi/2))
         sign_curvature_change[nfp_phi_length:2*nfp_phi_length] = (-1)*np.ones((nfp_phi_length-1,))
 
-    curvature = curvature * sign_curvature_change
+    curvature = curvature* sign_curvature_change
     for j in range(3):
         normal_cylindrical[:,j]   =   normal_cylindrical[:,j]*sign_curvature_change
         binormal_cylindrical[:,j] = binormal_cylindrical[:,j]*sign_curvature_change
 
     self._determine_helicity()
-    self.N_helicity = - self.helicity * self.nfp
+   
+    self.helicity = -0.5
+    self.N_helicity =  self.helicity * self.nfp
     
     # We use the same sign convention for torsion as the
     # Landreman-Sengupta-Plunk paper, wikipedia, and
@@ -178,21 +190,21 @@ def init_axis(self):
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
         self.d = np.zeros((self.nphi,))
         if not self.d_over_curvature == 0:
-            self.d = self.d_over_curvature * curvature
+            self.d = np.sqrt(self.d_over_curvature/B0) * curvature
         elif not self.d_over_curvature_cvals == []:
             if np.size(self.d_over_curvature_cvals) == self.nphi:
                 self.d = self.d_over_curvature_cvals * curvature
             else:
                 self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
         self.d -= self.k_second_order_SS * nfp * self.B0_vals[1] * np.sin(nfp * varphi) / B0
-        self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi) for i in range(len(self.d_cvals))]))
-        self.d += np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.d_svals))]))
+        self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi)*curvature for i in range(len(self.d_cvals))]))
+        self.d += np.array(sum([-self.d_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_svals))]))
 
     self.d_l_d_varphi = self.sG * G0 / self.B0   
     self.d_d_varphi = np.zeros((nphi, nphi))
     for j in range(nphi):
         self.d_d_varphi[j,:] = self.d_d_phi[j,:] * self.sG * G0 / (self.B0[j] * d_l_d_phi[j])
-
+    
     self.d_bar = self.d / (curvature + 1e-31)
 
     self.etabar_squared_over_curvature_squared = (self.B0  / self.Bbar) * self.d_bar**2

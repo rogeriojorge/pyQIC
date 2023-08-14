@@ -198,7 +198,7 @@ def _determine_helicity(self):
                 quadrant[j] = 2
             else:
                 quadrant[j] = 3
-    quadrant[self.nphi] = quadrant[0]
+    #quadrant[self.nphi] = quadrant[0] ### commenting this sets half-helicity  properly
 
     counter = 0
     for j in range(self.nphi):
@@ -213,7 +213,7 @@ def _determine_helicity(self):
     # to maintain "iota_N = iota + axis_helicity" under the parity
     # transformations.
     counter *= self.spsi * self.sG
-    self.helicity = counter / 4
+    self.helicity = counter / 4 
 
 def r1_diagnostics(self):
     """
@@ -271,13 +271,13 @@ def r1_diagnostics(self):
         # exit()
         # angle = -self.helicity * self.nfp * (self.phi - self.phi_shift*self.d_phi + self.nu_spline(self.phi - self.phi_shift*self.d_phi))
         # print(self.phi - self.phi_shift*self.d_phi + self.nu_spline(self.phi - self.phi_shift*self.d_phi) - self.varphi)
-        angle = -self.helicity * self.nfp * self.varphi
+        angle = self.helicity * self.nfp * self.varphi
         sinangle = np.sin(angle)
         cosangle = np.cos(angle)
-        self.X1s_untwisted = (self.X1s *   cosangle  + self.X1c * sinangle)# * self.sign_curvature_change
+        self.X1s_untwisted = (self.X1s *   cosangle  + self.X1c * sinangle)#* self.sign_curvature_change
         self.X1c_untwisted = (self.X1s * (-sinangle) + self.X1c * cosangle)# * self.sign_curvature_change
-        self.Y1s_untwisted = (self.Y1s *   cosangle  + self.Y1c * sinangle)# * self.sign_curvature_change
-        self.Y1c_untwisted = (self.Y1s * (-sinangle) + self.Y1c * cosangle)# * self.sign_curvature_change
+        self.Y1s_untwisted = (self.Y1s *   cosangle  + self.Y1c * sinangle) #* self.sign_curvature_change
+        self.Y1c_untwisted = (self.Y1s * (-sinangle) + self.Y1c * cosangle) #* self.sign_curvature_change
     # Use (R,Z) for elongation in the (R,Z) plane,
     # or use (X,Y) for elongation in the plane perpendicular to the magnetic axis.
     p = self.X1s * self.X1s + self.X1c * self.X1c + self.Y1s * self.Y1s + self.Y1c * self.Y1c
