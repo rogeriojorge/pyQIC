@@ -18,7 +18,7 @@ class Qic():
     """
     
     # Import methods that are defined in separate files:
-    from .init_axis import init_axis, convert_to_spline
+    from .init_axis import init_axis, convert_to_spline, convert_to_spline_tripled
     from .calculate_r1 import _residual, _jacobian, solve_sigma_equation, \
         _determine_helicity, r1_diagnostics
     from .grad_B_tensor import calculate_grad_B_tensor, calculate_grad_grad_B_tensor, \

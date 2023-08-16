@@ -5,6 +5,7 @@ off-axis cylindrical toroidal angle
 """
 
 import numpy as np
+from numpy.matlib import repmat 
 from scipy.optimize import root_scalar
 
 def Frenet_to_cylindrical_residual_func(phi0, phi_target, qic):
@@ -23,10 +24,10 @@ def Frenet_to_cylindrical_residual_func(phi0, phi_target, qic):
     R0_at_phi0   = qic.R0_func(phi0)
     X_at_phi0    = qic.X_spline(phi0)
     Y_at_phi0    = qic.Y_spline(phi0)
-    normal_R     = qic.normal_R_spline(phi0)
-    normal_phi   = qic.normal_phi_spline(phi0)
-    binormal_R   = qic.binormal_R_spline(phi0)
-    binormal_phi = qic.binormal_phi_spline(phi0)
+    normal_R     = qic.normal_R_spline_tripled(phi0)
+    normal_phi   = qic.normal_phi_spline_tripled(phi0)
+    binormal_R   = qic.binormal_R_spline_tripled(phi0)
+    binormal_phi = qic.binormal_phi_spline_tripled(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -69,12 +70,12 @@ def Frenet_to_cylindrical_1_point(phi0, qic):
     X_at_phi0    = qic.X_spline(phi0)
     Y_at_phi0    = qic.Y_spline(phi0)
     Z_at_phi0    = qic.Z_spline(phi0)
-    normal_R     = qic.normal_R_spline(phi0)
-    normal_phi   = qic.normal_phi_spline(phi0)
-    normal_z     = qic.normal_z_spline(phi0)
-    binormal_R   = qic.binormal_R_spline(phi0)
-    binormal_phi = qic.binormal_phi_spline(phi0)
-    binormal_z   = qic.binormal_z_spline(phi0)
+    normal_R     = qic.normal_R_spline_tripled(phi0)
+    normal_phi   = qic.normal_phi_spline_tripled(phi0)
+    normal_z     = qic.normal_z_spline_tripled(phi0)
+    binormal_R   = qic.binormal_R_spline_tripled(phi0)
+    binormal_phi = qic.binormal_phi_spline_tripled(phi0)
+    binormal_z   = qic.binormal_z_spline_tripled(phi0)
 
     normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
     normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
@@ -115,25 +116,72 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         r:  near-axis radius r of the desired boundary surface
         ntheta: resolution in the poloidal angle theta
     """
-    nphi_conversion = self.nphi
-    theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
-    phi_conversion = np.linspace(0,2*np.pi/self.nfp,nphi_conversion,endpoint=False)
-    R_2D = np.zeros((ntheta,nphi_conversion))
-    Z_2D = np.zeros((ntheta,nphi_conversion))
-    phi0_2D = np.zeros((ntheta,nphi_conversion))
-    for j_theta in range(ntheta):
-        costheta = np.cos(theta[j_theta])
-        sintheta = np.sin(theta[j_theta])
-        X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
-        Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
-        Z_at_this_theta = 0 * X_at_this_theta
-        if self.order != 'r1':
+    half_helicity=True
+    if half_helicity == True:
+        nphi_conversion = self.nphi 
+        theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
+        phi_conversion = np.linspace(0,2*np.pi/self.nfp,nphi_conversion,endpoint=False)
+        R_2D = np.zeros((ntheta,nphi_conversion))
+        Z_2D = np.zeros((ntheta,nphi_conversion))
+        phi0_2D = np.zeros((ntheta,nphi_conversion))
+        for j_theta in range(ntheta):
+            costheta = np.cos(theta[j_theta])
+            sintheta = np.sin(theta[j_theta])
+            #X1c_untwisted_tripled = repmat(self.X1c_untwisted,3,1)
+            #sign_curvature_change = np.ones((self.nphi,))
+            #nfp_phi_length = int(np.ceil(self.nphi/2))                 
+            #sign_curvature_change[nfp_phi_length:2*nfp_phi_length] = (-1)*np.ones((nfp_phi_length-1,))
+            #X1c_untwisted_tripled = np.append(self.X1c_untwisted,self.X1c_untwisted)
+            #X1c_untwisted_tripled = np.append(X1c_untwisted_tripled,self.X1c_untwisted)
+            #X1s_untwisted_tripled = np.append(self.X1s_untwisted,self.X1s_untwisted)
+            #X1s_untwisted_tripled = np.append(X1s_untwisted_tripled,self.X1s_untwisted)
+            #Y1c_untwisted_tripled = np.append(self.Y1c_untwisted,self.Y1c_untwisted)
+            #Y1c_untwisted_tripled = np.append(Y1c_untwisted_tripled,self.Y1c_untwisted)
+            #Y1s_untwisted_tripled = np.append(self.Y1s_untwisted,self.Y1s_untwisted)
+            #Y1s_untwisted_tripled = np.append(Y1s_untwisted_tripled,self.Y1s_untwisted)
+            X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
+            Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
+            Z_at_this_theta = 0 * X_at_this_theta
+            X_at_this_theta_tripled = np.append(-X_at_this_theta,X_at_this_theta)
+            X_at_this_theta_tripled = np.append(X_at_this_theta_tripled,-X_at_this_theta)
+            Y_at_this_theta_tripled = np.append(-Y_at_this_theta,Y_at_this_theta)
+            Y_at_this_theta_tripled = np.append(Y_at_this_theta_tripled,-Y_at_this_theta)
+            self.X_spline = self.convert_to_spline_tripled(X_at_this_theta_tripled)
+            self.Y_spline = self.convert_to_spline_tripled(Y_at_this_theta_tripled)
+            self.Z_spline = self.convert_to_spline(Z_at_this_theta)
+            for j_phi in range(nphi_conversion):
+            # Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
+                phi_target = phi_conversion[j_phi]
+                phi0_rootSolve_min = phi_target - 1.0 / self.nfp
+                phi0_rootSolve_max = phi_target + 1.0 / self.nfp
+                res = root_scalar(Frenet_to_cylindrical_residual_func, xtol=1e-17, rtol=1e-15, maxiter=2000,\
+                              args=(phi_target, self), bracket=[phi0_rootSolve_min, phi0_rootSolve_max], x0=phi_target)
+                phi0_solution = res.root
+                final_R, final_z, _ = Frenet_to_cylindrical_1_point(phi0_solution, self)
+                R_2D[j_theta,j_phi] = final_R
+                Z_2D[j_theta,j_phi] = final_z
+                phi0_2D[j_theta,j_phi] = phi0_solution
+        self.R_2D = R_2D
+    else:
+        nphi_conversion = self.nphi
+        theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)
+        phi_conversion = np.linspace(0,2*np.pi/self.nfp,nphi_conversion,endpoint=False)
+        R_2D = np.zeros((ntheta,nphi_conversion))
+        Z_2D = np.zeros((ntheta,nphi_conversion))
+        phi0_2D = np.zeros((ntheta,nphi_conversion))
+        for j_theta in range(ntheta):
+            costheta = np.cos(theta[j_theta])
+            sintheta = np.sin(theta[j_theta])
+            X_at_this_theta = r * (self.X1c_untwisted * costheta + self.X1s_untwisted * sintheta)
+            Y_at_this_theta = r * (self.Y1c_untwisted * costheta + self.Y1s_untwisted * sintheta)
+            Z_at_this_theta = 0 * X_at_this_theta
+            if self.order != 'r1':
             # We need O(r^2) terms:
-            cos2theta = np.cos(2 * theta[j_theta])
-            sin2theta = np.sin(2 * theta[j_theta])
-            X_at_this_theta += r * r * (self.X20_untwisted + self.X2c_untwisted * cos2theta + self.X2s_untwisted * sin2theta)
-            Y_at_this_theta += r * r * (self.Y20_untwisted + self.Y2c_untwisted * cos2theta + self.Y2s_untwisted * sin2theta)
-            Z_at_this_theta += r * r * (self.Z20_untwisted + self.Z2c_untwisted * cos2theta + self.Z2s_untwisted * sin2theta)
+                cos2theta = np.cos(2 * theta[j_theta])
+                sin2theta = np.sin(2 * theta[j_theta])
+                X_at_this_theta += r * r * (self.X20_untwisted + self.X2c_untwisted * cos2theta + self.X2s_untwisted * sin2theta)
+                Y_at_this_theta += r * r * (self.Y20_untwisted + self.Y2c_untwisted * cos2theta + self.Y2s_untwisted * sin2theta)
+                Z_at_this_theta += r * r * (self.Z20_untwisted + self.Z2c_untwisted * cos2theta + self.Z2s_untwisted * sin2theta)
             if self.order == 'r3':
                 # We need O(r^3) terms:
                 costheta  = np.cos(theta[j_theta])

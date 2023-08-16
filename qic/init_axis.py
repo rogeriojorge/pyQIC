@@ -1,6 +1,6 @@
 """
 This module contains the routine to initialize quantities like
-curvature and torsion from the magnetix axis shape.
+curvature and torsion from the magnetic axis shape.
 """
 
 import logging
@@ -9,6 +9,7 @@ from scipy.interpolate import CubicSpline as spline
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 from .fourier_interpolation import fourier_interpolation_matrix
+from numpy import matlib as ml  
 
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -17,6 +18,12 @@ logger = logging.getLogger(__name__)
 def convert_to_spline(self,array):
     sp=spline(np.append(self.phi,2*np.pi/self.nfp+self.phi[0]), np.append(array,array[0]), bc_type='periodic')
     return sp
+
+def convert_to_spline_tripled(self,array):
+    phi_tripled = np.append(self.phi-(2*np.pi/self.nfp),self.phi)
+    phi_tripled = np.append(phi_tripled,self.phi+(2*np.pi/self.nfp))
+    sp=spline(np.append(phi_tripled,4*np.pi/self.nfp+self.phi[0]), np.append(array,array[0]), bc_type='periodic')
+    return sp    
 
 def init_axis(self):
     """
@@ -266,6 +273,21 @@ def init_axis(self):
     self.tangent_R_spline = self.convert_to_spline(self.tangent_cylindrical[:,0])
     self.tangent_phi_spline = self.convert_to_spline(self.tangent_cylindrical[:,1])
     self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
+
+    # Spline interpolants for the cylindrical components of the Frenet-Serret frame (half helicity):
+    #if half_helicity == True:
+    self.normal_cylindrical_tripled = np.append(-self.normal_cylindrical[:,:],self.normal_cylindrical[:,:],axis=0)
+    self.normal_cylindrical_tripled = np.append(self.normal_cylindrical_tripled,-self.normal_cylindrical,axis=0) 
+    self.phi_tripled = np.append(self.phi-(2*np.pi/self.nfp),self.phi,axis=0)
+    self.phi_tripled = np.append(self.phi_tripled,self.phi+(2*np.pi/self.nfp),axis=0)
+    self.binormal_cylindrical_tripled = np.append(-self.binormal_cylindrical,self.binormal_cylindrical,axis=0)
+    self.binormal_cylindrical_tripled = np.append(self.binormal_cylindrical_tripled,-self.binormal_cylindrical,axis=0) 
+    self.normal_R_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,0])
+    self.normal_phi_spline_tripled   = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,1])
+    self.normal_z_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,2])
+    self.binormal_R_spline_tripled    = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,0])
+    self.binormal_phi_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,1])
+    self.binormal_z_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,2])
 
     # Spline interpolant for the magnetic field on-axis as a function of phi (not varphi)
     self.B0_spline = self.convert_to_spline(self.B0)

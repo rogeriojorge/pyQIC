@@ -60,7 +60,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14,firstOrd
     ac = [1]
     curtor = 2 * np.pi / mu0 * self.I2 * r * r
    
-    firstOrderSurface = True
+    #firstOrderSurface = True
    
     if firstOrderSurface == True:
         R1c, R1s, Z1c, Z1s = Frenet_to_cylindrical_1stOrder(self,r,ntheta)
@@ -126,6 +126,9 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14,firstOrd
     else:
     # Get surface shape at fixed off-axis toroidal angle phi
         R_2D, Z_2D, phi0_2D = self.Frenet_to_cylindrical(r, ntheta)
+        self.R_2D = R_2D
+        self.Z_2D = Z_2D
+        self.phi0_2D = phi0_2D
     
     # Fourier transform the result.
     # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.

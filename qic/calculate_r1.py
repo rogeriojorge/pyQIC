@@ -276,8 +276,8 @@ def r1_diagnostics(self):
         cosangle = np.cos(angle)
         self.X1s_untwisted = (self.X1s *   cosangle  + self.X1c * sinangle)#* self.sign_curvature_change
         self.X1c_untwisted = (self.X1s * (-sinangle) + self.X1c * cosangle)# * self.sign_curvature_change
-        self.Y1s_untwisted = (self.Y1s *   cosangle  + self.Y1c * sinangle) #* self.sign_curvature_change
-        self.Y1c_untwisted = (self.Y1s * (-sinangle) + self.Y1c * cosangle) #* self.sign_curvature_change
+        self.Y1s_untwisted = (self.Y1s *   cosangle  + self.Y1c * sinangle)# * self.sign_curvature_change
+        self.Y1c_untwisted = (self.Y1s * (-sinangle) + self.Y1c * cosangle)# * self.sign_curvature_change
     # Use (R,Z) for elongation in the (R,Z) plane,
     # or use (X,Y) for elongation in the plane perpendicular to the magnetic axis.
     p = self.X1s * self.X1s + self.X1c * self.X1c + self.Y1s * self.Y1s + self.Y1c * self.Y1c

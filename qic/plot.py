@@ -393,6 +393,8 @@ def get_boundary(self, r=0.1, ntheta=40, nphi=130, ntheta_fourier=20, mpol=13, n
     
     # Get surface shape at fixed off-axis toroidal angle phi
         R_2D, Z_2D, _ = self.Frenet_to_cylindrical(r, ntheta=ntheta_fourier)
+        self.R_2D = R_2D
+        self.Z_2D = Z_2D
     # Get Fourier coefficients in order to plot with arbitrary resolution
         RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol=mpol, ntor=ntor, lasym=self.lasym)
         if not self.lasym:
