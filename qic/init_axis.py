@@ -34,26 +34,52 @@ def init_axis(self):
     rc  = self.rc
     rs  = self.rs
     nfp = self.nfp
-    zs  = self.zs 
-    #if omn:
+    zs  = self.zs
+    zc  = self.zc
+    half_helicity = True #self.half_helicity 
+    if omn:
         ### Setting higher order rc to make sure kappa has first order zeros
         ###  at phi=0 and phi=pi/nfp
-        # if len(rc)>6:
-        #     rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1 + 36 * nfp * nfp)
-        # elif len(rc)>4:
-        #     rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1 + 16 * nfp * nfp)
-        # else:
-        #     rc[2]=-1 / (1 + 4 * nfp * nfp)
-#        rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1 + 49*nfp*nfp))
-  #      rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1+64*nfp*nfp))
+        if len(rc) == 3:
+            rc[1] = 0.0
+            rc[2] = -1 / (1.0 + 4 * nfp * nfp)
+        elif len(rc) == 4:
+            rc[2] = -1.0 / (1.0 + 4.0 * nfp * nfp)
+            rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9.0 * nfp * nfp)
+        elif len(rc) == 5:
+            rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9 * nfp * nfp)
+            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
+        elif len(rc) == 6:
+            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
+            rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
+        elif len(rc) == 7:
+            rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
+            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
+        elif len(rc) == 8:
+            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
+            rc[7] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp + rc[5] +  25*rc[5] * nfp * nfp) / (1.0 + 49 * nfp * nfp)
+        else:
+            rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1.0 + 49*nfp*nfp))
+            rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1.0+64*nfp*nfp))
     ### Conditions on rc and zs for half-helicity magnetic axis:
     ###
-#    if half_helicity :
-    rc[9] = -(rc[1]*(1+ nfp*nfp) + rc[3]*(1+9*nfp*nfp) + rc[5]*(1+ 25*nfp*nfp) + rc[7]*(1+49*nfp*nfp))/(1+81*nfp*nfp)
-    rc[10] = -(1+ rc[2]*(1+4*nfp*nfp) + rc[4]*(1+16*nfp*nfp) + rc[6]*(1+ 36*nfp*nfp) + rc[8]*(1+64*nfp*nfp))/(1+100*nfp*nfp)
-
-    zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
-        + zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp))
+        if half_helicity == True:
+            if len(zs) == 3:
+                zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))
+            elif len(rc) == 4:
+                zs[3] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp)) / (3.0*( 2.0 + 9.0* nfp * nfp))
+            elif len(rc) == 5:
+                zs[4] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) ) / (8.0*( 1.0 + 8.0* nfp * nfp))
+            elif len(rc) == 6:
+                zs[5] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) ) / (5.0*( 2.0 + 25.0* nfp * nfp))
+            elif len(rc) == 7:
+                zs[6] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) ) / (12.0*( 1.0 + 18.0* nfp * nfp))
+            elif len(rc) == 8:
+                zs[7] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp)   ) / (7.0*( 2.0 + 49.0* nfp * nfp))
+            else:
+                zs[8] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp) + 7.0*zs[7]*( 2.0 + 49.0* nfp * nfp)  ) / (16.0*( 1.0 + 32.0* nfp * nfp))
+            #zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
+        #+ zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp))
 
     # Shorthand:
     nphi = self.nphi
@@ -136,10 +162,10 @@ def init_axis(self):
         binormal_cylindrical[:,j] = binormal_cylindrical[:,j]*sign_curvature_change
 
     self._determine_helicity()
-   
-    self.helicity = -0.5
-    self.N_helicity =  self.helicity * self.nfp
-    
+    if half_helicity == True:  ### Half helicity conditions are enforced on the axis so we know helicity is 1/2
+        self.helicity = 0.5
+        #self.N_helicity =  -self.helicity * self.nfp
+    self.N_helicity =  -self.helicity * self.nfp
     # We use the same sign convention for torsion as the
     # Landreman-Sengupta-Plunk paper, wikipedia, and
     # mathworld.wolfram.com/Torsion.html.  This sign convention is
@@ -275,19 +301,19 @@ def init_axis(self):
     self.tangent_z_spline = self.convert_to_spline(self.tangent_cylindrical[:,2])
 
     # Spline interpolants for the cylindrical components of the Frenet-Serret frame (half helicity):
-    #if half_helicity == True:
-    self.normal_cylindrical_tripled = np.append(-self.normal_cylindrical[:,:],self.normal_cylindrical[:,:],axis=0)
-    self.normal_cylindrical_tripled = np.append(self.normal_cylindrical_tripled,-self.normal_cylindrical,axis=0) 
-    self.phi_tripled = np.append(self.phi-(2*np.pi/self.nfp),self.phi,axis=0)
-    self.phi_tripled = np.append(self.phi_tripled,self.phi+(2*np.pi/self.nfp),axis=0)
-    self.binormal_cylindrical_tripled = np.append(-self.binormal_cylindrical,self.binormal_cylindrical,axis=0)
-    self.binormal_cylindrical_tripled = np.append(self.binormal_cylindrical_tripled,-self.binormal_cylindrical,axis=0) 
-    self.normal_R_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,0])
-    self.normal_phi_spline_tripled   = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,1])
-    self.normal_z_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,2])
-    self.binormal_R_spline_tripled    = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,0])
-    self.binormal_phi_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,1])
-    self.binormal_z_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,2])
+    if half_helicity == True:
+        self.normal_cylindrical_tripled = np.append(-self.normal_cylindrical[:,:],self.normal_cylindrical[:,:],axis=0)
+        self.normal_cylindrical_tripled = np.append(self.normal_cylindrical_tripled,-self.normal_cylindrical,axis=0) 
+        self.phi_tripled = np.append(self.phi-(2*np.pi/self.nfp),self.phi,axis=0)
+        self.phi_tripled = np.append(self.phi_tripled,self.phi+(2*np.pi/self.nfp),axis=0)
+        self.binormal_cylindrical_tripled = np.append(-self.binormal_cylindrical,self.binormal_cylindrical,axis=0)
+        self.binormal_cylindrical_tripled = np.append(self.binormal_cylindrical_tripled,-self.binormal_cylindrical,axis=0) 
+        self.normal_R_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,0])
+        self.normal_phi_spline_tripled   = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,1])
+        self.normal_z_spline_tripled     = self.convert_to_spline_tripled(self.normal_cylindrical_tripled[:,2])
+        self.binormal_R_spline_tripled    = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,0])
+        self.binormal_phi_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,1])
+        self.binormal_z_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,2])
 
     # Spline interpolant for the magnetic field on-axis as a function of phi (not varphi)
     self.B0_spline = self.convert_to_spline(self.B0)
