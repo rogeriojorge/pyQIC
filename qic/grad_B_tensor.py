@@ -54,7 +54,7 @@ def calculate_grad_B_tensor(self):
                             + tensor.bb * b[i] * b[j] \
                             + tensor.tn * t[i] * n[j] + tensor.nt * n[i] * t[j] \
                             + tensor.tt * t[i] * t[j]
-                        for i in range(3)] for j in range(3)])
+                        for j in range(3)] for i in range(3)])
     self.grad_B_tensor_cylindrical_array = np.reshape(self.grad_B_tensor_cylindrical, 9 * self.nphi)
 
     self.grad_B_colon_grad_B = tensor.tn * tensor.tn + tensor.nt * tensor.nt \
@@ -121,8 +121,8 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     p2 = s.p2
 
     B20 = s.B20
-    B2s = s.B2s
-    B2c = s.B2c
+    B2s = s.B2s_array
+    B2c = s.B2c_array
 
     d_B0_d_varphi = np.matmul(s.d_d_varphi, B0)
 
@@ -157,997 +157,235 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     # The elements that follow are computed in the Mathematica notebook "20200407-01 Grad grad B tensor near axis"
     # and then formatted for fortran by the python script process_grad_grad_B_tensor_code
 
-    # The order is (normal, binormal, tangent). So element 123 means nbt.
+    # The order is (normal, binormal, tangent). So element 012 means nbt.
 
-    # Element 111
-    grad_grad_B[:,0,0,0] =(sG*B0**3*(8*iota_N0*X2c*Y1c* \
-        Y1s + 4*iota_N0*X2s* \
-        (-Y1c**2 + Y1s**2) -  \
-        2*iota_N0*X1s*Y1c*Y20 +  \
-        2*iota_N0*X1c*Y1s*Y20 +  \
-        2*iota_N0*X1s*Y1c*Y2c +  \
-        2*iota_N0*X1c*Y1s*Y2c -  \
-        2*iota_N0*X1c*Y1c*Y2s +  \
-        2*iota_N0*X1s*Y1s*Y2s -  \
-        5*iota_N0*X1c*X1s*Y1c**2* \
-        curvature +  \
-        5*iota_N0*X1c**2*Y1c*Y1s* \
-        curvature -  \
-        5*iota_N0*X1s**2*Y1c*Y1s* \
-        curvature +  \
-        5*iota_N0*X1c*X1s*Y1s**2* \
-        curvature -  \
-        2*Y1c*Y20*d_X1c_d_varphi +  \
-        2*Y1c*Y2c*d_X1c_d_varphi +  \
-        2*Y1s*Y2s*d_X1c_d_varphi -  \
-        5*X1s*Y1c*Y1s* \
-        curvature*d_X1c_d_varphi +  \
-        5*X1c*Y1s**2*curvature* \
-        d_X1c_d_varphi -  \
-        2*Y1s*Y20*d_X1s_d_varphi -  \
-        2*Y1s*Y2c*d_X1s_d_varphi +  \
-        2*Y1c*Y2s*d_X1s_d_varphi +  \
-        5*X1s*Y1c**2*curvature* \
-        d_X1s_d_varphi -  \
-        5*X1c*Y1c*Y1s* \
-        curvature*d_X1s_d_varphi +  \
-        2*Y1c**2*d_X20_d_varphi +  \
-        2*Y1s**2*d_X20_d_varphi -  \
-        2*Y1c**2*d_X2c_d_varphi +  \
-        2*Y1s**2*d_X2c_d_varphi -  \
-        4*Y1c*Y1s*d_X2s_d_varphi))/ \
-    (Bbar**2*lprime)
+    # Element111
+    grad_grad_B[:,0,0,0]=(B0**6*lprime*lprime*(8*iota_N0*X2c*Y1c*Y1s + 4*iota_N0*X2s*(-Y1c*Y1c + Y1s*Y1s) - \
+        2*iota_N0*X1s*Y1c*Y20 + 2*iota_N0*X1c*Y1s*Y20 + 2*iota_N0*X1s*Y1c*Y2c + 2*iota_N0*X1c*Y1s*Y2c - \
+        2*iota_N0*X1c*Y1c*Y2s + 2*iota_N0*X1s*Y1s*Y2s - 5*iota_N0*X1c*X1s*Y1c*Y1c*curvature + 5*iota_N0*X1c*X1c*Y1c*Y1s*curvature - \
+        5*iota_N0*X1s*X1s*Y1c*Y1s*curvature + 5*iota_N0*X1c*X1s*Y1s*Y1s*curvature - 2*Y1c*Y20*d_X1c_d_varphi + \
+        2*Y1c*Y2c*d_X1c_d_varphi + 2*Y1s*Y2s*d_X1c_d_varphi - 5*X1s*Y1c*Y1s*curvature*d_X1c_d_varphi + \
+        5*X1c*Y1s*Y1s*curvature*d_X1c_d_varphi - 2*Y1s*Y20*d_X1s_d_varphi - 2*Y1s*Y2c*d_X1s_d_varphi + \
+        2*Y1c*Y2s*d_X1s_d_varphi + 5*X1s*Y1c*Y1c*curvature*d_X1s_d_varphi - 5*X1c*Y1c*Y1s*curvature*d_X1s_d_varphi + \
+        2*Y1c*Y1c*d_X20_d_varphi + 2*Y1s*Y1s*d_X20_d_varphi - 2*Y1c*Y1c*d_X2c_d_varphi + 2*Y1s*Y1s*d_X2c_d_varphi - \
+        4*Y1c*Y1s*d_X2s_d_varphi))/(Bbar**2*G0*G0*G0)
 
-    # Element 112
-    grad_grad_B[:,0,0,1] =(sG*B0**3*(-5*iota_N0*X1s* \
-        Y1c**3*curvature +  \
-        Y1c**2*(-6*iota_N0*Y2s +  \
-            5*iota_N0*X1c*Y1s* \
-            curvature +  \
-            2*lprime*X20*torsion -  \
-            2*lprime*X2c*torsion +  \
-            5*lprime*X1s**2*curvature* \
-            torsion +  \
-            5*X1s*curvature* \
-            d_Y1s_d_varphi +  \
-            2*d_Y20_d_varphi -  \
-            2*d_Y2c_d_varphi) +  \
-        Y1s*(5*iota_N0*X1c*Y1s**2* \
-            curvature -  \
-            2*(lprime*(X1s* \
-                    (Y20 + Y2c) -  \
-                X1c*Y2s)*torsion -  \
-                Y2s*d_Y1c_d_varphi +  \
-                (Y20 + Y2c)* \
-                d_Y1s_d_varphi) +  \
-            Y1s*(6*iota_N0*Y2s +  \
-                lprime*(2*X20 + 2*X2c +  \
-                5*X1c**2*curvature)* \
-                torsion +  \
-                5*X1c*curvature* \
-                d_Y1c_d_varphi +  \
-                2*d_Y20_d_varphi +  \
-                2*d_Y2c_d_varphi)) -  \
-        Y1c*(5*iota_N0*X1s*Y1s**2* \
-            curvature +  \
-            2*lprime*(X1c* \
-                (Y20 - Y2c) -  \
-                X1s*Y2s)*torsion +  \
-            2*Y20*d_Y1c_d_varphi -  \
-            2*Y2c*d_Y1c_d_varphi -  \
-            2*Y2s*d_Y1s_d_varphi +  \
-            Y1s*(-12*iota_N0*Y2c +  \
-                2*lprime*(2*X2s +  \
-                5*X1c*X1s*curvature)* \
-                torsion +  \
-                5*X1s*curvature* \
-                d_Y1c_d_varphi +  \
-                5*X1c*curvature* \
-                d_Y1s_d_varphi +  \
-                4*d_Y2s_d_varphi))))/(Bbar**2*lprime)
+    # Element112
+    grad_grad_B[:,0,0,1]=(B0**6*lprime*lprime*(-5*iota_N0*X1s*Y1c*Y1c*Y1c*curvature + Y1c*Y1c * (-6*iota_N0*Y2s + \
+        5*iota_N0*X1c*Y1s*curvature + 2*lprime*X20*torsion - 2*lprime*X2c*torsion + 5*lprime*X1s*X1s*curvature*torsion + \
+        5*X1s*curvature*d_Y1s_d_varphi + 2*d_Y20_d_varphi - 2*d_Y2c_d_varphi) + Y1s * (5*iota_N0*X1c*Y1s*Y1s*curvature - \
+        2 * (lprime * (X1s*(Y20 + Y2c) - X1c*Y2s) * torsion - Y2s*d_Y1c_d_varphi + (Y20 + Y2c) * d_Y1s_d_varphi) + \
+        Y1s * (6*iota_N0*Y2s + lprime * (2*X20 + 2*X2c + 5*X1c*X1c*curvature) * torsion + 5*X1c*curvature*d_Y1c_d_varphi + \
+        2*d_Y20_d_varphi + 2*d_Y2c_d_varphi)) - Y1c * (5*iota_N0*X1s*Y1s*Y1s*curvature + 2*lprime * (X1c*(Y20 - Y2c) - \
+        X1s*Y2s) * torsion + 2*Y20*d_Y1c_d_varphi - 2*Y2c*d_Y1c_d_varphi - 2*Y2s*d_Y1s_d_varphi + Y1s * (-12*iota_N0*Y2c + \
+        2*lprime * (2*X2s + 5*X1c*X1s*curvature) * torsion + 5*X1s*curvature*d_Y1c_d_varphi + 5*X1c*curvature*d_Y1s_d_varphi + \
+        4*d_Y2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 113
-    grad_grad_B[:,0,0,2] =-((sG*B0**2*(Y1c**2* \
-            (2*G2*sG + 2*I2*sG*iota0 - 4*B20*lprime +  \
-            4*B2c*lprime +  \
-            4*iota_N0*B0*Z2s +  \
-            2*B0*lprime*X20* \
-                curvature -  \
-            2*B0*lprime*X2c* \
-                curvature +  \
-            B0*lprime*X1s**2* \
-                curvature**2 +  \
-            2*Z20*d_B0_d_varphi -  \
-            2*Z2c*d_B0_d_varphi -  \
-            2*B0*d_Z20_d_varphi +  \
-            2*B0*d_Z2c_d_varphi) +  \
-            Y1s*(2*B0*lprime* \
-                (X1s*(Y20 + Y2c) -  \
-                X1c*Y2s)*curvature +  \
-            Y1s*(2*G2*sG + 2*I2*sG*iota0 -  \
-                4*B20*lprime -  \
-                4*B2c*lprime -  \
-                4*iota_N0*B0*Z2s +  \
-                2*B0*lprime*X20* \
-                curvature +  \
-                2*B0*lprime*X2c* \
-                curvature +  \
-                B0*lprime*X1c**2* \
-                curvature**2 +  \
-                2*Z20*d_B0_d_varphi +  \
-                2*Z2c*d_B0_d_varphi -  \
-                2*B0*d_Z20_d_varphi -  \
-                2*B0*d_Z2c_d_varphi)) +  \
-            2*Y1c*(4*B2s*lprime* \
-                Y1s -  \
-            2*Y1s*Z2s* \
-                d_B0_d_varphi -  \
-            B0*(lprime* \
-                (X1c*(-Y20 + Y2c) +  \
-                    X1s*Y2s)*curvature +  \
-                Y1s* \
-                (4*iota_N0*Z2c +  \
-                    lprime*curvature* \
-                    (2*X2s +  \
-                        X1c*X1s*curvature) \
-    - 2*d_Z2s_d_varphi)))))/(Bbar**2*lprime))
+    # Element113
+    grad_grad_B[:,0,0,2]= - ((B0**5*lprime*lprime*(2*G0 * (4*B2s*lprime*Y1c*Y1s + 2*B2c*lprime*(Y1c*Y1c - Y1s*Y1s) - \
+        2*B20*lprime*(Y1c*Y1c + Y1s*Y1s) + Y1c*Y1c*Z20*d_B0_d_varphi + Y1s*Y1s*Z20*d_B0_d_varphi - Y1c*Y1c*Z2c*d_B0_d_varphi + \
+        Y1s*Y1s*Z2c*d_B0_d_varphi - 2*Y1c*Y1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(Y1c*Y1c*(2*G2 + 2*I2*iota + 2*G0*X20*curvature - \
+        2*G0*X2c*curvature + G0*X1s*X1s*curvature*curvature) - 2*G0*Y1c*curvature*(2*X2s*Y1s + X1s*Y2s + X1c*(-Y20 + Y2c + \
+        X1s*Y1s*curvature)) + Y1s * (2*G0 * (X1s*(Y20 + Y2c) - X1c*Y2s) * curvature + Y1s*(2*G2 + 2*I2*iota + 2*G0*X20*curvature + \
+        2*G0*X2c*curvature + G0*X1c*X1c*curvature*curvature))) + 2*G0 * (Y1c*Y1c*(2*iota_N0*Z2s - d_Z20_d_varphi + \
+        d_Z2c_d_varphi) - Y1s*Y1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + 2*Y1c*Y1s*(-2*iota_N0*Z2c + \
+        d_Z2s_d_varphi)))))/(Bbar**2*G0*G0*G0*G0))
 
-    # Element 121
-    grad_grad_B[:,0,1,0] =(sG*B0**3*(3*iota_N0*X1s**3*Y1c* \
-        curvature -  \
-        3*iota_N0*X1c**3*Y1s* \
-        curvature -  \
-        3*X1s**2*curvature* \
-        (iota_N0*X1c*Y1s +  \
-            Y1c*(lprime*Y1c* \
-                torsion - d_X1c_d_varphi)) +  \
-        3*X1c**2*Y1s*curvature* \
-        (-(lprime*Y1s*torsion) +  \
-            d_X1s_d_varphi) -  \
-        2*(lprime*(-2*X2s*Y1c* \
-                Y1s +  \
-                X2c* \
-                (-Y1c**2 + Y1s**2) +  \
-                X20*(Y1c**2 + Y1s**2))* \
-            torsion +  \
-            X2c*Y1c* \
-            d_X1c_d_varphi +  \
-            X2s*Y1s* \
-            d_X1c_d_varphi +  \
-            X2s*Y1c* \
-            d_X1s_d_varphi -  \
-            X2c*Y1s* \
-            d_X1s_d_varphi -  \
-            X20*(Y1c* \
-                d_X1c_d_varphi +  \
-                Y1s*d_X1s_d_varphi)) +  \
-        X1s*(2*iota_N0*X20*Y1c -  \
-            6*iota_N0*X2c*Y1c -  \
-            6*iota_N0*X2s*Y1s +  \
-            3*iota_N0*X1c**2*Y1c* \
-            curvature +  \
-            2*lprime*Y1s*Y20* \
-            torsion +  \
-            2*lprime*Y1s*Y2c* \
-            torsion -  \
-            2*lprime*Y1c*Y2s* \
-            torsion +  \
-            6*lprime*X1c*Y1c* \
-            Y1s*curvature*torsion -  \
-            3*X1c*Y1s*curvature* \
-            d_X1c_d_varphi -  \
-            3*X1c*Y1c*curvature* \
-            d_X1s_d_varphi -  \
-            2*Y1s*d_X20_d_varphi -  \
-            2*Y1s*d_X2c_d_varphi +  \
-            2*Y1c*d_X2s_d_varphi) +  \
-        2*X1c*(3*iota_N0*X2s*Y1c -  \
-            iota_N0*X20*Y1s -  \
-            3*iota_N0*X2c*Y1s +  \
-            lprime*Y1c*Y20* \
-            torsion -  \
-            lprime*Y1c*Y2c* \
-            torsion -  \
-            lprime*Y1s*Y2s* \
-            torsion -  \
-            Y1c*d_X20_d_varphi +  \
-            Y1c*d_X2c_d_varphi +  \
-            Y1s*d_X2s_d_varphi)))/\
-    (Bbar**2*lprime)
+    # Element121
+    grad_grad_B[:,0,1,0]= - ((B0**6*lprime*lprime*(-3*iota_N0*X1s*X1s*X1s*Y1c*curvature + 3*iota_N0*X1c*X1c*X1c*Y1s*curvature + \
+        3*X1s*X1s*curvature*(iota_N0*X1c*Y1s + Y1c * (lprime*Y1c*torsion - d_X1c_d_varphi)) + 3*X1c*X1c*Y1s*curvature*(lprime*Y1s*torsion - \
+        d_X1s_d_varphi) + 2 * (lprime * (-2*X2s*Y1c*Y1s + X2c*(-Y1c*Y1c + Y1s*Y1s) + X20 * (Y1c*Y1c + Y1s*Y1s)) * torsion + \
+        X2c*Y1c*d_X1c_d_varphi + X2s*Y1s*d_X1c_d_varphi + X2s*Y1c*d_X1s_d_varphi - X2c*Y1s*d_X1s_d_varphi - X20 * (Y1c*d_X1c_d_varphi + \
+        Y1s*d_X1s_d_varphi)) + X1s * (-2*iota_N0*X20*Y1c + 6*iota_N0*X2c*Y1c + 6*iota_N0*X2s*Y1s - 3*iota_N0*X1c*X1c*Y1c*curvature - \
+        2*lprime*Y1s*Y20*torsion - 2*lprime*Y1s*Y2c*torsion + 2*lprime*Y1c*Y2s*torsion - 6*lprime*X1c*Y1c*Y1s*curvature*torsion + \
+        3*X1c*Y1s*curvature*d_X1c_d_varphi + 3*X1c*Y1c*curvature*d_X1s_d_varphi + 2*Y1s*d_X20_d_varphi + 2*Y1s*d_X2c_d_varphi -\
+        2*Y1c*d_X2s_d_varphi) - 2*X1c * (3*iota_N0*X2s*Y1c - iota_N0*X20*Y1s - 3*iota_N0*X2c*Y1s + lprime*Y1c*Y20*torsion - \
+        lprime*Y1c*Y2c*torsion - lprime*Y1s*Y2s*torsion - Y1c*d_X20_d_varphi + Y1c*d_X2c_d_varphi + \
+        Y1s*d_X2s_d_varphi)))/(Bbar**2*G0*G0*G0))
 
-    # Element 122
-    grad_grad_B[:,0,1,1] =(sG*B0**3*(-4*iota_N0*X1s*Y1c* \
-        Y2c - 4*iota_N0*X1c*Y1s* \
-        Y2c + 4*iota_N0*X1c*Y1c* \
-        Y2s - 4*iota_N0*X1s*Y1s* \
-        Y2s + 3*iota_N0*X1c*X1s* \
-        Y1c**2*curvature -  \
-        3*iota_N0*X1c**2*Y1c*Y1s* \
-        curvature +  \
-        3*iota_N0*X1s**2*Y1c*Y1s* \
-        curvature -  \
-        3*iota_N0*X1c*X1s*Y1s**2* \
-        curvature +  \
-        2*X20*Y1c*d_Y1c_d_varphi +  \
-        3*X1s**2*Y1c*curvature* \
-        d_Y1c_d_varphi -  \
-        3*X1c*X1s*Y1s* \
-        curvature*d_Y1c_d_varphi -  \
-        2*X2c*Y1c* \
-        (2*iota_N0*Y1s + d_Y1c_d_varphi) +  \
-        2*X20*Y1s*d_Y1s_d_varphi +  \
-        2*X2c*Y1s*d_Y1s_d_varphi -  \
-        3*X1c*X1s*Y1c* \
-        curvature*d_Y1s_d_varphi +  \
-        3*X1c**2*Y1s*curvature* \
-        d_Y1s_d_varphi +  \
-        2*X2s*(iota_N0*Y1c**2 -  \
-            Y1s*(iota_N0*Y1s +  \
-                d_Y1c_d_varphi) -  \
-            Y1c*d_Y1s_d_varphi) -  \
-        2*X1c*Y1c*d_Y20_d_varphi -  \
-        2*X1s*Y1s*d_Y20_d_varphi +  \
-        2*X1c*Y1c*d_Y2c_d_varphi -  \
-        2*X1s*Y1s*d_Y2c_d_varphi +  \
-        2*X1s*Y1c*d_Y2s_d_varphi +  \
-        2*X1c*Y1s*d_Y2s_d_varphi))/ \
-    (Bbar**2*lprime)
+    # Element122
+    grad_grad_B[:,0,1,1]=(B0**6*lprime*lprime*(-4*iota_N0*X1s*Y1c*Y2c - 4*iota_N0*X1c*Y1s*Y2c + 4*iota_N0*X1c*Y1c*Y2s -\
+        4*iota_N0*X1s*Y1s*Y2s + 3*iota_N0*X1c*X1s*Y1c*Y1c*curvature - 3*iota_N0*X1c*X1c*Y1c*Y1s*curvature + \
+        3*iota_N0*X1s*X1s*Y1c*Y1s*curvature - 3*iota_N0*X1c*X1s*Y1s*Y1s*curvature + 2*X20*Y1c*d_Y1c_d_varphi + \
+        3*X1s*X1s*Y1c*curvature*d_Y1c_d_varphi - 3*X1c*X1s*Y1s*curvature*d_Y1c_d_varphi - 2*X2c*Y1c*(2*iota_N0*Y1s + \
+        d_Y1c_d_varphi) + 2*X20*Y1s*d_Y1s_d_varphi + 2*X2c*Y1s*d_Y1s_d_varphi - 3*X1c*X1s*Y1c*curvature*d_Y1s_d_varphi + \
+        3*X1c*X1c*Y1s*curvature*d_Y1s_d_varphi + 2*X2s * (iota_N0*Y1c*Y1c - Y1s * (iota_N0*Y1s + d_Y1c_d_varphi) - \
+        Y1c*d_Y1s_d_varphi) - 2*X1c*Y1c*d_Y20_d_varphi - 2*X1s*Y1s*d_Y20_d_varphi + 2*X1c*Y1c*d_Y2c_d_varphi - \
+        2*X1s*Y1s*d_Y2c_d_varphi + 2*X1s*Y1c*d_Y2s_d_varphi + 2*X1c*Y1s*d_Y2s_d_varphi))/(Bbar**2*G0*G0*G0)
 
-    # Element 123
-    grad_grad_B[:,0,1,2] =(2*sG*B0**2*(X1s* \
-        (2*B2s*lprime*Y1c +  \
-            Y1s*(G2*sG + I2*sG*iota0 -  \
-                2*B20*lprime -  \
-                2*B2c*lprime -  \
-                2*iota_N0*B0*Z2s +  \
-                2*B0*lprime*X20* \
-                curvature +  \
-                2*B0*lprime*X2c* \
-                curvature +  \
-                Z20*d_B0_d_varphi +  \
-                Z2c*d_B0_d_varphi -  \
-                B0*d_Z20_d_varphi -  \
-                B0*d_Z2c_d_varphi) -  \
-            Y1c*(Z2s* \
-                d_B0_d_varphi +  \
-                B0*(2*iota_N0*Z2c +  \
-                2*lprime*X2s*curvature -  \
-                d_Z2s_d_varphi))) +  \
-        X1c*(Y1c* \
-            (G2*sG + I2*sG*iota0 - 2*B20*lprime +  \
-                2*B2c*lprime +  \
-                2*iota_N0*B0*Z2s +  \
-                2*B0*lprime*X20* \
-                curvature -  \
-                2*B0*lprime*X2c* \
-                curvature +  \
-                Z20*d_B0_d_varphi -  \
-                Z2c*d_B0_d_varphi -  \
-                B0*d_Z20_d_varphi +  \
-                B0*d_Z2c_d_varphi) +  \
-            Y1s*(2*B2s*lprime -  \
-                Z2s*d_B0_d_varphi +  \
-                B0*(-2*iota_N0*Z2c -  \
-                2*lprime*X2s*curvature +  \
-                d_Z2s_d_varphi)))))/(Bbar**2*lprime)
+    # Element123
+    grad_grad_B[:,0,1,2]=(2*B0**5*lprime*lprime*(G0 * (2*B2s*lprime*X1s*Y1c + 2*B2s*lprime*X1c*Y1s + 2*B2c*lprime*(X1c*Y1c - \
+        X1s*Y1s) - 2*B20*lprime*(X1c*Y1c + X1s*Y1s) + X1c*Y1c*Z20*d_B0_d_varphi + X1s*Y1s*Z20*d_B0_d_varphi -\
+        X1c*Y1c*Z2c*d_B0_d_varphi + X1s*Y1s*Z2c*d_B0_d_varphi - X1s*Y1c*Z2s*d_B0_d_varphi - X1c*Y1s*Z2s*d_B0_d_varphi) +\
+        B0 * (lprime*(X1c * (-2*G0*X2s*Y1s*curvature + Y1c*(G2 + I2*iota + 2*G0*X20*curvature - 2*G0*X2c*curvature)) + \
+        X1s * (-2*G0*X2s*Y1c*curvature + Y1s*(G2 + I2*iota + 2*G0*X20*curvature + 2*G0*X2c*curvature))) - G0 * (X1s * (Y1s*(2*iota_N0*Z2s + \
+        d_Z20_d_varphi + d_Z2c_d_varphi) + Y1c*(2*iota_N0*Z2c - d_Z2s_d_varphi)) + X1c * (Y1c*(-2*iota_N0*Z2s + d_Z20_d_varphi - \
+        d_Z2c_d_varphi) + Y1s*(2*iota_N0*Z2c - d_Z2s_d_varphi))))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 131
-    grad_grad_B[:,0,2,0] =(sG*B0**2*(2*(-(X1s*Y1c) +  \
-            X1c*Y1s)*d_B0_d_varphi* \
-        (iota_N0*X1c*Y1c +  \
-            iota_N0*X1s*Y1s +  \
-            Y1s*d_X1c_d_varphi -  \
-            Y1c*d_X1s_d_varphi) +  \
-        B0*(lprime**2*curvature* \
-            (-2*X2c*Y1c**2 -  \
-                4*X2s*Y1c*Y1s +  \
-                2*X2c*Y1s**2 +  \
-                2*X20* \
-                (Y1c**2 + Y1s**2) -  \
-                2*X1c*Y1c*Y20 -  \
-                2*X1s*Y1s*Y20 +  \
-                2*X1c*Y1c*Y2c -  \
-                2*X1s*Y1s*Y2c +  \
-                2*X1s*Y1c*Y2s +  \
-                2*X1c*Y1s*Y2s +  \
-                3*X1s**2*Y1c**2* \
-                curvature -  \
-                6*X1c*X1s*Y1c* \
-                Y1s*curvature +  \
-                3*X1c**2*Y1s**2*curvature) \
-    - Y1s**2*d_X1c_d_varphi**2 +  \
-            iota_N0*X1c*Y1c**2* \
-            d_X1s_d_varphi +  \
-            iota_N0*X1c*Y1s**2* \
-            d_X1s_d_varphi +  \
-            2*Y1c*Y1s* \
-            d_X1c_d_varphi*d_X1s_d_varphi -  \
-            Y1c**2*d_X1s_d_varphi**2 +  \
-            iota_N0*X1c**2*Y1s* \
-            d_Y1c_d_varphi -  \
-            X1c*Y1s*d_X1s_d_varphi* \
-            d_Y1c_d_varphi -  \
-            iota_N0*X1c**2*Y1c* \
-            d_Y1s_d_varphi +  \
-            X1c*Y1c*d_X1s_d_varphi* \
-            d_Y1s_d_varphi +  \
-            iota_N0*X1s**2* \
-            (Y1s*d_Y1c_d_varphi -  \
-                Y1c*d_Y1s_d_varphi) +  \
-            lprime*(-(X1s*Y1c) +  \
-                X1c*Y1s)*torsion* \
-            (iota_N0*X1c**2 + iota_N0*X1s**2 -  \
-                iota_N0*Y1c**2 - iota_N0*Y1s**2 +  \
-                X1s*d_X1c_d_varphi -  \
-                X1c*d_X1s_d_varphi -  \
-                Y1s*d_Y1c_d_varphi +  \
-                Y1c*d_Y1s_d_varphi) +  \
-            X1c*Y1s**2* \
-            d2_X1c_d_varphi2 -  \
-            X1s*(Y1s* \
-                d_X1c_d_varphi* \
-                (iota_N0*Y1s - d_Y1c_d_varphi) \
-    + Y1c*(d_X1c_d_varphi* \
-                    d_Y1s_d_varphi +  \
-                Y1s*d2_X1c_d_varphi2) +  \
-                Y1c**2* \
-                (iota_N0*d_X1c_d_varphi -  \
-                d2_X1s_d_varphi2)) -  \
-            X1c*Y1c*Y1s* \
-            d2_X1s_d_varphi2)))/(Bbar**2*lprime**2)
+    # Element131
+    grad_grad_B[:,0,2,0]=(B0**5*lprime*((2*Bbar*sG*d_B0_d_varphi*(iota_N0*X1c*Y1c + iota_N0*X1s*Y1s + Y1s*d_X1c_d_varphi - \
+        Y1c*d_X1s_d_varphi))/B0 + B0*(lprime*lprime*curvature*(-2*X2c*Y1c*Y1c - 4*X2s*Y1c*Y1s + 2*X2c*Y1s*Y1s + 2*X20*(Y1c*Y1c +\
+        Y1s*Y1s) - 2*X1c*Y1c*Y20 - 2*X1s*Y1s*Y20 + 2*X1c*Y1c*Y2c - 2*X1s*Y1s*Y2c + 2*X1s*Y1c*Y2s + 2*X1c*Y1s*Y2s + \
+        3*X1s*X1s*Y1c*Y1c*curvature - 6*X1c*X1s*Y1c*Y1s*curvature + 3*X1c*X1c*Y1s*Y1s*curvature) - Y1s*Y1s*d_X1c_d_varphi*d_X1c_d_varphi + \
+        iota_N0*X1c*Y1c*Y1c*d_X1s_d_varphi + iota_N0*X1c*Y1s*Y1s*d_X1s_d_varphi + 2*Y1c*Y1s*d_X1c_d_varphi*d_X1s_d_varphi -\
+        Y1c*Y1c*d_X1s_d_varphi**2 + iota_N0*X1c*X1c*Y1s*d_Y1c_d_varphi - X1c*Y1s*d_X1s_d_varphi*d_Y1c_d_varphi - \
+        iota_N0*X1c*X1c*Y1c*d_Y1s_d_varphi + X1c*Y1c*d_X1s_d_varphi*d_Y1s_d_varphi + iota_N0*X1s*X1s*(Y1s*d_Y1c_d_varphi -\
+        Y1c*d_Y1s_d_varphi) + (Bbar*sG*lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s +\
+        X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi))/B0 + X1c*Y1s*Y1s*d2_X1c_d_varphi2 -\
+        X1s * (Y1s*d_X1c_d_varphi*(iota_N0*Y1s - d_Y1c_d_varphi) + Y1c * (d_X1c_d_varphi*d_Y1s_d_varphi + Y1s*d2_X1c_d_varphi2) + \
+        Y1c*Y1c*(iota_N0*d_X1c_d_varphi - d2_X1s_d_varphi2)) - X1c*Y1c*Y1s*d2_X1s_d_varphi2)))/(Bbar**2*G0*G0*G0)
 
-    # Element 132
-    grad_grad_B[:,0,2,1] =(sG*B0**2*((X1s*Y1c -  \
-            X1c*Y1s)*d_B0_d_varphi* \
-        (-2*iota_N0*Y1c**2 -  \
-            Y1s*(2*iota_N0*Y1s +  \
-                lprime*X1c*torsion +  \
-                2*d_Y1c_d_varphi) +  \
-            Y1c*(lprime*X1s* \
-                torsion + 2*d_Y1s_d_varphi)) +  \
-        B0*(iota_N0*Y1c**3* \
-            d_X1s_d_varphi +  \
-            lprime*(-(X1s*Y1c) +  \
-                X1c*Y1s)* \
-            (torsion* \
-                (Y1s*d_X1c_d_varphi -  \
-                Y1c*d_X1s_d_varphi) +  \
-                X1s*(2*iota_N0*Y1s* \
-                    torsion +  \
-                torsion*d_Y1c_d_varphi -  \
-                Y1c*d_torsion_d_varphi) +  \
-                X1c*(2*iota_N0*Y1c* \
-                    torsion -  \
-                torsion*d_Y1s_d_varphi +  \
-                Y1s*d_torsion_d_varphi)) +  \
-            Y1s*(-(iota_N0*Y1s**2* \
-                d_X1c_d_varphi) +  \
-                d_Y1c_d_varphi* \
-                (X1s*d_Y1c_d_varphi -  \
-                X1c*d_Y1s_d_varphi) +  \
-                Y1s*(iota_N0*X1s* \
-                    d_Y1c_d_varphi -  \
-                d_X1c_d_varphi* \
-                    d_Y1c_d_varphi +  \
-                X1c* \
-                    (iota_N0*d_Y1s_d_varphi +  \
-                    d2_Y1c_d_varphi2))) +  \
-            Y1c*(iota_N0*Y1s**2* \
-                d_X1s_d_varphi +  \
-                d_Y1s_d_varphi* \
-                (-(X1s*d_Y1c_d_varphi) +  \
-                X1c*d_Y1s_d_varphi) +  \
-                Y1s*(d_X1s_d_varphi* \
-                    d_Y1c_d_varphi -  \
-                2*iota_N0*X1s* \
-                    d_Y1s_d_varphi +  \
-                d_X1c_d_varphi* \
-                    d_Y1s_d_varphi -  \
-                X1s*d2_Y1c_d_varphi2 +  \
-                X1c* \
-                    (2*iota_N0*d_Y1c_d_varphi -  \
-                    d2_Y1s_d_varphi2))) -  \
-            Y1c**2*(iota_N0*Y1s* \
-                d_X1c_d_varphi +  \
-                (iota_N0*X1c + d_X1s_d_varphi)* \
-                d_Y1s_d_varphi +  \
-                X1s*(iota_N0*d_Y1c_d_varphi -  \
-                d2_Y1s_d_varphi2)))))/ \
-    (Bbar**2*lprime**2) 
+    # Element132
+    grad_grad_B[:,0,2,1]=(B0**5*lprime*(-((Bbar*sG*d_B0_d_varphi*(-2*iota_N0*Y1c*Y1c - Y1s*(2*iota_N0*Y1s + lprime*X1c*torsion + \
+        2*d_Y1c_d_varphi) + Y1c * (lprime*X1s*torsion + 2*d_Y1s_d_varphi)))/B0) + B0*(iota_N0*Y1c*Y1c*Y1c*d_X1s_d_varphi + \
+        (Bbar*sG*lprime*(torsion*(Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) + X1s*(2*iota_N0*Y1s*torsion + torsion*d_Y1c_d_varphi -\
+        Y1c*d_torsion_d_varphi) + X1c*(2*iota_N0*Y1c*torsion - torsion*d_Y1s_d_varphi + Y1s*d_torsion_d_varphi)))/B0 + \
+        Y1s*(-(iota_N0*Y1s*Y1s*d_X1c_d_varphi) + d_Y1c_d_varphi*(X1s*d_Y1c_d_varphi - X1c*d_Y1s_d_varphi) + \
+        Y1s * (iota_N0*X1s*d_Y1c_d_varphi - d_X1c_d_varphi*d_Y1c_d_varphi + X1c*(iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2))) +\
+        Y1c * (iota_N0*Y1s*Y1s*d_X1s_d_varphi + d_Y1s_d_varphi*(-(X1s*d_Y1c_d_varphi) + X1c*d_Y1s_d_varphi) + \
+        Y1s * (d_X1s_d_varphi*d_Y1c_d_varphi - 2*iota_N0*X1s*d_Y1s_d_varphi + d_X1c_d_varphi*d_Y1s_d_varphi - X1s*d2_Y1c_d_varphi2 + \
+        X1c*(2*iota_N0*d_Y1c_d_varphi - d2_Y1s_d_varphi2))) - Y1c*Y1c * (iota_N0*Y1s*d_X1c_d_varphi + (iota_N0*X1c +\
+        d_X1s_d_varphi) * d_Y1s_d_varphi + X1s * (iota_N0*d_Y1c_d_varphi - d2_Y1s_d_varphi2)))))/(Bbar**2*G0*G0*G0)
 
-    # Element 133 
-    grad_grad_B[:,0,2,2] =(sG*B0**2*((-2*X2c*Y1c**2 -  \
-            4*X2s*Y1c*Y1s +  \
-            2*X2c*Y1s**2 +  \
-            2*X20*(Y1c**2 + Y1s**2) -  \
-            2*X1c*Y1c*Y20 -  \
-            2*X1s*Y1s*Y20 +  \
-            2*X1c*Y1c*Y2c -  \
-            2*X1s*Y1s*Y2c +  \
-            2*X1s*Y1c*Y2s +  \
-            2*X1c*Y1s*Y2s +  \
-            3*X1s**2*Y1c**2*curvature -  \
-            6*X1c*X1s*Y1c* \
-            Y1s*curvature +  \
-            3*X1c**2*Y1s**2*curvature)* \
-        d_B0_d_varphi +  \
-        B0*(X1s*Y1c -  \
-            X1c*Y1s)* \
-        (iota_N0*X1s*Y1s*curvature +  \
-            Y1s*curvature* \
-            d_X1c_d_varphi -  \
-            Y1c*curvature* \
-            d_X1s_d_varphi +  \
-            X1s*Y1c* \
-            d_curvature_d_varphi +  \
-            X1c*(iota_N0*Y1c* \
-                curvature -  \
-                Y1s*d_curvature_d_varphi))))/ \
-    (Bbar**2*lprime) 
+    # Element133
+    grad_grad_B[:,0,2,2]=(B0**5*lprime*lprime*((-2*X2c*Y1c*Y1c - 4*X2s*Y1c*Y1s + 2*X2c*Y1s*Y1s + 2*X20 * (Y1c*Y1c + Y1s*Y1s) -\
+        2*X1c*Y1c*Y20 - 2*X1s*Y1s*Y20 + 2*X1c*Y1c*Y2c - 2*X1s*Y1s*Y2c + 2*X1s*Y1c*Y2s + 2*X1c*Y1s*Y2s + 3*X1s*X1s*Y1c*Y1c*curvature -\
+        6*X1c*X1s*Y1c*Y1s*curvature + 3*X1c*X1c*Y1s*Y1s*curvature) * d_B0_d_varphi - Bbar*sG * (iota_N0*X1s*Y1s*curvature +\
+        Y1s*curvature*d_X1c_d_varphi - Y1c*curvature*d_X1s_d_varphi + X1s*Y1c*d_curvature_d_varphi + X1c * (iota_N0*Y1c*curvature -\
+            Y1s*d_curvature_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 211
-    grad_grad_B[:,1,0,0] =(-2*sG*B0**3*(-(iota_N0*X1s**3* \
-            Y1c*curvature) +  \
-        X1s**2*(iota_N0*Y2s +  \
-            curvature* \
-            (iota_N0*X1c*Y1s +  \
-                lprime*Y1c**2*torsion -  \
-                Y1c*d_X1c_d_varphi)) +  \
-        X1s*(2*iota_N0*X2c*Y1c +  \
-            2*iota_N0*X2s*Y1s +  \
-            2*iota_N0*X1c*Y2c -  \
-            iota_N0*X1c**2*Y1c* \
-            curvature -  \
-            2*lprime*X1c*Y1c* \
-            Y1s*curvature*torsion +  \
-            Y2s*d_X1c_d_varphi +  \
-            X1c*Y1s*curvature* \
-            d_X1c_d_varphi -  \
-            Y20*d_X1s_d_varphi -  \
-            Y2c*d_X1s_d_varphi +  \
-            X1c*Y1c*curvature* \
-            d_X1s_d_varphi +  \
-            Y1s*d_X20_d_varphi +  \
-            Y1s*d_X2c_d_varphi -  \
-            Y1c*d_X2s_d_varphi) +  \
-        X1c*(-2*iota_N0*X2s*Y1c +  \
-            2*iota_N0*X2c*Y1s -  \
-            iota_N0*X1c*Y2s +  \
-            iota_N0*X1c**2*Y1s* \
-            curvature +  \
-            lprime*X1c*Y1s**2* \
-            curvature*torsion -  \
-            Y20*d_X1c_d_varphi +  \
-            Y2c*d_X1c_d_varphi +  \
-            Y2s*d_X1s_d_varphi -  \
-            X1c*Y1s*curvature* \
-            d_X1s_d_varphi +  \
-            Y1c*d_X20_d_varphi -  \
-            Y1c*d_X2c_d_varphi -  \
-            Y1s*d_X2s_d_varphi)))/ \
-    (Bbar**2*lprime)
+    # Element211
+    grad_grad_B[:,1,0,0]=(-2*B0**6*lprime*lprime*(-(iota_N0*X1s*X1s*X1s*Y1c*curvature) + X1s*X1s * (iota_N0*Y2s + \
+        curvature*(iota_N0*X1c*Y1s + lprime*Y1c*Y1c*torsion - Y1c*d_X1c_d_varphi)) + X1s * (2*iota_N0*X2c*Y1c + 2*iota_N0*X2s*Y1s +\
+        2*iota_N0*X1c*Y2c - iota_N0*X1c*X1c*Y1c*curvature - 2*lprime*X1c*Y1c*Y1s*curvature*torsion + Y2s*d_X1c_d_varphi + \
+        X1c*Y1s*curvature*d_X1c_d_varphi - Y20*d_X1s_d_varphi - Y2c*d_X1s_d_varphi + X1c*Y1c*curvature*d_X1s_d_varphi + \
+        Y1s*d_X20_d_varphi + Y1s*d_X2c_d_varphi - Y1c*d_X2s_d_varphi) + X1c * (-2*iota_N0*X2s*Y1c + 2*iota_N0*X2c*Y1s - \
+        iota_N0*X1c*Y2s + iota_N0*X1c*X1c*Y1s*curvature + lprime*X1c*Y1s*Y1s*curvature*torsion - Y20*d_X1c_d_varphi + \
+        Y2c*d_X1c_d_varphi + Y2s*d_X1s_d_varphi - X1c*Y1s*curvature*d_X1s_d_varphi + Y1c*d_X20_d_varphi - Y1c*d_X2c_d_varphi - \
+        Y1s*d_X2s_d_varphi)))/(Bbar**2*G0*G0*G0)
 
-    # Element 212
-    grad_grad_B[:,1,0,1] =(2*sG*B0**3*(X1s**2* \
-        (lprime*(Y20 + Y2c)* \
-            torsion +  \
-            Y1c*curvature* \
-            (iota_N0*Y1s + d_Y1c_d_varphi)) -  \
-        X1s*(-(iota_N0*X1c*Y1c**2* \
-                curvature) +  \
-            iota_N0*X1c*Y1s**2* \
-            curvature +  \
-            2*lprime*X1c*Y2s* \
-            torsion +  \
-            Y2s*d_Y1c_d_varphi -  \
-            Y20*d_Y1s_d_varphi -  \
-            Y2c*d_Y1s_d_varphi +  \
-            Y1s*(3*iota_N0*Y2s +  \
-                lprime*(X20 + X2c)* \
-                torsion +  \
-                X1c*curvature* \
-                d_Y1c_d_varphi +  \
-                d_Y20_d_varphi +  \
-                d_Y2c_d_varphi) +  \
-            Y1c*(iota_N0*Y20 +  \
-                3*iota_N0*Y2c -  \
-                lprime*X2s*torsion +  \
-                X1c*curvature* \
-                d_Y1s_d_varphi -  \
-                d_Y2s_d_varphi)) +  \
-        X1c*(lprime*X1c*Y20* \
-            torsion -  \
-            lprime*X1c*Y2c* \
-            torsion +  \
-            Y20*d_Y1c_d_varphi -  \
-            Y2c*d_Y1c_d_varphi -  \
-            Y2s*d_Y1s_d_varphi +  \
-            Y1c*(3*iota_N0*Y2s +  \
-                lprime*(-X20 + X2c)* \
-                torsion - d_Y20_d_varphi +  \
-                d_Y2c_d_varphi) +  \
-            Y1s*(iota_N0*Y20 -  \
-                3*iota_N0*Y2c -  \
-                iota_N0*X1c*Y1c* \
-                curvature +  \
-                lprime*X2s*torsion +  \
-                X1c*curvature* \
-                d_Y1s_d_varphi +  \
-                d_Y2s_d_varphi))))/(Bbar**2*lprime)
+    # Element212
+    grad_grad_B[:,1,0,1]=(2*B0**6*lprime*lprime*(X1s*X1s * (lprime*(Y20 + Y2c) * torsion + Y1c*curvature*(iota_N0*Y1s + d_Y1c_d_varphi)) - \
+        X1s * (-(iota_N0*X1c*Y1c*Y1c*curvature) + iota_N0*X1c*Y1s*Y1s*curvature + 2*lprime*X1c*Y2s*torsion + Y2s*d_Y1c_d_varphi - \
+        Y20*d_Y1s_d_varphi - Y2c*d_Y1s_d_varphi + Y1s * (3*iota_N0*Y2s + lprime * (X20 + X2c) * torsion + X1c*curvature*d_Y1c_d_varphi +\
+        d_Y20_d_varphi + d_Y2c_d_varphi) + Y1c * (iota_N0*Y20 + 3*iota_N0*Y2c - lprime*X2s*torsion + X1c*curvature*d_Y1s_d_varphi - \
+        d_Y2s_d_varphi)) + X1c * (lprime*X1c*Y20*torsion - lprime*X1c*Y2c*torsion + Y20*d_Y1c_d_varphi - Y2c*d_Y1c_d_varphi - \
+        Y2s*d_Y1s_d_varphi + Y1c * (3*iota_N0*Y2s + lprime * (-X20 + X2c) * torsion - d_Y20_d_varphi + d_Y2c_d_varphi) + \
+        Y1s * (iota_N0*Y20 - 3*iota_N0*Y2c - iota_N0*X1c*Y1c*curvature + lprime*X2s*torsion + X1c*curvature*d_Y1s_d_varphi + \
+        d_Y2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 213
-    grad_grad_B[:,1,0,2] =(2*sG*B0**2*(B0*lprime* \
-        X1c**2*(Y20 - Y2c)* \
-        curvature +  \
-        X1s*(2*B2s*lprime* \
-            Y1c - 2*iota_N0*B0*Y1c* \
-            Z2c - B0*lprime* \
-            X2s*Y1c*curvature +  \
-            B0*lprime*X1s*Y20* \
-            curvature +  \
-            B0*lprime*X1s*Y2c* \
-            curvature -  \
-            Y1c*Z2s*d_B0_d_varphi +  \
-            Y1s*(G2*sG + I2*sG*iota0 -  \
-                2*B20*lprime -  \
-                2*B2c*lprime -  \
-                2*iota_N0*B0*Z2s +  \
-                B0*lprime*X20* \
-                curvature +  \
-                B0*lprime*X2c* \
-                curvature +  \
-                Z20*d_B0_d_varphi +  \
-                Z2c*d_B0_d_varphi -  \
-                B0*d_Z20_d_varphi -  \
-                B0*d_Z2c_d_varphi) +  \
-            B0*Y1c*d_Z2s_d_varphi) +  \
-        X1c*(2*B2s*lprime* \
-            Y1s - 2*iota_N0*B0*Y1s* \
-            Z2c - B0*lprime* \
-            X2s*Y1s*curvature -  \
-            2*B0*lprime*X1s* \
-            Y2s*curvature -  \
-            Y1s*Z2s*d_B0_d_varphi +  \
-            Y1c*(G2*sG + I2*sG*iota0 -  \
-                2*B20*lprime +  \
-                2*B2c*lprime +  \
-                2*iota_N0*B0*Z2s +  \
-                B0*lprime*X20* \
-                curvature -  \
-                B0*lprime*X2c* \
-                curvature +  \
-                Z20*d_B0_d_varphi -  \
-                Z2c*d_B0_d_varphi -  \
-                B0*d_Z20_d_varphi +  \
-                B0*d_Z2c_d_varphi) +  \
-            B0*Y1s*d_Z2s_d_varphi)))/ \
-    (Bbar**2*lprime)
+    # Element213
+    grad_grad_B[:,1,0,2]=(2*B0**5*lprime*lprime*(G0 * (2*B2s*lprime*X1s*Y1c + 2*B2s*lprime*X1c*Y1s + 2*B2c*lprime*(X1c*Y1c - \
+        X1s*Y1s) - 2*B20*lprime*(X1c*Y1c + X1s*Y1s) + X1c*Y1c*Z20*d_B0_d_varphi + X1s*Y1s*Z20*d_B0_d_varphi - X1c*Y1c*Z2c*d_B0_d_varphi + \
+        X1s*Y1s*Z2c*d_B0_d_varphi - X1s*Y1c*Z2s*d_B0_d_varphi - X1c*Y1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(G0*X1c*X1c * (Y20 - \
+        Y2c) * curvature + X1c * (-(G0*(X2s*Y1s + 2*X1s*Y2s) * curvature) + Y1c*(G2 + I2*iota + G0*X20*curvature - G0*X2c*curvature)) + \
+        X1s * (G0*(-(X2s*Y1c) + X1s * (Y20 + Y2c)) * curvature + Y1s*(G2 + I2*iota + G0*X20*curvature + G0*X2c*curvature))) - \
+        G0 * (X1s * (Y1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + Y1c*(2*iota_N0*Z2c - d_Z2s_d_varphi)) + \
+        X1c * (Y1c*(-2*iota_N0*Z2s + d_Z20_d_varphi - d_Z2c_d_varphi) + Y1s*(2*iota_N0*Z2c - d_Z2s_d_varphi))))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 221
-    grad_grad_B[:,1,1,0] =(-2*sG*B0**3*(X1c**2* \
-        (3*iota_N0*X2s +  \
-            lprime*(Y20 - Y2c)* \
-            torsion - d_X20_d_varphi +  \
-            d_X2c_d_varphi) +  \
-        X1s*(lprime* \
-            (X2s*Y1c -  \
-                (X20 + X2c)*Y1s)* \
-            torsion -  \
-            X2s*d_X1c_d_varphi +  \
-            X20*d_X1s_d_varphi +  \
-            X2c*d_X1s_d_varphi -  \
-            X1s*(3*iota_N0*X2s -  \
-                lprime*(Y20 + Y2c)* \
-                torsion + d_X20_d_varphi +  \
-                d_X2c_d_varphi)) +  \
-        X1c*(lprime* \
-            (-(X20*Y1c) +  \
-                X2c*Y1c +  \
-                X2s*Y1s)*torsion +  \
-            X20*d_X1c_d_varphi -  \
-            X2c*d_X1c_d_varphi -  \
-            X2s*d_X1s_d_varphi -  \
-            2*X1s*(3*iota_N0*X2c +  \
-                lprime*Y2s*torsion -  \
-                d_X2s_d_varphi))))/(Bbar**2*lprime) \
+    # Element221
+    grad_grad_B[:,1,1,0]=(-2*B0**6*lprime*lprime*(X1c*X1c * (3*iota_N0*X2s + lprime * (Y20 - Y2c) * torsion - d_X20_d_varphi + \
+        d_X2c_d_varphi) + X1s * (lprime*(X2s*Y1c - (X20 + X2c) * Y1s) * torsion - X2s*d_X1c_d_varphi + X20*d_X1s_d_varphi + \
+        X2c*d_X1s_d_varphi - X1s * (3*iota_N0*X2s - lprime * (Y20 + Y2c) * torsion + d_X20_d_varphi + d_X2c_d_varphi)) + \
+        X1c * (lprime*(-(X20*Y1c) + X2c*Y1c + X2s*Y1s) * torsion + X20*d_X1c_d_varphi - X2c*d_X1c_d_varphi - X2s*d_X1s_d_varphi - \
+        2*X1s * (3*iota_N0*X2c + lprime*Y2s*torsion - d_X2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 222 \
-    grad_grad_B[:,1,1,1] =(2*sG*B0**3*(X1s**2* \
-        (2*iota_N0*Y2s + d_Y20_d_varphi +  \
-            d_Y2c_d_varphi) +  \
-        X1c*(iota_N0*X2c*Y1s -  \
-            2*iota_N0*X1c*Y2s +  \
-            X2c*d_Y1c_d_varphi -  \
-            X20*(iota_N0*Y1s +  \
-                d_Y1c_d_varphi) +  \
-            X2s*(-(iota_N0*Y1c) +  \
-                d_Y1s_d_varphi) +  \
-            X1c*d_Y20_d_varphi -  \
-            X1c*d_Y2c_d_varphi) +  \
-        X1s*(iota_N0*X2s*Y1s +  \
-            4*iota_N0*X1c*Y2c +  \
-            X2s*d_Y1c_d_varphi +  \
-            X20*(iota_N0*Y1c -  \
-                d_Y1s_d_varphi) +  \
-            X2c*(iota_N0*Y1c -  \
-                d_Y1s_d_varphi) -  \
-            2*X1c*d_Y2s_d_varphi)))/ \
-    (Bbar**2*lprime)
+    # Element222
+    grad_grad_B[:,1,1,1]=(2*B0**6*lprime*lprime*(X1s*X1s * (2*iota_N0*Y2s + d_Y20_d_varphi + d_Y2c_d_varphi) + X1c * (iota_N0*X2c*Y1s - \
+        2*iota_N0*X1c*Y2s + X2c*d_Y1c_d_varphi - X20 * (iota_N0*Y1s + d_Y1c_d_varphi) + X2s * (-(iota_N0*Y1c) + d_Y1s_d_varphi) + \
+        X1c*d_Y20_d_varphi - X1c*d_Y2c_d_varphi) + X1s * (iota_N0*X2s*Y1s + 4*iota_N0*X1c*Y2c + X2s*d_Y1c_d_varphi + X20 * (iota_N0*Y1c - \
+        d_Y1s_d_varphi) + X2c * (iota_N0*Y1c - d_Y1s_d_varphi) - 2*X1c*d_Y2s_d_varphi)))/(Bbar**2*G0*G0*G0)
 
-    # Element 223
-    grad_grad_B[:,1,1,2] =(-2*sG*B0**2*(X1s**2* \
-        (G2*sG + I2*sG*iota0 - 2*B20*lprime -  \
-            2*B2c*lprime -  \
-            2*iota_N0*B0*Z2s +  \
-            2*B0*lprime*X20* \
-            curvature +  \
-            2*B0*lprime*X2c* \
-            curvature +  \
-            Z20*d_B0_d_varphi +  \
-            Z2c*d_B0_d_varphi -  \
-            B0*d_Z20_d_varphi -  \
-            B0*d_Z2c_d_varphi) +  \
-        X1c**2*(G2*sG + I2*sG*iota0 -  \
-            2*B20*lprime +  \
-            2*B2c*lprime +  \
-            2*iota_N0*B0*Z2s +  \
-            2*B0*lprime*X20* \
-            curvature -  \
-            2*B0*lprime*X2c* \
-            curvature +  \
-            Z20*d_B0_d_varphi -  \
-            Z2c*d_B0_d_varphi -  \
-            B0*d_Z20_d_varphi +  \
-            B0*d_Z2c_d_varphi) +  \
-        2*X1c*X1s* \
-        (2*B2s*lprime -  \
-            Z2s*d_B0_d_varphi +  \
-            B0*(-2*iota_N0*Z2c -  \
-                2*lprime*X2s*curvature +  \
-                d_Z2s_d_varphi))))/(Bbar**2*lprime)
+    # Element223
+    grad_grad_B[:,1,1,2]=(-2*B0**5*lprime*lprime*(G0 * (4*B2s*lprime*X1c*X1s + 2*B2c*lprime*(X1c*X1c - X1s*X1s) - \
+        2*B20*lprime*(X1c*X1c + X1s*X1s) + X1c*X1c*Z20*d_B0_d_varphi + X1s*X1s*Z20*d_B0_d_varphi - X1c*X1c*Z2c*d_B0_d_varphi + \
+        X1s*X1s*Z2c*d_B0_d_varphi - 2*X1c*X1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(-4*G0*X1c*X1s*X2s*curvature + X1c*X1c*(G2 + \
+        I2*iota + 2*G0*X20*curvature - 2*G0*X2c*curvature) + X1s*X1s*(G2 + I2*iota + 2*G0*X20*curvature + 2*G0*X2c*curvature)) + \
+        G0 * (X1c*X1c*(2*iota_N0*Z2s - d_Z20_d_varphi + d_Z2c_d_varphi) - X1s*X1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) +\
+        2*X1c*X1s*(-2*iota_N0*Z2c + d_Z2s_d_varphi)))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 231
-    grad_grad_B[:,1,2,0] =(sG*B0**2*((X1s*Y1c -  \
-            X1c*Y1s)*d_B0_d_varphi* \
-        (2*iota_N0*X1c**2 +  \
-            X1s*(2*iota_N0*X1s -  \
-                lprime*Y1c*torsion +  \
-                2*d_X1c_d_varphi) +  \
-            X1c*(lprime*Y1s* \
-                torsion - 2*d_X1s_d_varphi)) +  \
-        B0*(2*lprime**2* \
-            (X1c**2*(Y20 - Y2c) +  \
-                X1s*(X2s*Y1c -  \
-                X20*Y1s -  \
-                X2c*Y1s +  \
-                X1s*Y20 +  \
-                X1s*Y2c) +  \
-                X1c*(-(X20*Y1c) +  \
-                X2c*Y1c +  \
-                X2s*Y1s -  \
-                2*X1s*Y2s))*curvature +  \
-            iota_N0*X1c**3*d_Y1s_d_varphi +  \
-            lprime*(-(X1s*Y1c) +  \
-                X1c*Y1s)* \
-            (torsion* \
-                (Y1s*d_X1c_d_varphi -  \
-                Y1c*d_X1s_d_varphi) +  \
-                X1s*(2*iota_N0*Y1s* \
-                    torsion +  \
-                torsion*d_Y1c_d_varphi +  \
-                Y1c*d_torsion_d_varphi) +  \
-                X1c*(2*iota_N0*Y1c* \
-                    torsion -  \
-                torsion*d_Y1s_d_varphi -  \
-                Y1s*d_torsion_d_varphi)) +  \
-            X1s*(d_X1c_d_varphi* \
-                (Y1s*d_X1c_d_varphi -  \
-                Y1c*d_X1s_d_varphi) -  \
-                iota_N0*X1s**2*d_Y1c_d_varphi +  \
-                X1s*(iota_N0*Y1s* \
-                    d_X1c_d_varphi -  \
-                d_X1c_d_varphi* \
-                    d_Y1c_d_varphi +  \
-                Y1c* \
-                    (iota_N0*d_X1s_d_varphi +  \
-                    d2_X1c_d_varphi2))) +  \
-            X1c*(d_X1s_d_varphi* \
-                (-(Y1s*d_X1c_d_varphi) +  \
-                Y1c*d_X1s_d_varphi) +  \
-                iota_N0*X1s**2*d_Y1s_d_varphi +  \
-                X1s*(d_X1s_d_varphi* \
-                    d_Y1c_d_varphi +  \
-                d_X1c_d_varphi* \
-                    d_Y1s_d_varphi -  \
-                Y1s* \
-                    (2*iota_N0*d_X1s_d_varphi +  \
-                    d2_X1c_d_varphi2) +  \
-                Y1c* \
-                    (2*iota_N0*d_X1c_d_varphi -  \
-                    d2_X1s_d_varphi2))) -  \
-            X1c**2*(iota_N0*Y1c* \
-                d_X1s_d_varphi +  \
-                iota_N0*X1s*d_Y1c_d_varphi +  \
-                d_X1s_d_varphi* \
-                d_Y1s_d_varphi +  \
-                Y1s*(iota_N0*d_X1c_d_varphi -  \
-                d2_X1s_d_varphi2)))))/ \
-    (Bbar**2*lprime**2)
+    # Element231
+    grad_grad_B[:,1,2,0]=(B0**5*lprime*(-((Bbar*sG*d_B0_d_varphi*(2*iota_N0*X1c*X1c + X1s*(2*iota_N0*X1s - lprime*Y1c*torsion + \
+        2*d_X1c_d_varphi) + X1c * (lprime*Y1s*torsion - 2*d_X1s_d_varphi)))/B0) + B0*(2*lprime*lprime * (X1c*X1c*(Y20 - Y2c) +\
+        X1s * (X2s*Y1c - X20*Y1s - X2c*Y1s + X1s*Y20 + X1s*Y2c) + X1c * (-(X20*Y1c) + X2c*Y1c + X2s*Y1s - 2*X1s*Y2s)) * curvature +\
+        iota_N0*X1c*X1c*X1c*d_Y1s_d_varphi + (Bbar*sG*lprime*(torsion*(Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) + \
+        X1s*(2*iota_N0*Y1s*torsion + torsion*d_Y1c_d_varphi + Y1c*d_torsion_d_varphi) + X1c*(2*iota_N0*Y1c*torsion - \
+        torsion*d_Y1s_d_varphi - Y1s*d_torsion_d_varphi)))/B0 + X1s*(d_X1c_d_varphi*(Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) -\
+        iota_N0*X1s*X1s*d_Y1c_d_varphi + X1s * (iota_N0*Y1s*d_X1c_d_varphi - d_X1c_d_varphi*d_Y1c_d_varphi + \
+        Y1c*(iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2))) + X1c * (d_X1s_d_varphi*(-(Y1s*d_X1c_d_varphi) + Y1c*d_X1s_d_varphi) +\
+        iota_N0*X1s*X1s*d_Y1s_d_varphi + X1s * (d_X1s_d_varphi*d_Y1c_d_varphi + d_X1c_d_varphi*d_Y1s_d_varphi - \
+        Y1s*(2*iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2) + Y1c*(2*iota_N0*d_X1c_d_varphi - d2_X1s_d_varphi2))) - \
+        X1c*X1c * (iota_N0*Y1c*d_X1s_d_varphi + iota_N0*X1s*d_Y1c_d_varphi + d_X1s_d_varphi*d_Y1s_d_varphi + \
+        Y1s * (iota_N0*d_X1c_d_varphi - d2_X1s_d_varphi2)))))/(Bbar**2*G0*G0*G0)
 
-    # Element 232
-    grad_grad_B[:,1,2,1] =-((sG*B0**2*(2* \
-            (-(X1s*Y1c) +  \
-            X1c*Y1s)* \
-            d_B0_d_varphi* \
-            (X1s*(iota_N0*Y1s +  \
-                d_Y1c_d_varphi) +  \
-            X1c*(iota_N0*Y1c -  \
-                d_Y1s_d_varphi)) +  \
-            B0*(lprime* \
-                (-(X1s*Y1c) +  \
-                X1c*Y1s)*torsion* \
-                (iota_N0*X1c**2 +  \
-                iota_N0*X1s**2 -  \
-                iota_N0*Y1c**2 -  \
-                iota_N0*Y1s**2 +  \
-                X1s*d_X1c_d_varphi -  \
-                X1c*d_X1s_d_varphi -  \
-                Y1s*d_Y1c_d_varphi +  \
-                Y1c*d_Y1s_d_varphi) +  \
-            X1s**2* \
-                (iota_N0*Y1s*d_Y1c_d_varphi +  \
-                d_Y1c_d_varphi**2 -  \
-                Y1c* \
-                (iota_N0*d_Y1s_d_varphi +  \
-                    d2_Y1c_d_varphi2)) +  \
-            X1c*(iota_N0*Y1c**2* \
-                d_X1s_d_varphi +  \
-                iota_N0*Y1s**2* \
-                d_X1s_d_varphi -  \
-                Y1c* \
-                (iota_N0*X1c +  \
-                    d_X1s_d_varphi)* \
-                d_Y1s_d_varphi +  \
-                X1c*d_Y1s_d_varphi**2 +  \
-                Y1s* \
-                (iota_N0*X1c* \
-                    d_Y1c_d_varphi +  \
-                    d_X1s_d_varphi* \
-                    d_Y1c_d_varphi -  \
-                    X1c*d2_Y1s_d_varphi2)) +  \
-            X1s*(-(iota_N0*Y1c**2* \
-                    d_X1c_d_varphi) -  \
-                iota_N0*Y1s**2* \
-                d_X1c_d_varphi -  \
-                2*X1c*d_Y1c_d_varphi* \
-                d_Y1s_d_varphi +  \
-                Y1s* \
-                (-(d_X1c_d_varphi* \
-                        d_Y1c_d_varphi) +  \
-                    X1c*d2_Y1c_d_varphi2) +  \
-                Y1c* \
-                (d_X1c_d_varphi* \
-                    d_Y1s_d_varphi +  \
-                    X1c*d2_Y1s_d_varphi2)))))/ \
-        (Bbar**2*lprime**2))
+    # Element232
+    grad_grad_B[:,1,2,1]= - ((B0**5*lprime*((2*Bbar*sG*d_B0_d_varphi*(X1s * (iota_N0*Y1s + d_Y1c_d_varphi) + X1c * (iota_N0*Y1c -\
+        d_Y1s_d_varphi)))/B0 + B0 * ((Bbar*sG*lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s +\
+        X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi))/B0 + X1s*X1s*(iota_N0*Y1s*d_Y1c_d_varphi +\
+        d_Y1c_d_varphi**2 - Y1c*(iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2)) + X1c * (iota_N0*Y1c*Y1c*d_X1s_d_varphi + \
+        iota_N0*Y1s*Y1s*d_X1s_d_varphi - Y1c*(iota_N0*X1c + d_X1s_d_varphi) * d_Y1s_d_varphi + X1c*d_Y1s_d_varphi*d_Y1s_d_varphi +\
+        Y1s*(iota_N0*X1c*d_Y1c_d_varphi + d_X1s_d_varphi*d_Y1c_d_varphi - X1c*d2_Y1s_d_varphi2)) + \
+        X1s * (-(iota_N0*Y1c*Y1c*d_X1c_d_varphi) - iota_N0*Y1s*Y1s*d_X1c_d_varphi - 2*X1c*d_Y1c_d_varphi*d_Y1s_d_varphi + \
+        Y1s*(-(d_X1c_d_varphi*d_Y1c_d_varphi) + X1c*d2_Y1c_d_varphi2) + Y1c*(d_X1c_d_varphi*d_Y1s_d_varphi + \
+        X1c*d2_Y1s_d_varphi2)))))/(Bbar**2*G0*G0*G0))
 
-    # Element 233
-    grad_grad_B[:,1,2,2] =(sG*B0**2*(2*(X1c**2* \
-            (Y20 - Y2c) +  \
-            X1s*(X2s*Y1c -  \
-                X20*Y1s -  \
-                X2c*Y1s +  \
-                X1s*Y20 +  \
-                X1s*Y2c) +  \
-            X1c*(-(X20*Y1c) +  \
-                X2c*Y1c +  \
-                X2s*Y1s -  \
-                2*X1s*Y2s))* \
-        d_B0_d_varphi +  \
-        B0*(-(X1s*Y1c) +  \
-            X1c*Y1s)*curvature* \
-        (iota_N0*X1c**2 +  \
-            X1s*(iota_N0*X1s -  \
-                2*lprime*Y1c*torsion +  \
-                d_X1c_d_varphi) +  \
-            X1c*(2*lprime*Y1s* \
-                torsion - d_X1s_d_varphi))))/ \
-    (Bbar**2*lprime) \
+    # Element233
+    grad_grad_B[:,1,2,2]=(B0**5*lprime*lprime*(2 * (X1c*X1c * (Y20 - Y2c) + X1s * (X2s*Y1c - X20*Y1s - X2c*Y1s + X1s*Y20 + X1s*Y2c) + \
+        X1c * (-(X20*Y1c) + X2c*Y1c + X2s*Y1s - 2*X1s*Y2s)) * d_B0_d_varphi + Bbar*sG*curvature*(iota_N0*X1c*X1c + \
+        X1s * (iota_N0*X1s - 2*lprime*Y1c*torsion + d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - \
+        d_X1s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 311 \
-    grad_grad_B[:,2,0,0] =-((sG*B0**2*(X1s*Y1c -  \
-            X1c*Y1s)* \
-        (3*sG**2*d_B0_d_varphi* \
-            (iota_N0*X1c*Y1c +  \
-            iota_N0*X1s*Y1s +  \
-            Y1s*d_X1c_d_varphi -  \
-            Y1c*d_X1s_d_varphi) +  \
-            B0*(2*lprime**2* \
-                (-(X1s*Y1c) +  \
-                X1c*Y1s)*curvature**2 +  \
-            sG**2*lprime*torsion* \
-                (iota_N0*X1c**2 +  \
-                iota_N0*X1s**2 -  \
-                iota_N0*Y1c**2 -  \
-                iota_N0*Y1s**2 +  \
-                X1s*d_X1c_d_varphi -  \
-                X1c*d_X1s_d_varphi -  \
-                Y1s*d_Y1c_d_varphi +  \
-                Y1c*d_Y1s_d_varphi) +  \
-            sG**2*(iota_N0*X1c* \
-                d_Y1c_d_varphi -  \
-                d_X1s_d_varphi* \
-                d_Y1c_d_varphi +  \
-                iota_N0*X1s*d_Y1s_d_varphi +  \
-                d_X1c_d_varphi* \
-                d_Y1s_d_varphi +  \
-                Y1s* \
-                (iota_N0*d_X1s_d_varphi +  \
-                    d2_X1c_d_varphi2) +  \
-                Y1c* \
-                (iota_N0*d_X1c_d_varphi -  \
-                    d2_X1s_d_varphi2)))))/ \
-        (Bbar**2*lprime**2))
+    # Element311
+    grad_grad_B[:,2,0,0]=(sG*B0*B0*B0*B0*lprime*(3*d_B0_d_varphi*(iota_N0*X1c*Y1c + iota_N0*X1s*Y1s + Y1s*d_X1c_d_varphi - \
+        Y1c*d_X1s_d_varphi) + B0 * ((2*Bbar*sG*lprime*lprime*curvature*curvature)/B0 + iota_N0*Y1c*d_X1c_d_varphi + \
+        iota_N0*Y1s*d_X1s_d_varphi + iota_N0*X1c*d_Y1c_d_varphi - d_X1s_d_varphi*d_Y1c_d_varphi + iota_N0*X1s*d_Y1s_d_varphi +\
+        d_X1c_d_varphi*d_Y1s_d_varphi + lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s +\
+        X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi) + Y1s*d2_X1c_d_varphi2 - \
+        Y1c*d2_X1s_d_varphi2)))/(Bbar*G0*G0*G0)
 
-    # Element 312
-    grad_grad_B[:,2,0,1] =(sG*B0**2*(X1s*Y1c -  \
-        X1c*Y1s)* \
-        (-(d_B0_d_varphi* \
-            (3*iota_N0*Y1c**2 +  \
-            Y1s*(3*iota_N0*Y1s +  \
-                2*lprime*X1c*torsion +  \
-                3*d_Y1c_d_varphi) -  \
-            Y1c*(2*lprime*X1s* \
-                torsion + 3*d_Y1s_d_varphi))) -  \
-        B0*(lprime* \
-            (2*iota_N0*X1s*Y1s* \
-                torsion +  \
-                2*Y1s*torsion* \
-                d_X1c_d_varphi -  \
-                2*Y1c*torsion* \
-                d_X1s_d_varphi -  \
-                X1s*Y1c* \
-                d_torsion_d_varphi +  \
-                X1c*(2*iota_N0*Y1c* \
-                    torsion +  \
-                Y1s*d_torsion_d_varphi)) +  \
-            Y1s*(2*iota_N0*d_Y1s_d_varphi +  \
-                d2_Y1c_d_varphi2) +  \
-            Y1c*(2*iota_N0*d_Y1c_d_varphi -  \
-                d2_Y1s_d_varphi2))))/(Bbar**2*lprime**2) \
+    # Element312
+    grad_grad_B[:,2,0,1]=(sG*B0*B0*B0*B0*lprime*(d_B0_d_varphi*(3*iota_N0*Y1c*Y1c + Y1s * (3*iota_N0*Y1s + 2*lprime*X1c*torsion + \
+        3*d_Y1c_d_varphi) - Y1c * (2*lprime*X1s*torsion + 3*d_Y1s_d_varphi)) + B0 * (lprime*(2*iota_N0*X1s*Y1s*torsion + \
+        2*Y1s*torsion*d_X1c_d_varphi - 2*Y1c*torsion*d_X1s_d_varphi - X1s*Y1c*d_torsion_d_varphi + X1c * (2*iota_N0*Y1c*torsion +\
+        Y1s*d_torsion_d_varphi)) + Y1s * (2*iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2) + Y1c * (2*iota_N0*d_Y1c_d_varphi -\
+        d2_Y1s_d_varphi2))))/(Bbar*G0*G0*G0)
 
-    # Element 313 \
-    grad_grad_B[:,2,0,2] =(sG*B0**2*(X1s*Y1c -  \
-        X1c*Y1s)* \
-        ((2 + sG**2)*(X1s*Y1c -  \
-            X1c*Y1s)*curvature* \
-        d_B0_d_varphi +  \
-        B0*((-1 + sG**2)*curvature* \
-            (Y1s*d_X1c_d_varphi -  \
-                Y1c*d_X1s_d_varphi) +  \
-            X1s*(sG**2*iota_N0*Y1s* \
-                curvature +  \
-                curvature*d_Y1c_d_varphi +  \
-                Y1c*d_curvature_d_varphi) +  \
-            X1c*(sG**2*iota_N0*Y1c* \
-                curvature -  \
-                curvature*d_Y1s_d_varphi -  \
-                Y1s*d_curvature_d_varphi))))/ \
-    (Bbar**2*lprime)
+    # Element313
+    grad_grad_B[:,2,0,2]= - ((sG*B0*B0*B0*B0*lprime*lprime*((-3*Bbar*sG*curvature*d_B0_d_varphi)/B0 + B0*(X1s * (iota_N0*Y1s*curvature +\
+        curvature*d_Y1c_d_varphi + Y1c*d_curvature_d_varphi) + X1c * (iota_N0*Y1c*curvature - curvature*d_Y1s_d_varphi - \
+        Y1s*d_curvature_d_varphi))))/(Bbar*G0*G0*G0))
 
-    # Element 321
-    grad_grad_B[:,2,1,0] =-((sG*B0**2*(X1s*Y1c -  \
-            X1c*Y1s)* \
-        (-(d_B0_d_varphi* \
-            (3*iota_N0*X1c**2 +  \
-                X1s*(3*iota_N0*X1s -  \
-                    2*lprime*Y1c*torsion +  \
-                    3*d_X1c_d_varphi) +  \
-                X1c*(2*lprime*Y1s* \
-                    torsion - 3*d_X1s_d_varphi))) \
-    + B0*(lprime* \
-                (X1s*(2*iota_N0*Y1s* \
-                    torsion +  \
-                    2*torsion*d_Y1c_d_varphi +  \
-                    Y1c*d_torsion_d_varphi) +  \
-                X1c* \
-                (2*iota_N0*Y1c*torsion -  \
-                    2*torsion*d_Y1s_d_varphi -  \
-                    Y1s*d_torsion_d_varphi)) -  \
-            X1s*(2*iota_N0*d_X1s_d_varphi +  \
-                d2_X1c_d_varphi2) +  \
-            X1c*(-2*iota_N0*d_X1c_d_varphi +  \
-                d2_X1s_d_varphi2))))/(Bbar**2*lprime**2) \
-    )
+    # Element321
+    grad_grad_B[:,2,1,0]= - ((sG*B0*B0*B0*B0*lprime*(d_B0_d_varphi*(3*iota_N0*X1c*X1c + X1s * (3*iota_N0*X1s - 2*lprime*Y1c*torsion + \
+        3*d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - 3*d_X1s_d_varphi)) + B0 * (-(lprime*(X1s*(2*iota_N0*Y1s*torsion + \
+        2*torsion*d_Y1c_d_varphi + Y1c*d_torsion_d_varphi) + X1c*(2*iota_N0*Y1c*torsion - 2*torsion*d_Y1s_d_varphi -\
+        Y1s*d_torsion_d_varphi))) + X1s * (2*iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2) + X1c * (2*iota_N0*d_X1c_d_varphi -\
+        d2_X1s_d_varphi2))))/(Bbar*G0*G0*G0))
 
-    # Element 322
-    grad_grad_B[:,2,1,1] =(sG*B0**2*(X1s*Y1c -  \
-        X1c*Y1s)* \
-        (3*d_B0_d_varphi* \
-        (X1s*(iota_N0*Y1s +  \
-                d_Y1c_d_varphi) +  \
-            X1c*(iota_N0*Y1c -  \
-                d_Y1s_d_varphi)) +  \
-        B0*(iota_N0*Y1c* \
-            d_X1c_d_varphi +  \
-            iota_N0*Y1s*d_X1s_d_varphi +  \
-            iota_N0*X1c*d_Y1c_d_varphi +  \
-            d_X1s_d_varphi*d_Y1c_d_varphi +  \
-            iota_N0*X1s*d_Y1s_d_varphi -  \
-            d_X1c_d_varphi*d_Y1s_d_varphi +  \
-            lprime*torsion* \
-            (iota_N0*X1c**2 + iota_N0*X1s**2 -  \
-                iota_N0*Y1c**2 - iota_N0*Y1s**2 +  \
-                X1s*d_X1c_d_varphi -  \
-                X1c*d_X1s_d_varphi -  \
-                Y1s*d_Y1c_d_varphi +  \
-                Y1c*d_Y1s_d_varphi) +  \
-            X1s*d2_Y1c_d_varphi2 -  \
-            X1c*d2_Y1s_d_varphi2)))/ \
-    (Bbar**2*lprime**2)
+    # Element322
+    grad_grad_B[:,2,1,1]= - ((sG*B0*B0*B0*B0*lprime*(3*d_B0_d_varphi*(X1s * (iota_N0*Y1s + d_Y1c_d_varphi) + X1c * (iota_N0*Y1c - \
+        d_Y1s_d_varphi)) + B0 * (iota_N0*Y1c*d_X1c_d_varphi + iota_N0*Y1s*d_X1s_d_varphi + iota_N0*X1c*d_Y1c_d_varphi + \
+        d_X1s_d_varphi*d_Y1c_d_varphi + iota_N0*X1s*d_Y1s_d_varphi - d_X1c_d_varphi*d_Y1s_d_varphi + lprime*torsion*(iota_N0*X1c*X1c + \
+        iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s + X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + \
+        Y1c*d_Y1s_d_varphi) + X1s*d2_Y1c_d_varphi2 - X1c*d2_Y1s_d_varphi2)))/(Bbar*G0*G0*G0))
 
-    # Element 323
-    grad_grad_B[:,2,1,2] =-((sG*B0**3*(X1s*Y1c -  \
-            X1c*Y1s)*curvature* \
-        (sG**2*iota_N0*X1c**2 +  \
-            X1s*(sG**2*iota_N0*X1s -  \
-            (1 + sG**2)*lprime*Y1c* \
-                torsion + sG**2*d_X1c_d_varphi) +  \
-            X1c*((1 + sG**2)*lprime*Y1s* \
-                torsion - sG**2*d_X1s_d_varphi)))/ \
-        (Bbar**2*lprime)) \
+    # Element323
+    grad_grad_B[:,2,1,2]=(sG*B0**5*lprime*lprime*curvature*(iota_N0*X1c*X1c + X1s * (iota_N0*X1s - 2*lprime*Y1c*torsion + \
+        d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - d_X1s_d_varphi)))/(Bbar*G0*G0*G0)
 
-    # Element 331
-    grad_grad_B[:,2,2,0] =(sG*B0**2*(X1s*Y1c -  \
-        X1c*Y1s)* \
-        ((2 + sG**2)*(X1s*Y1c -  \
-            X1c*Y1s)*curvature* \
-        d_B0_d_varphi +  \
-        B0*((-1 + sG**2)*curvature* \
-            (Y1s*d_X1c_d_varphi -  \
-                Y1c*d_X1s_d_varphi) +  \
-            X1s*(sG**2*iota_N0*Y1s* \
-                curvature +  \
-                curvature*d_Y1c_d_varphi +  \
-                Y1c*d_curvature_d_varphi) +  \
-            X1c*(sG**2*iota_N0*Y1c* \
-                curvature -  \
-                curvature*d_Y1s_d_varphi -  \
-                Y1s*d_curvature_d_varphi))))/ \
-    (Bbar**2*lprime)
+    # Element331
+    grad_grad_B[:,2,2,0]= - ((sG*B0*B0*B0*B0*lprime*lprime*((-3*Bbar*sG*curvature*d_B0_d_varphi)/B0 + B0*(X1s * (iota_N0*Y1s*curvature +\
+        curvature*d_Y1c_d_varphi + Y1c*d_curvature_d_varphi) + X1c * (iota_N0*Y1c*curvature - curvature*d_Y1s_d_varphi - \
+        Y1s*d_curvature_d_varphi))))/(Bbar*G0*G0*G0))
 
-    # Element 332
-    grad_grad_B[:,1,1,0] =(sG*B0**3*(X1s*Y1c -  \
-        X1c*Y1s)*curvature* \
-        (sG**2*iota_N0*Y1c**2 +  \
-        Y1s*(sG**2*iota_N0*Y1s +  \
-            (-1 + sG**2)*lprime*X1c* \
-            torsion + sG**2*d_Y1c_d_varphi) -  \
-        Y1c*((-1 + sG**2)*lprime*X1s* \
-            torsion + sG**2*d_Y1s_d_varphi)))/ \
-    (Bbar**2*lprime)
+    # Element332
+    grad_grad_B[:,2,2,1]= - ((sG*B0**5*lprime*lprime*curvature*(iota_N0*Y1c*Y1c + Y1s * (iota_N0*Y1s + d_Y1c_d_varphi) - \
+        Y1c*d_Y1s_d_varphi))/(Bbar*G0*G0*G0))
 
-    # Element 333
-    grad_grad_B[:,1,1,1] =(sG*B0*(X1s*Y1c -  \
-        X1c*Y1s)* \
-        (2*B0**2*lprime**2* \
-        (-(X1s*Y1c) +  \
-            X1c*Y1s)*curvature**2 +  \
-        2*sG**2*(X1s*Y1c -  \
-            X1c*Y1s)* \
-        d_B0_d_varphi**2 +  \
-        sG**2*B0*(d_B0_d_varphi* \
-            (X1s*d_Y1c_d_varphi -  \
-                X1c*d_Y1s_d_varphi) -  \
-            Y1s*(d_B0_d_varphi* \
-                d_X1c_d_varphi +  \
-                X1c*d2_B0_d_varphi2) +  \
-            Y1c*(d_B0_d_varphi* \
-                d_X1s_d_varphi +  \
-                X1s*d2_B0_d_varphi2))))/ \
-    (Bbar**2*lprime**2) \
-
-
+    # Element333
+    grad_grad_B[:,2,2,2]=(sG*B0*B0*B0*lprime*(-2*Bbar*sG*B0*lprime*lprime*curvature*curvature + (2*Bbar*sG*d_B0_d_varphi**2)/B0 +\
+        B0 * (d_B0_d_varphi*(-(X1s*d_Y1c_d_varphi) + X1c*d_Y1s_d_varphi) + Y1s * (d_B0_d_varphi*d_X1c_d_varphi + X1c*d2_B0_d_varphi2) -\
+        Y1c * (d_B0_d_varphi*d_X1s_d_varphi + X1s*d2_B0_d_varphi2))))/(Bbar*G0*G0*G0)
 
     self.grad_grad_B = grad_grad_B
 
@@ -1165,646 +403,228 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     # "20200424-01 Rogerio's GradGradB calculation.nb"
     # and verify the two calculations match.
 
-    # Element 111
-    grad_grad_B_alt[:,0,0,0] =(-2*B0*(-4*sign_G*sign_psi*iota_N0*X2c*Y1c*\
-                                      Y1s + iota_N0*X1c*X1c*\
-                                      Y1c*(Y1c*\
-                                           (-Y20 + Y2c) + \
-                                           Y1s*(Y2s - \
-                                                2*sign_G*sign_psi*curvature)) + \
-                                      X20*Y1c*Y1c*Y1s*\
-                                      d_X1c_d_varphi - \
-                                      X2c*Y1c*Y1c*Y1s*\
-                                      d_X1c_d_varphi + \
-                                      X20*Y1s*Y1s*Y1s*\
-                                      d_X1c_d_varphi + \
-                                      X2c*Y1s*Y1s*Y1s*\
-                                      d_X1c_d_varphi + \
-                                      sign_G*sign_psi*Y1c*Y20*\
-                                      d_X1c_d_varphi - \
-                                      sign_G*sign_psi*Y1c*Y2c*\
-                                      d_X1c_d_varphi - \
-                                      sign_G*sign_psi*Y1s*Y2s*\
-                                      d_X1c_d_varphi - \
-                                      2*X2s*(sign_G*sign_psi*iota_N0*Y1s*Y1s + \
-                                             Y1c*Y1c*\
-                                             (-(sign_G*sign_psi*iota_N0) + \
-                                              iota_N0*X1c*Y1s) + \
-                                             Y1c*Y1s*Y1s*\
-                                             d_X1c_d_varphi) + \
-                                      X1c*(iota_N0*X2c*Y1c*\
-                                           (-Y1c*Y1c + Y1s*Y1s) + \
-                                           iota_N0*X20*Y1c*\
-                                           (Y1c*Y1c + Y1s*Y1s) - \
-                                           sign_G*sign_psi*iota_N0*Y1s*Y20 - \
-                                           sign_G*sign_psi*iota_N0*Y1s*Y2c + \
-                                           sign_G*sign_psi*iota_N0*Y1c*Y2s - \
-                                           Y1c*Y1s*Y20*\
-                                           d_X1c_d_varphi + \
-                                           Y1c*Y1s*Y2c*\
-                                           d_X1c_d_varphi + \
-                                           Y1s*Y1s*Y2s*\
-                                           d_X1c_d_varphi - \
-                                           2*sign_G*sign_psi*Y1s*Y1s*curvature*\
-                                           d_X1c_d_varphi) - \
-                                      sign_G*sign_psi*Y1c*Y1c*d_X20_d_varphi - \
-                                      sign_G*sign_psi*Y1s*Y1s*d_X20_d_varphi + \
-                                      sign_G*sign_psi*Y1c*Y1c*d_X2c_d_varphi - \
-                                      sign_G*sign_psi*Y1s*Y1s*d_X2c_d_varphi + \
-                                      2*sign_G*sign_psi*Y1c*Y1s*\
-                                      d_X2s_d_varphi))/(lp*sign_psi)
+    # Element111
+    grad_grad_B_alt[:,0,0,0]=(B0**6*lprime*lprime*(8*iota_N0*X2c*Y1c*Y1s + 4*iota_N0*X2s*(-Y1c*Y1c + Y1s*Y1s) - \
+        2*iota_N0*X1s*Y1c*Y20 + 2*iota_N0*X1c*Y1s*Y20 + 2*iota_N0*X1s*Y1c*Y2c + 2*iota_N0*X1c*Y1s*Y2c - 2*iota_N0*X1c*Y1c*Y2s + \
+        2*iota_N0*X1s*Y1s*Y2s - 5*iota_N0*X1c*X1s*Y1c*Y1c*curvature + 5*iota_N0*X1c*X1c*Y1c*Y1s*curvature - \
+        5*iota_N0*X1s*X1s*Y1c*Y1s*curvature + 5*iota_N0*X1c*X1s*Y1s*Y1s*curvature - 2*Y1c*Y20*d_X1c_d_varphi + \
+        2*Y1c*Y2c*d_X1c_d_varphi + 2*Y1s*Y2s*d_X1c_d_varphi - 5*X1s*Y1c*Y1s*curvature*d_X1c_d_varphi + \
+        5*X1c*Y1s*Y1s*curvature*d_X1c_d_varphi - 2*Y1s*Y20*d_X1s_d_varphi - 2*Y1s*Y2c*d_X1s_d_varphi + 2*Y1c*Y2s*d_X1s_d_varphi + \
+        5*X1s*Y1c*Y1c*curvature*d_X1s_d_varphi - 5*X1c*Y1c*Y1s*curvature*d_X1s_d_varphi + 2*Y1c*Y1c*d_X20_d_varphi + \
+        2*Y1s*Y1s*d_X20_d_varphi - 2*Y1c*Y1c*d_X2c_d_varphi + 2*Y1s*Y1s*d_X2c_d_varphi - 4*Y1c*Y1s*d_X2s_d_varphi))/(Bbar**2*G0*G0*G0)
 
-    # Element 112
-    grad_grad_B_alt[:,0,0,1] =(2*B0*(2*iota_N0*X2s*Y1c*Y1c*Y1c*\
-                                     Y1s + 2*iota_N0*X2s*\
-                                     Y1c*Y1s*Y1s*Y1s + \
-                                     iota_N0*X1c*Y1c*Y1c*Y1c*\
-                                     Y20 + iota_N0*X1c*Y1c*\
-                                     Y1s*Y1s*Y20 - \
-                                     iota_N0*X1c*Y1c*Y1c*Y1c*\
-                                     Y2c + 6*sign_G*sign_psi*iota_N0*Y1c*\
-                                     Y1s*Y2c - \
-                                     iota_N0*X1c*Y1c*Y1s*Y1s*\
-                                     Y2c - 3*sign_G*sign_psi*iota_N0*Y1c*Y1c*\
-                                     Y2s - iota_N0*X1c*\
-                                     Y1c*Y1c*Y1s*Y2s + \
-                                     3*sign_G*sign_psi*iota_N0*Y1s*Y1s*Y2s - \
-                                     iota_N0*X1c*Y1s*Y1s*Y1s*\
-                                     Y2s + 2*sign_G*sign_psi*iota_N0*X1c*\
-                                     Y1c*Y1c*Y1s*curvature + \
-                                     2*sign_G*sign_psi*iota_N0*X1c*Y1s*Y1s*Y1s*\
-                                     curvature - \
-                                     2*lp*sign_G*sign_psi*X2s*Y1c*\
-                                     Y1s*torsion + \
-                                     2*lp*X1c*X2s*Y1c*\
-                                     Y1s*Y1s*torsion - \
-                                     lp*sign_G*sign_psi*X1c*Y1c*\
-                                     Y20*torsion + \
-                                     lp*X1c*X1c*Y1c*Y1s*\
-                                     Y20*torsion + \
-                                     lp*sign_G*sign_psi*X1c*Y1c*\
-                                     Y2c*torsion - \
-                                     lp*X1c*X1c*Y1c*Y1s*\
-                                     Y2c*torsion + \
-                                     lp*sign_G*sign_psi*X1c*Y1s*\
-                                     Y2s*torsion - \
-                                     lp*X1c*X1c*Y1s*Y1s*Y2s*\
-                                     torsion + \
-                                     2*lp*sign_G*sign_psi*X1c*X1c*Y1s*Y1s*\
-                                     curvature*torsion + \
-                                     2*X2s*Y1c*Y1s*Y1s*\
-                                     d_Y1c_d_varphi - \
-                                     sign_G*sign_psi*Y1c*Y20*\
-                                     d_Y1c_d_varphi + \
-                                     X1c*Y1c*Y1s*\
-                                     Y20*d_Y1c_d_varphi + \
-                                     sign_G*sign_psi*Y1c*Y2c*\
-                                     d_Y1c_d_varphi - \
-                                     X1c*Y1c*Y1s*\
-                                     Y2c*d_Y1c_d_varphi + \
-                                     sign_G*sign_psi*Y1s*Y2s*\
-                                     d_Y1c_d_varphi - \
-                                     X1c*Y1s*Y1s*Y2s*\
-                                     d_Y1c_d_varphi + \
-                                     2*sign_G*sign_psi*X1c*Y1s*Y1s*\
-                                     curvature*d_Y1c_d_varphi - \
-                                     2*X2s*Y1c*Y1c*Y1s*\
-                                     d_Y1s_d_varphi - \
-                                     X1c*Y1c*Y1c*Y20*\
-                                     d_Y1s_d_varphi - \
-                                     sign_G*sign_psi*Y1s*Y20*\
-                                     d_Y1s_d_varphi + \
-                                     X1c*Y1c*Y1c*Y2c*\
-                                     d_Y1s_d_varphi - \
-                                     sign_G*sign_psi*Y1s*Y2c*\
-                                     d_Y1s_d_varphi + \
-                                     sign_G*sign_psi*Y1c*Y2s*\
-                                     d_Y1s_d_varphi + \
-                                     X1c*Y1c*Y1s*\
-                                     Y2s*d_Y1s_d_varphi - \
-                                     2*sign_G*sign_psi*X1c*Y1c*Y1s*\
-                                     curvature*d_Y1s_d_varphi + \
-                                     X2c*(Y1c*Y1c - Y1s*Y1s)*\
-                                     (iota_N0*Y1c*Y1c + iota_N0*Y1s*Y1s - \
-                                      lp*sign_G*sign_psi*torsion + \
-                                      Y1s*(lp*X1c*torsion + \
-                                           d_Y1c_d_varphi) - \
-                                      Y1c*d_Y1s_d_varphi) - \
-                                     X20*(Y1c*Y1c + Y1s*Y1s)*\
-                                     (iota_N0*Y1c*Y1c + iota_N0*Y1s*Y1s - \
-                                      lp*sign_G*sign_psi*torsion + \
-                                      Y1s*(lp*X1c*torsion + \
-                                           d_Y1c_d_varphi) - \
-                                      Y1c*d_Y1s_d_varphi) + \
-                                     sign_G*sign_psi*Y1c*Y1c*d_Y20_d_varphi + \
-                                     sign_G*sign_psi*Y1s*Y1s*d_Y20_d_varphi - \
-                                     sign_G*sign_psi*Y1c*Y1c*d_Y2c_d_varphi + \
-                                     sign_G*sign_psi*Y1s*Y1s*d_Y2c_d_varphi - \
-                                     2*sign_G*sign_psi*Y1c*Y1s*\
-                                     d_Y2s_d_varphi))/(lp*sign_psi)
+    # Element112
+    grad_grad_B_alt[:,0,0,1]=(B0**6*lprime*lprime*(-5*iota_N0*X1s*Y1c*Y1c*Y1c*curvature + Y1c*Y1c * (-6*iota_N0*Y2s + \
+        5*iota_N0*X1c*Y1s*curvature + 2*lprime*X20*torsion - 2*lprime*X2c*torsion + 5*lprime*X1s*X1s*curvature*torsion + \
+        5*X1s*curvature*d_Y1s_d_varphi + 2*d_Y20_d_varphi - 2*d_Y2c_d_varphi) + Y1s * (5*iota_N0*X1c*Y1s*Y1s*curvature - \
+        2*(lprime * (X1s*(Y20 + Y2c) - X1c*Y2s) * torsion - Y2s*d_Y1c_d_varphi + (Y20 + Y2c) * d_Y1s_d_varphi) + \
+        Y1s * (6*iota_N0*Y2s + lprime * (2*X20 + 2*X2c + 5*X1c*X1c*curvature) * torsion + 5*X1c*curvature*d_Y1c_d_varphi + \
+        2*d_Y20_d_varphi + 2*d_Y2c_d_varphi)) - Y1c * (5*iota_N0*X1s*Y1s*Y1s*curvature + 2*lprime * (X1c*(Y20 - Y2c) - \
+        X1s*Y2s) * torsion + 2*Y20*d_Y1c_d_varphi - 2*Y2c*d_Y1c_d_varphi - 2*Y2s*d_Y1s_d_varphi + Y1s * (-12*iota_N0*Y2c + \
+        2*lprime * (2*X2s + 5*X1c*X1s*curvature) * torsion + 5*X1s*curvature*d_Y1c_d_varphi + 5*X1c*curvature*d_Y1s_d_varphi + \
+        4*d_Y2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 113
-    grad_grad_B_alt[:,0,0,2] =(-2*(Y1c*Y1c*(G2*sign_psi + I2*sign_psi*iota - \
-                                            2*lp*sign_G*sign_psi*B20 + \
-                                            2*lp*sign_G*sign_psi*B2c + \
-                                            2*B0*sign_G*sign_psi*iota_N0*Z2s + \
-                                            B0*lp*sign_G*sign_psi*X20*curvature - \
-                                            B0*lp*sign_G*sign_psi*X2c*curvature + \
-                                            B0*lp*X1c*X20*Y1s*\
-                                            curvature - \
-                                            B0*lp*X1c*X2c*Y1s*\
-                                            curvature - \
-                                            B0*sign_G*sign_psi*d_Z20_d_varphi + \
-                                            B0*sign_G*sign_psi*d_Z2c_d_varphi) + \
-                                   Y1s*(B0*lp*X1c*\
-                                        (X20 + X2c)*Y1s*Y1s*\
-                                        curvature - \
-                                        B0*lp*sign_G*sign_psi*X1c*Y2s*\
-                                        curvature + \
-                                        Y1s*(G2*sign_psi + I2*sign_psi*iota - \
-                                             2*lp*sign_G*sign_psi*B20 - \
-                                             2*lp*sign_G*sign_psi*B2c - \
-                                             2*B0*sign_G*sign_psi*iota_N0*Z2s + \
-                                             B0*lp*sign_G*sign_psi*X20*curvature + \
-                                             B0*lp*sign_G*sign_psi*X2c*curvature + \
-                                             B0*lp*X1c*X1c*Y2s*\
-                                             curvature + \
-                                             B0*lp*sign_G*sign_psi*X1c*X1c*\
-                                             curvature*curvature - \
-                                             B0*sign_G*sign_psi*d_Z20_d_varphi - \
-                                             B0*sign_G*sign_psi*d_Z2c_d_varphi)) + \
-                                   Y1c*(4*lp*sign_G*sign_psi*B2s*\
-                                        Y1s - \
-                                        B0*(2*lp*X1c*X2s*\
-                                            Y1s*Y1s*curvature + \
-                                            lp*sign_G*sign_psi*X1c*\
-                                            (-Y20 + Y2c)*\
-                                            curvature + \
-                                            Y1s*\
-                                            (4*sign_G*sign_psi*iota_N0*Z2c + \
-                                             2*lp*sign_G*sign_psi*X2s*curvature + \
-                                             lp*X1c*X1c*Y20*\
-                                             curvature - \
-                                             lp*X1c*X1c*Y2c*\
-                                             curvature - \
-                                             2*sign_G*sign_psi*d_Z2s_d_varphi)))))/\
-                                             (lp*sign_psi)
+    # Element113
+    grad_grad_B_alt[:,0,0,2]= - ((B0**5*lprime*lprime*(2*G0 * (4*B2s*lprime*Y1c*Y1s + 2*B2c*lprime*(Y1c*Y1c - Y1s*Y1s) - \
+        2*B20*lprime*(Y1c*Y1c + Y1s*Y1s) + Y1c*Y1c*Z20*d_B0_d_varphi + Y1s*Y1s*Z20*d_B0_d_varphi - Y1c*Y1c*Z2c*d_B0_d_varphi + \
+        Y1s*Y1s*Z2c*d_B0_d_varphi - 2*Y1c*Y1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(Y1c*Y1c*(2*G2 + 2*I2*iota + 2*G0*X20*curvature - \
+        2*G0*X2c*curvature + G0*X1s*X1s*curvature*curvature) - 2*G0*Y1c*curvature*(2*X2s*Y1s + X1s*Y2s + X1c*(-Y20 + Y2c + \
+        X1s*Y1s*curvature)) + Y1s * (2*G0 * (X1s*(Y20 + Y2c) - X1c*Y2s) * curvature + Y1s*(2*G2 + 2*I2*iota + 2*G0*X20*curvature +\
+        2*G0*X2c*curvature + G0*X1c*X1c*curvature*curvature))) + 2*G0 * (Y1c*Y1c*(2*iota_N0*Z2s - d_Z20_d_varphi + d_Z2c_d_varphi) - \
+        Y1s*Y1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + 2*Y1c*Y1s*(-2*iota_N0*Z2c + d_Z2s_d_varphi)))))/(Bbar**2*G0*G0*G0*G0))
 
-    # Element 121
-    grad_grad_B_alt[:,0,1,0] =(-2*B0*(iota_N0*X1c*X1c*X1c*\
-                                      (Y1c*(Y20 - Y2c) + \
-                                       Y1s*(-Y2s + \
-                                            sign_G*sign_psi*curvature)) - \
-                                      X1c*X1c*(iota_N0*X2c*\
-                                               (-Y1c*Y1c + Y1s*Y1s) + \
-                                               iota_N0*X20*\
-                                               (Y1c*Y1c + Y1s*Y1s) + \
-                                               Y1s*(-2*iota_N0*X2s*\
-                                                    Y1c + \
-                                                    lp*(Y1c*\
-                                                        (-Y20 + Y2c) + \
-                                                        Y1s*\
-                                                        (Y2s - sign_G*sign_psi*curvature))*\
-                                                    torsion)) + \
-                                      sign_G*sign_psi*(X2s*Y1s*\
-                                                       (-2*lp*Y1c*torsion + \
-                                                        d_X1c_d_varphi) + \
-                                                       X20*(lp*Y1c*Y1c*\
-                                                            torsion + \
-                                                            lp*Y1s*Y1s*torsion - \
-                                                            Y1c*d_X1c_d_varphi) + \
-                                                       X2c*(-(lp*Y1c*Y1c*\
-                                                              torsion) + \
-                                                            lp*Y1s*Y1s*torsion + \
-                                                            Y1c*d_X1c_d_varphi)) + \
-                                      X1c*(3*sign_G*sign_psi*iota_N0*X2c*\
-                                           Y1s + \
-                                           lp*X2c*Y1c*Y1c*Y1s*\
-                                           torsion - \
-                                           lp*X2c*Y1s*Y1s*Y1s*\
-                                           torsion - \
-                                           lp*sign_G*sign_psi*Y1c*Y20*\
-                                           torsion + \
-                                           lp*sign_G*sign_psi*Y1c*Y2c*\
-                                           torsion + \
-                                           lp*sign_G*sign_psi*Y1s*Y2s*\
-                                           torsion - \
-                                           X20*Y1s*\
-                                           (-(sign_G*sign_psi*iota_N0) + \
-                                            lp*Y1c*Y1c*torsion + \
-                                            lp*Y1s*Y1s*torsion) + \
-                                           X2s*Y1c*\
-                                           (-3*sign_G*sign_psi*iota_N0 + \
-                                            2*lp*Y1s*Y1s*torsion) + \
-                                           sign_G*sign_psi*Y1c*d_X20_d_varphi - \
-                                           sign_G*sign_psi*Y1c*d_X2c_d_varphi - \
-                                           sign_G*sign_psi*Y1s*d_X2s_d_varphi)))/\
-                                           (lp*sign_psi)
+    # Element121
+    grad_grad_B_alt[:,0,1,0]= - ((B0**6*lprime*lprime*(-3*iota_N0*X1s*X1s*X1s*Y1c*curvature + 3*iota_N0*X1c*X1c*X1c*Y1s*curvature + \
+        3*X1s*X1s*curvature*(iota_N0*X1c*Y1s + Y1c * (lprime*Y1c*torsion - d_X1c_d_varphi)) + 3*X1c*X1c*Y1s*curvature*(lprime*Y1s*torsion -\
+        d_X1s_d_varphi) + 2 * (lprime * (-2*X2s*Y1c*Y1s + X2c*(-Y1c*Y1c + Y1s*Y1s) + X20 * (Y1c*Y1c + Y1s*Y1s)) * torsion + \
+        X2c*Y1c*d_X1c_d_varphi + X2s*Y1s*d_X1c_d_varphi + X2s*Y1c*d_X1s_d_varphi - X2c*Y1s*d_X1s_d_varphi - X20 * (Y1c*d_X1c_d_varphi + \
+        Y1s*d_X1s_d_varphi)) + X1s * (-2*iota_N0*X20*Y1c + 6*iota_N0*X2c*Y1c + 6*iota_N0*X2s*Y1s - 3*iota_N0*X1c*X1c*Y1c*curvature - \
+        2*lprime*Y1s*Y20*torsion - 2*lprime*Y1s*Y2c*torsion + 2*lprime*Y1c*Y2s*torsion - 6*lprime*X1c*Y1c*Y1s*curvature*torsion + \
+        3*X1c*Y1s*curvature*d_X1c_d_varphi + 3*X1c*Y1c*curvature*d_X1s_d_varphi + 2*Y1s*d_X20_d_varphi + 2*Y1s*d_X2c_d_varphi - \
+        2*Y1c*d_X2s_d_varphi) - 2*X1c * (3*iota_N0*X2s*Y1c - iota_N0*X20*Y1s - 3*iota_N0*X2c*Y1s + lprime*Y1c*Y20*torsion - \
+        lprime*Y1c*Y2c*torsion - lprime*Y1s*Y2s*torsion - Y1c*d_X20_d_varphi + Y1c*d_X2c_d_varphi + \
+        Y1s*d_X2s_d_varphi)))/(Bbar**2*G0*G0*G0))
 
-    # Element 122
-    grad_grad_B_alt[:,0,1,1] =(2*B0*(-(X1c*X1c*\
-                                       (Y1c*(Y20 - Y2c) + \
-                                        Y1s*(-Y2s + \
-                                             sign_G*sign_psi*curvature))*\
-                                       (iota_N0*Y1c - d_Y1s_d_varphi)) \
-                                     + X2s*(iota_N0*Y1c*Y1c*\
-                                            (sign_G*sign_psi - 2*X1c*Y1s) - \
-                                            sign_G*sign_psi*Y1s*\
-                                            (iota_N0*Y1s + \
-                                             d_Y1c_d_varphi) + \
-                                            Y1c*(-(sign_G*sign_psi) + \
-                                                 2*X1c*Y1s)*\
-                                            d_Y1s_d_varphi) + \
-                                     sign_G*sign_psi*(X20*\
-                                                      (Y1c*d_Y1c_d_varphi + \
-                                                       Y1s*d_Y1s_d_varphi) + \
-                                                      X2c*(-(Y1c*\
-                                                             (2*iota_N0*Y1s + \
-                                                              d_Y1c_d_varphi)) + \
-                                                           Y1s*d_Y1s_d_varphi)) + \
-                                     X1c*(-(X2c*\
-                                            (Y1c*Y1c - Y1s*Y1s)*\
-                                            (iota_N0*Y1c - \
-                                             d_Y1s_d_varphi)) + \
-                                          X20*(Y1c*Y1c + Y1s*Y1s)*\
-                                          (iota_N0*Y1c - d_Y1s_d_varphi) \
-                                          + sign_G*sign_psi*(Y1c*\
-                                                             (2*iota_N0*Y2s - \
-                                                              d_Y20_d_varphi + \
-                                                              d_Y2c_d_varphi) + \
-                                                             Y1s*\
-                                                             (-2*iota_N0*Y2c + \
-                                                              d_Y2s_d_varphi)))))/(lp*sign_psi)
+    # Element122
+    grad_grad_B_alt[:,0,1,1]=(B0**6*lprime*lprime*(-4*iota_N0*X1s*Y1c*Y2c - 4*iota_N0*X1c*Y1s*Y2c + 4*iota_N0*X1c*Y1c*Y2s - \
+        4*iota_N0*X1s*Y1s*Y2s + 3*iota_N0*X1c*X1s*Y1c*Y1c*curvature - 3*iota_N0*X1c*X1c*Y1c*Y1s*curvature + \
+        3*iota_N0*X1s*X1s*Y1c*Y1s*curvature - 3*iota_N0*X1c*X1s*Y1s*Y1s*curvature + 2*X20*Y1c*d_Y1c_d_varphi + \
+        3*X1s*X1s*Y1c*curvature*d_Y1c_d_varphi - 3*X1c*X1s*Y1s*curvature*d_Y1c_d_varphi - 2*X2c*Y1c*(2*iota_N0*Y1s + \
+        d_Y1c_d_varphi) + 2*X20*Y1s*d_Y1s_d_varphi + 2*X2c*Y1s*d_Y1s_d_varphi - 3*X1c*X1s*Y1c*curvature*d_Y1s_d_varphi + \
+        3*X1c*X1c*Y1s*curvature*d_Y1s_d_varphi + 2*X2s * (iota_N0*Y1c*Y1c - Y1s * (iota_N0*Y1s + d_Y1c_d_varphi) - \
+        Y1c*d_Y1s_d_varphi) - 2*X1c*Y1c*d_Y20_d_varphi - 2*X1s*Y1s*d_Y20_d_varphi + 2*X1c*Y1c*d_Y2c_d_varphi - 2*X1s*Y1s*d_Y2c_d_varphi +\
+        2*X1s*Y1c*d_Y2s_d_varphi + 2*X1c*Y1s*d_Y2s_d_varphi))/(Bbar**2*G0*G0*G0)
 
-    # Element 123
-    grad_grad_B_alt[:,0,1,2] =(2*X1c*(Y1c*\
-                                      (G2 + I2*iota - 2*lp*sign_G*B20 + \
-                                       2*lp*sign_G*B2c + \
-                                       2*B0*sign_G*iota_N0*Z2s + \
-                                       2*B0*lp*sign_G*X20*curvature - \
-                                       2*B0*lp*sign_G*X2c*curvature - \
-                                       B0*sign_G*d_Z20_d_varphi + \
-                                       B0*sign_G*d_Z2c_d_varphi) + \
-                                      sign_G*Y1s*(2*lp*B2s + \
-                                                  B0*(-2*iota_N0*Z2c - \
-                                                      2*lp*X2s*curvature + \
-                                                      d_Z2s_d_varphi))))/(lp)
+    # Element123
+    grad_grad_B_alt[:,0,1,2]=(2*B0**5*lprime*lprime*(G0 * (2*B2s*lprime*X1s*Y1c + 2*B2s*lprime*X1c*Y1s + 2*B2c*lprime*(X1c*Y1c - X1s*Y1s) -\
+        2*B20*lprime*(X1c*Y1c + X1s*Y1s) + X1c*Y1c*Z20*d_B0_d_varphi + X1s*Y1s*Z20*d_B0_d_varphi - X1c*Y1c*Z2c*d_B0_d_varphi +\
+        X1s*Y1s*Z2c*d_B0_d_varphi - X1s*Y1c*Z2s*d_B0_d_varphi - X1c*Y1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(X1c * (-2*G0*X2s*Y1s*curvature + \
+        Y1c*(G2 + I2*iota + 2*G0*X20*curvature - 2*G0*X2c*curvature)) + X1s * (-2*G0*X2s*Y1c*curvature + Y1s*(G2 + I2*iota + \
+        2*G0*X20*curvature + 2*G0*X2c*curvature))) - G0 * (X1s * (Y1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + \
+        Y1c*(2*iota_N0*Z2c - d_Z2s_d_varphi)) + X1c * (Y1c*(-2*iota_N0*Z2s + d_Z20_d_varphi - d_Z2c_d_varphi) + Y1s*(2*iota_N0*Z2c - \
+        d_Z2s_d_varphi))))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 131
-    grad_grad_B_alt[:,0,2,0] =(B0*(-(lp*sign_G*sign_psi*iota_N0*Y1c*Y1c*\
-                                     torsion) + \
-                                   lp*iota_N0*X1c*X1c*X1c*Y1s*\
-                                   torsion + \
-                                   X1c*X1c*(lp*lp*Y1s*Y1s*\
-                                            torsion*torsion + \
-                                            iota_N0*Y1s*d_Y1c_d_varphi - \
-                                            iota_N0*Y1c*d_Y1s_d_varphi) + \
-                                   sign_G*sign_psi*Y1c*\
-                                   (iota_N0*d_X1c_d_varphi + \
-                                    2*lp*torsion*d_Y1s_d_varphi) + \
-                                   X1c*Y1s*\
-                                   (2*lp*lp*sign_G*sign_psi*curvature*curvature - \
-                                    lp*lp*sign_G*sign_psi*torsion*torsion - \
-                                    iota_N0*Y1c*d_X1c_d_varphi + \
-                                    lp*torsion*\
-                                    (Y1s*d_Y1c_d_varphi - \
-                                     Y1c*d_Y1s_d_varphi)) - \
-                                   Y1s*(Y1s*\
-                                        (lp*sign_G*sign_psi*iota_N0*torsion + \
-                                         d_X1c_d_varphi*d_X1c_d_varphi) + \
-                                        sign_G*sign_psi*(2*lp*torsion*\
-                                                         d_Y1c_d_varphi - \
-                                                         d2_X1c_d_varphi2))))/(lp*lp*sign_G)
+    # Element131
+    grad_grad_B_alt[:,0,2,0]=(B0*B0*B0*B0*lprime*(2*Bbar*sG*d_B0_d_varphi*(iota_N0*X1c*Y1c + iota_N0*X1s*Y1s + Y1s*d_X1c_d_varphi - \
+    Y1c*d_X1s_d_varphi) + Bbar*sG*B0*lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s + \
+    X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi) + B0**2 * (lprime*lprime*curvature*(-2*X2c*Y1c*Y1c -\
+    4*X2s*Y1c*Y1s + 2*X2c*Y1s*Y1s + 2*X20*(Y1c*Y1c + Y1s*Y1s) - 2*X1c*Y1c*Y20 - 2*X1s*Y1s*Y20 + 2*X1c*Y1c*Y2c - 2*X1s*Y1s*Y2c + \
+    2*X1s*Y1c*Y2s + 2*X1c*Y1s*Y2s + 3*X1s*X1s*Y1c*Y1c*curvature - 6*X1c*X1s*Y1c*Y1s*curvature + 3*X1c*X1c*Y1s*Y1s*curvature) - \
+    Y1s*Y1s*d_X1c_d_varphi*d_X1c_d_varphi + iota_N0*X1c*Y1c*Y1c*d_X1s_d_varphi + iota_N0*X1c*Y1s*Y1s*d_X1s_d_varphi + \
+    2*Y1c*Y1s*d_X1c_d_varphi*d_X1s_d_varphi - Y1c*Y1c*d_X1s_d_varphi**2 + iota_N0*X1c*X1c*Y1s*d_Y1c_d_varphi - \
+    X1c*Y1s*d_X1s_d_varphi*d_Y1c_d_varphi - iota_N0*X1c*X1c*Y1c*d_Y1s_d_varphi + X1c*Y1c*d_X1s_d_varphi*d_Y1s_d_varphi + \
+    iota_N0*X1s*X1s*(Y1s*d_Y1c_d_varphi - Y1c*d_Y1s_d_varphi) + X1c*Y1s*Y1s*d2_X1c_d_varphi2 - X1s * (Y1s*d_X1c_d_varphi*(iota_N0*Y1s - \
+    d_Y1c_d_varphi) + Y1c * (d_X1c_d_varphi*d_Y1s_d_varphi + Y1s*d2_X1c_d_varphi2) + Y1c*Y1c*(iota_N0*d_X1c_d_varphi - \
+    d2_X1s_d_varphi2)) - X1c*Y1c*Y1s*d2_X1s_d_varphi2)))/(Bbar**2*G0*G0*G0)
 
-    # Element 132
-    grad_grad_B_alt[:,0,2,1] =(B0*(-(iota_N0*Y1c*Y1c*Y1s*\
-                                     d_X1c_d_varphi) + \
-                                   lp*X1c*X1c*Y1s*torsion*\
-                                   (iota_N0*Y1c - d_Y1s_d_varphi) + \
-                                   X1c*(-(iota_N0*Y1c*Y1c*\
-                                          d_Y1s_d_varphi) + \
-                                        Y1c*(lp*sign_G*sign_psi*iota_N0*\
-                                             torsion + \
-                                             iota_N0*Y1s*\
-                                             d_Y1c_d_varphi + \
-                                             d_Y1s_d_varphi*d_Y1s_d_varphi) - \
-                                        Y1s*(lp*Y1s*torsion*\
-                                             d_X1c_d_varphi + \
-                                             d_Y1c_d_varphi*\
-                                             d_Y1s_d_varphi - \
-                                             lp*sign_G*sign_psi*d_torsion_d_varphi)) + \
-                                   Y1s*(-(iota_N0*Y1s*Y1s*\
-                                          d_X1c_d_varphi) - \
-                                        Y1s*d_X1c_d_varphi*\
-                                        d_Y1c_d_varphi + \
-                                        sign_G*sign_psi*(2*lp*torsion*\
-                                                         d_X1c_d_varphi + \
-                                                         iota_N0*d_Y1s_d_varphi + \
-                                                         d2_Y1c_d_varphi2)) + \
-                                   Y1c*(sign_G*sign_psi*iota_N0*\
-                                        d_Y1c_d_varphi + \
-                                        Y1s*d_X1c_d_varphi*\
-                                        d_Y1s_d_varphi - \
-                                        sign_G*sign_psi*d2_Y1s_d_varphi2)))/\
-                                        (lp*lp*sign_G)
+    # Element132
+    grad_grad_B_alt[:,0,2,1]=(B0*B0*B0*B0*lprime*(Bbar*sG*d_B0_d_varphi*(2*iota_N0*Y1c*Y1c + Y1s * (2*iota_N0*Y1s + \
+        lprime*X1c*torsion + 2*d_Y1c_d_varphi) - Y1c * (lprime*X1s*torsion + 2*d_Y1s_d_varphi)) + \
+        Bbar*sG*B0*lprime*(torsion * (Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) + X1s * (2*iota_N0*Y1s*torsion + \
+        torsion*d_Y1c_d_varphi - Y1c*d_torsion_d_varphi) + X1c * (2*iota_N0*Y1c*torsion - torsion*d_Y1s_d_varphi + \
+        Y1s*d_torsion_d_varphi)) + B0**2 * (iota_N0*Y1c*Y1c*Y1c*d_X1s_d_varphi + Y1s * (-(iota_N0*Y1s*Y1s*d_X1c_d_varphi) + \
+        d_Y1c_d_varphi*(X1s*d_Y1c_d_varphi - X1c*d_Y1s_d_varphi) + Y1s * (iota_N0*X1s*d_Y1c_d_varphi - d_X1c_d_varphi*d_Y1c_d_varphi + \
+        X1c*(iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2))) + Y1c * (iota_N0*Y1s*Y1s*d_X1s_d_varphi + d_Y1s_d_varphi*(-(X1s*d_Y1c_d_varphi) +\
+        X1c*d_Y1s_d_varphi) + Y1s * (d_X1s_d_varphi*d_Y1c_d_varphi - 2*iota_N0*X1s*d_Y1s_d_varphi + d_X1c_d_varphi*d_Y1s_d_varphi - \
+        X1s*d2_Y1c_d_varphi2 + X1c*(2*iota_N0*d_Y1c_d_varphi - d2_Y1s_d_varphi2))) - Y1c*Y1c * (iota_N0*Y1s*d_X1c_d_varphi + (iota_N0*X1c + \
+        d_X1s_d_varphi) * d_Y1s_d_varphi + X1s * (iota_N0*d_Y1c_d_varphi - d2_Y1s_d_varphi2)))))/(Bbar**2*G0*G0*G0)
 
-    # Element 133
-    grad_grad_B_alt[:,0,2,2] =-((B0*(Y1s*curvature*\
-                                     d_X1c_d_varphi + \
-                                     X1c*(iota_N0*Y1c*\
-                                          curvature - \
-                                          Y1s*d_curvature_d_varphi)))/\
-                                (lp*sign_psi))
+    # Element133
+    grad_grad_B_alt[:,0,2,2]=(B0**5*lprime*lprime*((-4*X2s*Y1c*Y1s - 2*X2c * (Y1c*Y1c - Y1s*Y1s) + 2*X20 * (Y1c*Y1c + Y1s*Y1s) - \
+        2*X1c*Y1c*Y20 - 2*X1s*Y1s*Y20 + 2*X1c*Y1c*Y2c - 2*X1s*Y1s*Y2c + 2*X1s*Y1c*Y2s + 2*X1c*Y1s*Y2s + 3*X1s*X1s*Y1c*Y1c*curvature - \
+        6*X1c*X1s*Y1c*Y1s*curvature + 3*X1c*X1c*Y1s*Y1s*curvature) * d_B0_d_varphi - Bbar*sG * (curvature*(Y1s*d_X1c_d_varphi - \
+        Y1c*d_X1s_d_varphi) + X1s * (iota_N0*Y1s*curvature + Y1c*d_curvature_d_varphi) + X1c * (iota_N0*Y1c*curvature - \
+        Y1s*d_curvature_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 211
-    grad_grad_B_alt[:,1,0,0] =(-2*B0*X1c*(2*sign_G*sign_psi*iota_N0*X2c*\
-                                          Y1s + iota_N0*X1c*X1c*\
-                                          (Y1c*(Y20 - Y2c) + \
-                                           sign_G*sign_psi*Y1s*curvature) - \
-                                          X20*Y1c*Y1s*\
-                                          d_X1c_d_varphi + \
-                                          X2c*Y1c*Y1s*\
-                                          d_X1c_d_varphi - \
-                                          sign_G*sign_psi*Y20*d_X1c_d_varphi + \
-                                          sign_G*sign_psi*Y2c*d_X1c_d_varphi + \
-                                          X2s*(Y1c*\
-                                               (-2*sign_G*sign_psi*iota_N0 + \
-                                                iota_N0*X1c*Y1s) + \
-                                               Y1s*Y1s*d_X1c_d_varphi) + \
-                                          X1c*(-(iota_N0*X20*\
-                                                 Y1c*Y1c) + \
-                                               iota_N0*X2c*Y1c*Y1c - \
-                                               sign_G*sign_psi*iota_N0*Y2s + \
-                                               lp*sign_G*sign_psi*Y1s*Y1s*curvature*\
-                                               torsion + \
-                                               Y1s*Y20*\
-                                               d_X1c_d_varphi - \
-                                               Y1s*Y2c*\
-                                               d_X1c_d_varphi) + \
-                                          sign_G*sign_psi*Y1c*d_X20_d_varphi - \
-                                          sign_G*sign_psi*Y1c*d_X2c_d_varphi - \
-                                          sign_G*sign_psi*Y1s*d_X2s_d_varphi))/\
-                                          (lp*sign_psi)
+    # Element211
+    grad_grad_B_alt[:,1,0,0]=(-2*B0**6*lprime*lprime*(-(iota_N0*X1s*X1s*X1s*Y1c*curvature) + X1s*X1s * (iota_N0*Y2s + curvature*(iota_N0*X1c*Y1s + \
+        lprime*Y1c*Y1c*torsion - Y1c*d_X1c_d_varphi)) + X1s * (2*iota_N0*X2c*Y1c + 2*iota_N0*X2s*Y1s + 2*iota_N0*X1c*Y2c - \
+        iota_N0*X1c*X1c*Y1c*curvature - 2*lprime*X1c*Y1c*Y1s*curvature*torsion + Y2s*d_X1c_d_varphi + X1c*Y1s*curvature*d_X1c_d_varphi - \
+        Y20*d_X1s_d_varphi - Y2c*d_X1s_d_varphi + X1c*Y1c*curvature*d_X1s_d_varphi + Y1s*d_X20_d_varphi + Y1s*d_X2c_d_varphi - \
+        Y1c*d_X2s_d_varphi) + X1c * (-2*iota_N0*X2s*Y1c + 2*iota_N0*X2c*Y1s - iota_N0*X1c*Y2s + iota_N0*X1c*X1c*Y1s*curvature + \
+        lprime*X1c*Y1s*Y1s*curvature*torsion - Y20*d_X1c_d_varphi + Y2c*d_X1c_d_varphi + Y2s*d_X1s_d_varphi - X1c*Y1s*curvature*d_X1s_d_varphi +\
+        Y1c*d_X20_d_varphi - Y1c*d_X2c_d_varphi - Y1s*d_X2s_d_varphi)))/(Bbar**2*G0*G0*G0)
 
-    # Element 212
-    grad_grad_B_alt[:,1,0,1] =(-2*B0*X1c*(iota_N0*X2s*\
-                                          Y1c*Y1c*Y1s + \
-                                          iota_N0*X2s*Y1s*Y1s*Y1s + \
-                                          iota_N0*X1c*Y1c*Y1c*\
-                                          Y20 - sign_G*sign_psi*iota_N0*Y1s*\
-                                          Y20 + iota_N0*X1c*\
-                                          Y1s*Y1s*Y20 - \
-                                          iota_N0*X1c*Y1c*Y1c*\
-                                          Y2c + 3*sign_G*sign_psi*iota_N0*Y1s*\
-                                          Y2c - iota_N0*X1c*\
-                                          Y1s*Y1s*Y2c - \
-                                          3*sign_G*sign_psi*iota_N0*Y1c*Y2s + \
-                                          sign_G*sign_psi*iota_N0*X1c*Y1c*\
-                                          Y1s*curvature - \
-                                          lp*sign_G*sign_psi*X2s*Y1s*\
-                                          torsion + \
-                                          lp*X1c*X2s*Y1s*Y1s*\
-                                          torsion - \
-                                          lp*sign_G*sign_psi*X1c*Y20*\
-                                          torsion + \
-                                          lp*X1c*X1c*Y1s*Y20*\
-                                          torsion + \
-                                          lp*sign_G*sign_psi*X1c*Y2c*\
-                                          torsion - \
-                                          lp*X1c*X1c*Y1s*Y2c*\
-                                          torsion + \
-                                          X2s*Y1s*Y1s*\
-                                          d_Y1c_d_varphi - \
-                                          sign_G*sign_psi*Y20*d_Y1c_d_varphi + \
-                                          X1c*Y1s*Y20*\
-                                          d_Y1c_d_varphi + \
-                                          sign_G*sign_psi*Y2c*d_Y1c_d_varphi - \
-                                          X1c*Y1s*Y2c*\
-                                          d_Y1c_d_varphi - \
-                                          X2s*Y1c*Y1s*\
-                                          d_Y1s_d_varphi - \
-                                          X1c*Y1c*Y20*\
-                                          d_Y1s_d_varphi + \
-                                          X1c*Y1c*Y2c*\
-                                          d_Y1s_d_varphi + \
-                                          sign_G*sign_psi*Y2s*d_Y1s_d_varphi - \
-                                          sign_G*sign_psi*X1c*Y1s*\
-                                          curvature*d_Y1s_d_varphi - \
-                                          X20*Y1c*\
-                                          (iota_N0*Y1c*Y1c + iota_N0*Y1s*Y1s - \
-                                           lp*sign_G*sign_psi*torsion + \
-                                           Y1s*(lp*X1c*torsion + \
-                                                d_Y1c_d_varphi) - \
-                                           Y1c*d_Y1s_d_varphi) + \
-                                          X2c*Y1c*\
-                                          (iota_N0*Y1c*Y1c + iota_N0*Y1s*Y1s - \
-                                           lp*sign_G*sign_psi*torsion + \
-                                           Y1s*(lp*X1c*torsion + \
-                                                d_Y1c_d_varphi) - \
-                                           Y1c*d_Y1s_d_varphi) + \
-                                          sign_G*sign_psi*Y1c*d_Y20_d_varphi - \
-                                          sign_G*sign_psi*Y1c*d_Y2c_d_varphi - \
-                                          sign_G*sign_psi*Y1s*d_Y2s_d_varphi))/\
-                                          (lp*sign_psi)
+    # Element212
+    grad_grad_B_alt[:,1,0,1]=(2*B0**6*lprime*lprime*(X1s*X1s * (lprime*(Y20 + Y2c) * torsion + Y1c*curvature*(iota_N0*Y1s + d_Y1c_d_varphi)) - \
+        X1s * (-(iota_N0*X1c*Y1c*Y1c*curvature) + iota_N0*X1c*Y1s*Y1s*curvature + 2*lprime*X1c*Y2s*torsion + Y2s*d_Y1c_d_varphi -\
+        Y20*d_Y1s_d_varphi - Y2c*d_Y1s_d_varphi + Y1s * (3*iota_N0*Y2s + lprime * (X20 + X2c) * torsion + X1c*curvature*d_Y1c_d_varphi +\
+        d_Y20_d_varphi + d_Y2c_d_varphi) + Y1c * (iota_N0*Y20 + 3*iota_N0*Y2c - lprime*X2s*torsion + X1c*curvature*d_Y1s_d_varphi - \
+        d_Y2s_d_varphi)) + X1c * (lprime*X1c*Y20*torsion - lprime*X1c*Y2c*torsion + Y20*d_Y1c_d_varphi - Y2c*d_Y1c_d_varphi - \
+        Y2s*d_Y1s_d_varphi + Y1c * (3*iota_N0*Y2s + lprime * (-X20 + X2c) * torsion - d_Y20_d_varphi + d_Y2c_d_varphi) + \
+        Y1s * (iota_N0*Y20 - 3*iota_N0*Y2c - iota_N0*X1c*Y1c*curvature + lprime*X2s*torsion + X1c*curvature*d_Y1s_d_varphi +\
+        d_Y2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 213
-    grad_grad_B_alt[:,1,0,2] =(2*X1c*(2*lp*sign_G*sign_psi*B2s*\
-                                      Y1s + Y1c*\
-                                      (G2*sign_psi + I2*sign_psi*iota - \
-                                       2*lp*sign_G*sign_psi*B20 + \
-                                       2*lp*sign_G*sign_psi*B2c + \
-                                       2*B0*sign_G*sign_psi*iota_N0*Z2s + \
-                                       B0*lp*sign_G*sign_psi*X20*curvature - \
-                                       B0*lp*sign_G*sign_psi*X2c*curvature + \
-                                       B0*lp*X1c*X20*Y1s*\
-                                       curvature - \
-                                       B0*lp*X1c*X2c*Y1s*\
-                                       curvature - \
-                                       B0*sign_G*sign_psi*d_Z20_d_varphi + \
-                                       B0*sign_G*sign_psi*d_Z2c_d_varphi) - \
-                                      B0*(lp*X1c*X2s*Y1s*Y1s*\
-                                          curvature + \
-                                          lp*sign_G*sign_psi*X1c*\
-                                          (-Y20 + Y2c)*\
-                                          curvature + \
-                                          Y1s*(2*sign_G*sign_psi*iota_N0*Z2c + \
-                                               lp*sign_G*sign_psi*X2s*curvature + \
-                                               lp*X1c*X1c*Y20*\
-                                               curvature - \
-                                               lp*X1c*X1c*Y2c*\
-                                               curvature - \
-                                               sign_G*sign_psi*d_Z2s_d_varphi))))/\
-                                               (lp*sign_psi)
+    # Element213
+    grad_grad_B_alt[:,1,0,2]=(2*B0**5*lprime*lprime*(G0 * (2*B2s*lprime*X1s*Y1c + 2*B2s*lprime*X1c*Y1s + 2*B2c*lprime*(X1c*Y1c - X1s*Y1s) - \
+        2*B20*lprime*(X1c*Y1c + X1s*Y1s) + X1c*Y1c*Z20*d_B0_d_varphi + X1s*Y1s*Z20*d_B0_d_varphi - X1c*Y1c*Z2c*d_B0_d_varphi +\
+        X1s*Y1s*Z2c*d_B0_d_varphi - X1s*Y1c*Z2s*d_B0_d_varphi - X1c*Y1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(G0*X1c*X1c * (Y20 - \
+        Y2c) * curvature + X1c * (-(G0*(X2s*Y1s + 2*X1s*Y2s) * curvature) + Y1c*(G2 + I2*iota + G0*X20*curvature - G0*X2c*curvature)) + \
+        X1s * (G0*(-(X2s*Y1c) + X1s * (Y20 + Y2c)) * curvature + Y1s*(G2 + I2*iota + G0*X20*curvature + G0*X2c*curvature))) - \
+        G0 * (X1s * (Y1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + Y1c*(2*iota_N0*Z2c - d_Z2s_d_varphi)) + \
+        X1c * (Y1c*(-2*iota_N0*Z2s + d_Z20_d_varphi - d_Z2c_d_varphi) + Y1s*(2*iota_N0*Z2c - \
+        d_Z2s_d_varphi))))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 221
-    grad_grad_B_alt[:,1,1,0] =(2*B0*X1c*(iota_N0*X1c*X1c*X1c*\
-                                         (Y20 - Y2c) + \
-                                         X1c*X1c*(-(iota_N0*X20*\
-                                                    Y1c) + \
-                                                  iota_N0*X2c*Y1c + \
-                                                  Y1s*(iota_N0*X2s + \
-                                                       lp*(Y20 - Y2c)*\
-                                                       torsion)) - \
-                                         sign_G*sign_psi*(lp*X2s*Y1s*\
-                                                          torsion + \
-                                                          X2c*(lp*Y1c*\
-                                                               torsion - d_X1c_d_varphi) + \
-                                                          X20*(-(lp*Y1c*\
-                                                                 torsion) + d_X1c_d_varphi)) \
-                                         + X1c*(-(lp*X20*Y1c*\
-                                                  Y1s*torsion) + \
-                                                lp*X2c*Y1c*Y1s*\
-                                                torsion - \
-                                                lp*sign_G*sign_psi*Y20*torsion + \
-                                                lp*sign_G*sign_psi*Y2c*torsion + \
-                                                X2s*(-3*sign_G*sign_psi*iota_N0 + \
-                                                     lp*Y1s*Y1s*torsion) + \
-                                                sign_G*sign_psi*d_X20_d_varphi - \
-                                                sign_G*sign_psi*d_X2c_d_varphi)))/\
-                                                (lp*sign_psi)
+    # Element221
+    grad_grad_B_alt[:,1,1,0]=(-2*B0**6*lprime*lprime*(X1c*X1c * (3*iota_N0*X2s + lprime * (Y20 - Y2c) * torsion - d_X20_d_varphi + \
+        d_X2c_d_varphi) + X1s * (lprime*(X2s*Y1c - (X20 + X2c) * Y1s) * torsion - X2s*d_X1c_d_varphi + X20*d_X1s_d_varphi + \
+        X2c*d_X1s_d_varphi - X1s * (3*iota_N0*X2s - lprime * (Y20 + Y2c) * torsion + d_X20_d_varphi + d_X2c_d_varphi)) + \
+        X1c * (lprime*(-(X20*Y1c) + X2c*Y1c + X2s*Y1s) * torsion + X20*d_X1c_d_varphi - X2c*d_X1c_d_varphi - X2s*d_X1s_d_varphi - \
+        2*X1s * (3*iota_N0*X2c + lprime*Y2s*torsion - d_X2s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 222
-    grad_grad_B_alt[:,1,1,1] =(-2*B0*X1c*(sign_G*sign_psi*\
-                                          (X20 - X2c)*\
-                                          (iota_N0*Y1s + d_Y1c_d_varphi) + \
-                                          X2s*(sign_G*sign_psi - \
-                                               X1c*Y1s)*\
-                                          (iota_N0*Y1c - d_Y1s_d_varphi) - \
-                                          X1c*X1c*(Y20 - Y2c)*\
-                                          (iota_N0*Y1c - d_Y1s_d_varphi) + \
-                                          X1c*(X20*Y1c*\
-                                               (iota_N0*Y1c - d_Y1s_d_varphi) \
-                                               + X2c*Y1c*\
-                                               (-(iota_N0*Y1c) + \
-                                                d_Y1s_d_varphi) + \
-                                               sign_G*sign_psi*(2*iota_N0*Y2s - \
-                                                                d_Y20_d_varphi + \
-                                                                d_Y2c_d_varphi))))/(lp*sign_psi)
+    # Element222
+    grad_grad_B_alt[:,1,1,1]=(2*B0**6*lprime*lprime*(X1s*X1s * (2*iota_N0*Y2s + d_Y20_d_varphi + d_Y2c_d_varphi) + \
+        X1c * (iota_N0*X2c*Y1s - 2*iota_N0*X1c*Y2s + X2c*d_Y1c_d_varphi - X20 * (iota_N0*Y1s + d_Y1c_d_varphi) + \
+        X2s * (-(iota_N0*Y1c) + d_Y1s_d_varphi) + X1c*d_Y20_d_varphi - X1c*d_Y2c_d_varphi) + X1s * (iota_N0*X2s*Y1s + \
+        4*iota_N0*X1c*Y2c + X2s*d_Y1c_d_varphi + X20 * (iota_N0*Y1c - d_Y1s_d_varphi) + X2c * (iota_N0*Y1c - d_Y1s_d_varphi) - \
+        2*X1c*d_Y2s_d_varphi)))/(Bbar**2*G0*G0*G0)
 
-    # Element 223
-    grad_grad_B_alt[:,1,1,2] =(-2*X1c*X1c*(G2 + I2*iota - 2*lp*sign_G*B20 + \
-                                           2*lp*sign_G*B2c + 2*B0*sign_G*iota_N0*Z2s + \
-                                           2*B0*lp*sign_G*X20*curvature - \
-                                           2*B0*lp*sign_G*X2c*curvature - \
-                                           B0*sign_G*d_Z20_d_varphi + \
-                                           B0*sign_G*d_Z2c_d_varphi))/(lp)
+    # Element223
+    grad_grad_B_alt[:,1,1,2]=(-2*B0**5*lprime*lprime*(G0 * (4*B2s*lprime*X1c*X1s + 2*B2c*lprime*(X1c*X1c - X1s*X1s) - \
+        2*B20*lprime*(X1c*X1c + X1s*X1s) + X1c*X1c*Z20*d_B0_d_varphi + X1s*X1s*Z20*d_B0_d_varphi - X1c*X1c*Z2c*d_B0_d_varphi + \
+        X1s*X1s*Z2c*d_B0_d_varphi - 2*X1c*X1s*Z2s*d_B0_d_varphi) + B0 * (lprime*(-4*G0*X1c*X1s*X2s*curvature + X1c*X1c*(G2 + \
+        I2*iota + 2*G0*X20*curvature - 2*G0*X2c*curvature) + X1s*X1s*(G2 + I2*iota + 2*G0*X20*curvature + 2*G0*X2c*curvature)) + \
+        G0 * (X1c*X1c*(2*iota_N0*Z2s - d_Z20_d_varphi + d_Z2c_d_varphi) - X1s*X1s*(2*iota_N0*Z2s + d_Z20_d_varphi + d_Z2c_d_varphi) + \
+        2*X1c*X1s*(-2*iota_N0*Z2c + d_Z2s_d_varphi)))))/(Bbar**2*G0*G0*G0*G0)
 
-    # Element 231
-    grad_grad_B_alt[:,1,2,0] =(B0*X1c*(lp*iota_N0*Y1c*\
-                                       (sign_G*sign_psi + X1c*Y1s)*\
-                                       torsion + \
-                                       (-(sign_G*sign_psi*iota_N0) + \
-                                        lp*Y1s*Y1s*torsion)*\
-                                       d_X1c_d_varphi + \
-                                       iota_N0*X1c*X1c*d_Y1s_d_varphi - \
-                                       2*lp*sign_G*sign_psi*torsion*\
-                                       d_Y1s_d_varphi + \
-                                       lp*X1c*Y1s*torsion*\
-                                       d_Y1s_d_varphi - \
-                                       lp*sign_G*sign_psi*Y1s*d_torsion_d_varphi))/\
-                                       (lp*lp*sign_G)
+    # Element231
+    grad_grad_B_alt[:,1,2,0]=(B0*B0*B0*B0*lprime*(-(Bbar*sG*d_B0_d_varphi*(2*iota_N0*X1c*X1c + X1s * (2*iota_N0*X1s - \
+        lprime*Y1c*torsion + 2*d_X1c_d_varphi) + X1c * (lprime*Y1s*torsion - 2*d_X1s_d_varphi))) + \
+        Bbar*sG*B0*lprime*(torsion * (Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) + X1s * (2*iota_N0*Y1s*torsion + \
+        torsion*d_Y1c_d_varphi + Y1c*d_torsion_d_varphi) + X1c * (2*iota_N0*Y1c*torsion - torsion*d_Y1s_d_varphi - \
+        Y1s*d_torsion_d_varphi)) + B0**2 * (2*lprime*lprime*(X1c*X1c * (Y20 - Y2c) + X1s * (X2s*Y1c - X20*Y1s - X2c*Y1s + \
+        X1s*Y20 + X1s*Y2c) + X1c * (-(X20*Y1c) + X2c*Y1c + X2s*Y1s - 2*X1s*Y2s)) * curvature + iota_N0*X1c*X1c*X1c*d_Y1s_d_varphi + \
+        X1s * (d_X1c_d_varphi*(Y1s*d_X1c_d_varphi - Y1c*d_X1s_d_varphi) - iota_N0*X1s*X1s*d_Y1c_d_varphi + \
+        X1s * (iota_N0*Y1s*d_X1c_d_varphi - d_X1c_d_varphi*d_Y1c_d_varphi + Y1c*(iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2))) + \
+        X1c * (d_X1s_d_varphi*(-(Y1s*d_X1c_d_varphi) + Y1c*d_X1s_d_varphi) + iota_N0*X1s*X1s*d_Y1s_d_varphi + \
+        X1s * (d_X1s_d_varphi*d_Y1c_d_varphi + d_X1c_d_varphi*d_Y1s_d_varphi - Y1s*(2*iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2) +\
+        Y1c*(2*iota_N0*d_X1c_d_varphi - d2_X1s_d_varphi2))) - X1c*X1c * (iota_N0*Y1c*d_X1s_d_varphi + iota_N0*X1s*d_Y1c_d_varphi + \
+        d_X1s_d_varphi*d_Y1s_d_varphi + Y1s * (iota_N0*d_X1c_d_varphi - d2_X1s_d_varphi2)))))/(Bbar**2*G0*G0*G0)
 
-    # Element 232
-    grad_grad_B_alt[:,1,2,1] =(B0*X1c*(lp*iota_N0*Y1c*Y1c*\
-                                       Y1s*torsion + \
-                                       lp*iota_N0*Y1s*Y1s*Y1s*torsion - \
-                                       lp*lp*sign_G*sign_psi*Y1s*torsion*torsion - \
-                                       sign_G*sign_psi*iota_N0*d_Y1c_d_varphi + \
-                                       lp*Y1s*Y1s*torsion*\
-                                       d_Y1c_d_varphi - \
-                                       lp*Y1c*Y1s*torsion*\
-                                       d_Y1s_d_varphi + \
-                                       X1c*(-(lp*sign_G*sign_psi*iota_N0*\
-                                              torsion) + \
-                                            lp*lp*Y1s*Y1s*torsion*torsion + \
-                                            (iota_N0*Y1c - d_Y1s_d_varphi)*\
-                                            d_Y1s_d_varphi) + \
-                                       sign_G*sign_psi*d2_Y1s_d_varphi2))/(lp*lp*sign_G)
+    # Element232
+    grad_grad_B_alt[:,1,2,1]= - ((B0*B0*B0*B0*lprime*(2*Bbar*sG*d_B0_d_varphi*(X1s * (iota_N0*Y1s + d_Y1c_d_varphi) + X1c * (iota_N0*Y1c -\
+        d_Y1s_d_varphi)) + Bbar*sG*B0*lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s + \
+        X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi) + B0**2 * (X1s*X1s*(iota_N0*Y1s*d_Y1c_d_varphi + \
+        d_Y1c_d_varphi**2 - Y1c*(iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2)) + X1c * (iota_N0*Y1c*Y1c*d_X1s_d_varphi + \
+        iota_N0*Y1s*Y1s*d_X1s_d_varphi - Y1c*(iota_N0*X1c + d_X1s_d_varphi) * d_Y1s_d_varphi + X1c*d_Y1s_d_varphi*d_Y1s_d_varphi + \
+        Y1s*(iota_N0*X1c*d_Y1c_d_varphi + d_X1s_d_varphi*d_Y1c_d_varphi - X1c*d2_Y1s_d_varphi2)) + X1s * (-(iota_N0*Y1c*Y1c*d_X1c_d_varphi) -\
+        iota_N0*Y1s*Y1s*d_X1c_d_varphi - 2*X1c*d_Y1c_d_varphi*d_Y1s_d_varphi + Y1s*(-(d_X1c_d_varphi*d_Y1c_d_varphi) + \
+        X1c*d2_Y1c_d_varphi2) + Y1c*(d_X1c_d_varphi*d_Y1s_d_varphi + X1c*d2_Y1s_d_varphi2)))))/(Bbar**2*G0*G0*G0))
 
-    # Element 233
-    grad_grad_B_alt[:,1,2,2] =(B0*X1c*curvature*\
-                               (iota_N0*X1c + \
-                                2*lp*Y1s*torsion))/(lp*sign_psi)
+    # Element233
+    grad_grad_B_alt[:,1,2,2]=(B0**5*lprime*lprime*(2 * (X1c*X1c * (Y20 - Y2c) + X1s * (X2s*Y1c - X20*Y1s - X2c*Y1s + X1s*Y20 + X1s*Y2c) + \
+        X1c * (-(X20*Y1c) + X2c*Y1c + X2s*Y1s - 2*X1s*Y2s)) * d_B0_d_varphi + Bbar*sG*curvature*(iota_N0*X1c*X1c + X1s * (iota_N0*X1s - \
+        2*lprime*Y1c*torsion + d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - d_X1s_d_varphi))))/(Bbar**2*G0*G0*G0)
 
-    # Element 311
-    grad_grad_B_alt[:,2,0,0] =(B0*(2*lp*lp*sign_G*sign_psi*curvature*curvature + \
-                                   lp*iota_N0*X1c*X1c*torsion - \
-                                   lp*iota_N0*Y1c*Y1c*torsion - \
-                                   lp*iota_N0*Y1s*Y1s*torsion + \
-                                   iota_N0*Y1c*d_X1c_d_varphi + \
-                                   iota_N0*X1c*d_Y1c_d_varphi - \
-                                   lp*Y1s*torsion*\
-                                   d_Y1c_d_varphi + \
-                                   lp*Y1c*torsion*\
-                                   d_Y1s_d_varphi + \
-                                   d_X1c_d_varphi*d_Y1s_d_varphi + \
-                                   Y1s*d2_X1c_d_varphi2))/\
-                                   (lp*lp*sign_psi)
+    # Element311
+    grad_grad_B_alt[:,2,0,0]=(sG*B0*B0*B0*B0*lprime*(3*d_B0_d_varphi*(iota_N0*X1c*Y1c + iota_N0*X1s*Y1s + Y1s*d_X1c_d_varphi - \
+        Y1c*d_X1s_d_varphi) + B0 * ((2*Bbar*sG*lprime*lprime*curvature*curvature)/B0 + iota_N0*Y1c*d_X1c_d_varphi + iota_N0*Y1s*d_X1s_d_varphi +\
+        iota_N0*X1c*d_Y1c_d_varphi - d_X1s_d_varphi*d_Y1c_d_varphi + iota_N0*X1s*d_Y1s_d_varphi + d_X1c_d_varphi*d_Y1s_d_varphi +\
+        lprime*torsion*(iota_N0*X1c*X1c + iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s + X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi -\
+        Y1s*d_Y1c_d_varphi + Y1c*d_Y1s_d_varphi) + Y1s*d2_X1c_d_varphi2 - Y1c*d2_X1s_d_varphi2)))/(Bbar*G0*G0*G0)
 
-    # Element 312
-    grad_grad_B_alt[:,2,0,1] =(B0*(lp*X1c*(2*iota_N0*Y1c*\
-                                           torsion + \
-                                           Y1s*d_torsion_d_varphi) + \
-                                   Y1s*(2*lp*torsion*\
-                                        d_X1c_d_varphi + \
-                                        2*iota_N0*d_Y1s_d_varphi + \
-                                        d2_Y1c_d_varphi2) + \
-                                   Y1c*(2*iota_N0*d_Y1c_d_varphi - \
-                                        d2_Y1s_d_varphi2)))/(lp*lp*sign_psi)
+    # Element312
+    grad_grad_B_alt[:,2,0,1]=(sG*B0*B0*B0*B0*lprime*(d_B0_d_varphi*(3*iota_N0*Y1c*Y1c + Y1s * (3*iota_N0*Y1s + 2*lprime*X1c*torsion + \
+        3*d_Y1c_d_varphi) - Y1c * (2*lprime*X1s*torsion + 3*d_Y1s_d_varphi)) + B0 * (lprime*(2*iota_N0*X1s*Y1s*torsion + \
+        2*Y1s*torsion*d_X1c_d_varphi - 2*Y1c*torsion*d_X1s_d_varphi - X1s*Y1c*d_torsion_d_varphi + X1c * (2*iota_N0*Y1c*torsion + \
+        Y1s*d_torsion_d_varphi)) + Y1s * (2*iota_N0*d_Y1s_d_varphi + d2_Y1c_d_varphi2) + Y1c * (2*iota_N0*d_Y1c_d_varphi - \
+        d2_Y1s_d_varphi2))))/(Bbar*G0*G0*G0)
 
-    # Element 313
-    grad_grad_B_alt[:,2,0,2] =(B0*(-(iota_N0*X1c*Y1c*\
-                                     curvature) - \
-                                   Y1s*curvature*\
-                                   d_X1c_d_varphi + \
-                                   sign_G*sign_psi*d_curvature_d_varphi))/(lp*sign_psi)
+    # Element313
+    grad_grad_B_alt[:,2,0,2]=(sG*B0*B0*B0*lprime*lprime*(3*Bbar*sG*curvature*d_B0_d_varphi - B0**2 * (X1s*(iota_N0*Y1s*curvature + \
+        curvature*d_Y1c_d_varphi + Y1c*d_curvature_d_varphi) + X1c * (iota_N0*Y1c*curvature - curvature*d_Y1s_d_varphi - \
+        Y1s*d_curvature_d_varphi))))/(Bbar*G0*G0*G0)
 
-    # Element 321
-    grad_grad_B_alt[:,2,1,0] =(B0*X1c*(2*lp*iota_N0*Y1c*\
-                                       torsion - \
-                                       2*iota_N0*d_X1c_d_varphi - \
-                                       lp*(2*torsion*d_Y1s_d_varphi + \
-                                           Y1s*d_torsion_d_varphi)))/\
-                                           (lp*lp*sign_psi)
+    # Element321
+    grad_grad_B_alt[:,2,1,0]=(sG*B0*B0*B0*B0*lprime*(-(d_B0_d_varphi*(3*iota_N0*X1c*X1c + X1s * (3*iota_N0*X1s - 2*lprime*Y1c*torsion + \
+        3*d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - 3*d_X1s_d_varphi))) + B0 * (lprime*(X1s * (2*iota_N0*Y1s*torsion + \
+        2*torsion*d_Y1c_d_varphi + Y1c*d_torsion_d_varphi) + X1c * (2*iota_N0*Y1c*torsion - 2*torsion*d_Y1s_d_varphi - Y1s*d_torsion_d_varphi)) -\
+        X1s * (2*iota_N0*d_X1s_d_varphi + d2_X1c_d_varphi2) + X1c * (-2*iota_N0*d_X1c_d_varphi + d2_X1s_d_varphi2))))/(Bbar*G0*G0*G0)
 
-    # Element 322
-    grad_grad_B_alt[:,2,1,1] =-((B0*(iota_N0*Y1c*d_X1c_d_varphi + \
-                                     iota_N0*X1c*d_Y1c_d_varphi - \
-                                     d_X1c_d_varphi*\
-                                     d_Y1s_d_varphi + \
-                                     lp*torsion*\
-                                     (iota_N0*X1c*X1c - \
-                                      iota_N0*Y1c*Y1c - \
-                                      Y1s*(iota_N0*Y1s + \
-                                           d_Y1c_d_varphi) + \
-                                      Y1c*d_Y1s_d_varphi) - \
-                                     X1c*d2_Y1s_d_varphi2))/\
-                                (lp*lp*sign_psi))
+    # Element322
+    grad_grad_B_alt[:,2,1,1]= - ((sG*B0*B0*B0*B0*lprime*(3*d_B0_d_varphi*(X1s * (iota_N0*Y1s + d_Y1c_d_varphi) + X1c * (iota_N0*Y1c -\
+        d_Y1s_d_varphi)) + B0 * (iota_N0*Y1c*d_X1c_d_varphi + iota_N0*Y1s*d_X1s_d_varphi + iota_N0*X1c*d_Y1c_d_varphi + \
+        d_X1s_d_varphi*d_Y1c_d_varphi + iota_N0*X1s*d_Y1s_d_varphi - d_X1c_d_varphi*d_Y1s_d_varphi + lprime*torsion*(iota_N0*X1c*X1c +\
+        iota_N0*X1s*X1s - iota_N0*Y1c*Y1c - iota_N0*Y1s*Y1s + X1s*d_X1c_d_varphi - X1c*d_X1s_d_varphi - Y1s*d_Y1c_d_varphi + \
+        Y1c*d_Y1s_d_varphi) + X1s*d2_Y1c_d_varphi2 - X1c*d2_Y1s_d_varphi2)))/(Bbar*G0*G0*G0))
 
-    # Element 323
-    grad_grad_B_alt[:,2,1,2] =(B0*curvature*(iota_N0*X1c*X1c + \
-                                             lp*sign_G*sign_psi*torsion + \
-                                             lp*X1c*Y1s*torsion))/\
-                                             (lp*sign_psi)
+    # Element323
+    grad_grad_B_alt[:,2,1,2]=(sG*B0**5*lprime*lprime*curvature*(iota_N0*X1c*X1c + X1s * (iota_N0*X1s - 2*lprime*Y1c*torsion + \
+        d_X1c_d_varphi) + X1c * (2*lprime*Y1s*torsion - d_X1s_d_varphi)))/(Bbar*G0*G0*G0)
 
-    # Element 331
-    grad_grad_B_alt[:,2,2,0] =(B0*(-(iota_N0*X1c*Y1c*\
-                                     curvature) - \
-                                   Y1s*curvature*\
-                                   d_X1c_d_varphi + \
-                                   sign_G*sign_psi*d_curvature_d_varphi))/(lp*sign_psi)
+    # Element331
+    grad_grad_B_alt[:,2,2,0]=(sG*B0*B0*B0*lprime*lprime*(3*Bbar*sG*curvature*d_B0_d_varphi - B0**2 * (X1s*(iota_N0*Y1s*curvature +\
+        curvature*d_Y1c_d_varphi + Y1c*d_curvature_d_varphi) + X1c * (iota_N0*Y1c*curvature - curvature*d_Y1s_d_varphi - \
+        Y1s*d_curvature_d_varphi))))/(Bbar*G0*G0*G0)
 
-    # Element 332
-    grad_grad_B_alt[:,2,2,1] =-((B0*curvature*(iota_N0*Y1c*Y1c + \
-                                               iota_N0*Y1s*Y1s - \
-                                               lp*sign_G*sign_psi*torsion + \
-                                               Y1s*(lp*X1c*torsion + \
-                                                    d_Y1c_d_varphi) - \
-                                               Y1c*d_Y1s_d_varphi))/\
-                                (lp*sign_psi))
+    # Element332
+    grad_grad_B_alt[:,2,2,1]= - ((sG*B0**5*lprime*lprime*curvature*(iota_N0*Y1c*Y1c + Y1s * (iota_N0*Y1s + d_Y1c_d_varphi) - \
+        Y1c*d_Y1s_d_varphi))/(Bbar*G0*G0*G0))
 
-    # Element 333
-    grad_grad_B_alt[:,2,2,2] =(-2*B0*curvature*curvature)/sign_G
+    # Element333
+    grad_grad_B_alt[:,2,2,2]= - ((sG*B0**2*lprime*(-2*Bbar*sG*d_B0_d_varphi**2 + B0**2 * (2*Bbar*sG*lprime*lprime*curvature*curvature + \
+        Y1c*d_B0_d_varphi*d_X1s_d_varphi + X1s*d_B0_d_varphi*d_Y1c_d_varphi - X1c*d_B0_d_varphi*d_Y1s_d_varphi + \
+        X1s*Y1c*d2_B0_d_varphi2 - Y1s * (d_B0_d_varphi*d_X1c_d_varphi + X1c*d2_B0_d_varphi2))))/(Bbar*G0*G0*G0))
 
     self.grad_grad_B_alt = grad_grad_B_alt
 
@@ -1915,7 +735,46 @@ def grad_grad_B_tensor_cylindrical(self):
     vector B=(B_R,B_phi,B_Z) at every point along the axis (hence with nphi points)
     where R, phi and Z are the standard cylindrical coordinates.
     '''
-    return np.transpose(self.grad_grad_B,(1,2,3,0))
+
+    # The order is (normal, binormal, tangent). So element 123 means nbt.
+    # Element111
+    # grad_grad_B[:,0,0,0]
+    grad_grad_B = self.grad_grad_B
+    
+    t = self.tangent_cylindrical.transpose()
+    n = self.normal_cylindrical.transpose()
+    b = self.binormal_cylindrical.transpose()
+
+    grad_grad_B_tensor_cylindrical = np.array([[[
+                              grad_grad_B[:,0,0,0] * n[i] * n[j] * n[k] \
+                            + grad_grad_B[:,0,0,1] * n[i] * n[j] * b[k] \
+                            + grad_grad_B[:,0,0,2] * n[i] * n[j] * t[k] \
+                            + grad_grad_B[:,0,1,0] * n[i] * b[j] * n[k] \
+                            + grad_grad_B[:,0,1,1] * n[i] * b[j] * b[k] \
+                            + grad_grad_B[:,0,1,2] * n[i] * b[j] * t[k] \
+                            + grad_grad_B[:,0,2,0] * n[i] * t[j] * n[k] \
+                            + grad_grad_B[:,0,2,1] * n[i] * t[j] * b[k] \
+                            + grad_grad_B[:,0,2,2] * n[i] * t[j] * t[k] \
+                            + grad_grad_B[:,1,0,0] * b[i] * n[j] * n[k] \
+                            + grad_grad_B[:,1,0,1] * b[i] * n[j] * b[k] \
+                            + grad_grad_B[:,1,0,2] * b[i] * n[j] * t[k] \
+                            + grad_grad_B[:,1,1,0] * b[i] * b[j] * n[k] \
+                            + grad_grad_B[:,1,1,1] * b[i] * b[j] * b[k] \
+                            + grad_grad_B[:,1,1,2] * b[i] * b[j] * t[k] \
+                            + grad_grad_B[:,1,2,0] * b[i] * t[j] * n[k] \
+                            + grad_grad_B[:,1,2,1] * b[i] * t[j] * b[k] \
+                            + grad_grad_B[:,1,2,2] * b[i] * t[j] * t[k] \
+                            + grad_grad_B[:,2,0,0] * t[i] * n[j] * n[k] \
+                            + grad_grad_B[:,2,0,1] * t[i] * n[j] * b[k] \
+                            + grad_grad_B[:,2,0,2] * t[i] * n[j] * t[k] \
+                            + grad_grad_B[:,2,1,0] * t[i] * b[j] * n[k] \
+                            + grad_grad_B[:,2,1,1] * t[i] * b[j] * b[k] \
+                            + grad_grad_B[:,2,1,2] * t[i] * b[j] * t[k] \
+                            + grad_grad_B[:,2,2,0] * t[i] * t[j] * n[k] \
+                            + grad_grad_B[:,2,2,1] * t[i] * t[j] * b[k] \
+                            + grad_grad_B[:,2,2,2] * t[i] * t[j] * t[k]
+                        for k in range(3)] for j in range(3)] for i in range(3)])
+    return grad_grad_B_tensor_cylindrical
 
 def grad_grad_B_tensor_cartesian(self):
     '''

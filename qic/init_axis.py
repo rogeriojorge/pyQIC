@@ -6,6 +6,7 @@ curvature and torsion from the magnetic axis shape.
 import logging
 import numpy as np
 from scipy.interpolate import CubicSpline as spline
+from scipy.interpolate import BSpline, make_interp_spline
 from .spectral_diff_matrix import spectral_diff_matrix
 from .util import fourier_minimum
 from .fourier_interpolation import fourier_interpolation_matrix
@@ -221,7 +222,8 @@ def init_axis(self):
         B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.B0_svals))]))
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
-        self.d = np.zeros((self.nphi,))
+        
+        self.d = np.zeros(nphi)
         if not self.d_over_curvature == 0:
             self.d = np.sqrt(self.d_over_curvature/B0) * curvature
         elif not self.d_over_curvature_cvals == []:
@@ -229,6 +231,17 @@ def init_axis(self):
                 self.d = self.d_over_curvature_cvals * curvature
             else:
                 self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
+        elif not len(self.d_over_curvature_spline)==0:
+            N_points = len(self.d_over_curvature_spline)
+            x_in = np.linspace(0,1,N_points)*np.pi/self.nfp
+            y_in = self.d_over_curvature_spline
+            x_in_periodic = np.append(x_in, 2*np.pi/self.nfp-x_in[-2::-1])
+            y_in_periodic = np.append(y_in, y_in[-2::-1])
+            # The order of the spline is important, as we are going to take derivatives with respect to phi
+            spline_d_over_curv = make_interp_spline(x_in_periodic, y_in_periodic, bc_type = 'periodic', k = 7) 
+            temp_d_over_curv = spline_d_over_curv(self.phi)
+            self.d = temp_d_over_curv * curvature
+
         self.d -= self.k_second_order_SS * nfp * self.B0_vals[1] * np.sin(nfp * varphi) / B0
         self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi)*curvature for i in range(len(self.d_cvals))]))
         self.d += np.array(sum([-self.d_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_svals))]))

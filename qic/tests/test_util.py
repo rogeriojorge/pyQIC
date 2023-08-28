@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-from qsc.util import *
+from qic.util import *
 
 class FourierMinimizeTests(unittest.TestCase):
 

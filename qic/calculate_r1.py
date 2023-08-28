@@ -131,7 +131,7 @@ def _residual(self, x):
         self.gamma = iota + self.helicity * self.nfp - np.matmul(self.d_d_varphi, self.alpha)
     r = np.matmul(self.d_d_varphi, sigma) + self.gamma * \
         (self.etabar_squared_over_curvature_squared * self.etabar_squared_over_curvature_squared + 1 + sigma * sigma) \
-        - 2 * self.etabar_squared_over_curvature_squared * (-self.spsi * self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
+        - 2 * self.etabar_squared_over_curvature_squared * (- self.torsion + self.I2 / self.Bbar) * self.G0 / self.B0
     #logger.debug("_residual called with x={}, r={}".format(x, r))
 
     sigma_at_0 = self.interpolateTo0 @ sigma

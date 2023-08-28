@@ -5,8 +5,8 @@ import os
 from scipy.io import netcdf
 import numpy as np
 import logging
-from qsc.qsc import Qsc
-from qsc.util import to_Fourier
+from qic.qic import Qic
+from qic.util import to_Fourier
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -149,7 +149,7 @@ def compare_to_fortran(name, filename):
     r      = f.variables['r'][()]
     ntheta = 20
 
-    py = Qsc.from_paper(name, nphi=nphi, order='r3')
+    py = Qic.from_paper(name, nphi=nphi, order='r3')
     logger.info('Comparing to fortran file ' + abs_filename)
 
     def compare_field(fortran_name, py_field, rtol=1e-9, atol=1e-9):
@@ -214,20 +214,20 @@ def compare_to_fortran(name, filename):
 
     # logger.info('Test boundary and axis splines in cylindrical coordinates')
     R_fortran, Z_fortran, R0_fortran, Z0_fortran, r, mpol, ntor, _ = fortran_plot_single(filename=filename, ntheta=ntheta, nphi=nphi)
-    _, _, Z_qsc, R_qsc = py.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
+    _, _, Z_qic, R_qic = py.get_boundary(r=r, ntheta=ntheta, nphi=nphi, mpol=mpol, ntor=ntor, ntheta_fourier=2*mpol)
     phi_array = np.linspace(0, 2*np.pi, nphi)
-    R0_qsc = py.R0_func(phi_array)
-    Z0_qsc = py.Z0_func(phi_array)
+    R0_qic = py.R0_func(phi_array)
+    Z0_qic = py.Z0_func(phi_array)
     rtol = 1e-7
     atol = 1e-7
-    np.testing.assert_allclose(R_fortran, R_qsc,   rtol=rtol, atol=atol)
-    np.testing.assert_allclose(Z_fortran, Z_qsc,   rtol=rtol, atol=atol)
-    np.testing.assert_allclose(R0_fortran, R0_qsc, rtol=rtol, atol=atol)
-    np.testing.assert_allclose(Z0_fortran, Z0_qsc, rtol=rtol, atol=atol)
+    np.testing.assert_allclose(R_fortran, R_qic,   rtol=rtol, atol=atol)
+    np.testing.assert_allclose(Z_fortran, Z_qic,   rtol=rtol, atol=atol)
+    np.testing.assert_allclose(R0_fortran, R0_qic, rtol=rtol, atol=atol)
+    np.testing.assert_allclose(Z0_fortran, Z0_qic, rtol=rtol, atol=atol)
 
     f.close()
     
-class QscTests(unittest.TestCase):
+class QicTests(unittest.TestCase):
 
     def test_curvature_torsion(self):
         """
@@ -236,7 +236,7 @@ class QscTests(unittest.TestCase):
         """
         
         # Stellarator-symmetric case:
-        stel = Qsc(rc=[1.3, 0.3, 0.01, -0.001],
+        stel = Qic(rc=[1.3, 0.3, 0.01, -0.001],
                    zs=[0, 0.4, -0.02, -0.003], nfp=5, nphi=15)
         
         curvature_fortran = [1.74354628565018, 1.61776632275718, 1.5167042487094, 
@@ -263,7 +263,7 @@ class QscTests(unittest.TestCase):
         np.testing.assert_allclose(stel.varphi, varphi_fortran, rtol=rtol, atol=atol)
 
         # Non-stellarator-symmetric case:
-        stel = Qsc(rc=[1.3, 0.3, 0.01, -0.001],
+        stel = Qic(rc=[1.3, 0.3, 0.01, -0.001],
                    zs=[0, 0.4, -0.02, -0.003],
                    rs=[0, -0.1, -0.03, 0.002],
                    zc=[0.3, 0.2, 0.04, 0.004], nfp=5, nphi=15)
@@ -299,28 +299,28 @@ class QscTests(unittest.TestCase):
         places2 = 3 # For max/min quantities that are less accurate
         for nphi in [50, 63]:
             # Landreman, Sengupta, Plunk (2019), section 5.1:
-            stel = Qsc.from_paper('r1 section 5.1', nphi=nphi)
+            stel = Qic.from_paper('r1 section 5.1', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.418306910215178, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.41373705531443, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.52948586064743, places=places2)
             
             # Landreman, Sengupta, Plunk (2019), section 5.2:
-            stel = Qsc.from_paper('r1 section 5.2', nphi=nphi)
+            stel = Qic.from_paper('r1 section 5.2', nphi=nphi)
             self.assertEqual(stel.helicity, -1)
             self.assertAlmostEqual(stel.iota, 1.93109725535729, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.08125973323805, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 4.73234243198959, places=places2)
             
             # Landreman, Sengupta, Plunk (2019), section 5.3:
-            stel = Qsc.from_paper('r1 section 5.3', nphi=nphi)
+            stel = Qic.from_paper('r1 section 5.3', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.311181373123728, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.30480616121377, places=places2)
             self.assertAlmostEqual(stel.min_L_grad_B, 1 / 1.7014044379421, places=places2)
         
             # Landreman & Sengupta (2019), section 5.1:
-            stel = Qsc.from_paper('r2 section 5.1', nphi=nphi)
+            stel = Qic.from_paper('r2 section 5.1', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, -0.420473351810416 , places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.38384260252044, places=places2)
@@ -328,7 +328,7 @@ class QscTests(unittest.TestCase):
             check_r2(stel)
         
             # Landreman & Sengupta (2019), section 5.2:
-            stel = Qsc.from_paper('r2 section 5.2', nphi=nphi)
+            stel = Qic.from_paper('r2 section 5.2', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, -0.423723995700502, places=places)
             self.assertAlmostEqual(stel.max_elongation, 4.86202324600918, places=places2)
@@ -336,7 +336,7 @@ class QscTests(unittest.TestCase):
             check_r2(stel)
             
             # Landreman & Sengupta (2019), section 5.3:
-            stel = Qsc.from_paper('r2 section 5.3', nphi=nphi)
+            stel = Qic.from_paper('r2 section 5.3', nphi=nphi)
             self.assertEqual(stel.helicity, 0)
             self.assertAlmostEqual(stel.iota, 0.959698159859113, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.20914173760329, places=places2)
@@ -344,7 +344,7 @@ class QscTests(unittest.TestCase):
             check_r2(stel)
             
             # Landreman & Sengupta (2019), section 5.4:
-            stel = Qsc.from_paper('r2 section 5.4', nphi=nphi)
+            stel = Qic.from_paper('r2 section 5.4', nphi=nphi)
             self.assertEqual(stel.helicity, 1)
             self.assertAlmostEqual(stel.iota, -1.14413695118515, places=places)
             self.assertAlmostEqual(stel.max_elongation, 2.98649978627541, places=places2)
@@ -352,7 +352,7 @@ class QscTests(unittest.TestCase):
             check_r2(stel)
             
             # Landreman & Sengupta (2019), section 5.5:
-            stel = Qsc.from_paper('r2 section 5.5', nphi=nphi)
+            stel = Qic.from_paper('r2 section 5.5', nphi=nphi)
             self.assertEqual(stel.helicity, 1)
             self.assertAlmostEqual(stel.iota, -0.828885267089981, places=places)
             self.assertAlmostEqual(stel.max_elongation, 3.6226360623368, places=places2)
@@ -373,7 +373,7 @@ class QscTests(unittest.TestCase):
         B2c_cvals = [ -0.40251233990996754,0.10398784730800278,0.5170167340215038,-0.2255734311522203,0.044645330385214954,0.21871024881966092,-0.06764902501780555,0.014096798551213216,-0.05415701995955931,0.0 ]
         p2      =  0.0
         nphi    =  301
-        stel    =  Qsc(omn_method = omn_method, k_buffer=k_buffer, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, B2c_cvals=B2c_cvals, B2s_svals=B2s_svals, p2=p2, order='r3', k_second_order_SS=k_second_order_SS)
+        stel    =  Qic(omn_method = omn_method, k_buffer=k_buffer, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, B2c_cvals=B2c_cvals, B2s_svals=B2s_svals, p2=p2, order='r3', k_second_order_SS=k_second_order_SS)
         check_r2(stel)
 
     def test_compare_to_fortran(self):
@@ -392,10 +392,10 @@ class QscTests(unittest.TestCase):
         """
         rtol = 1e-13
         atol = 1e-13
-        s1 = Qsc.from_paper('r2 section 5.2')
+        s1 = Qic.from_paper('r2 section 5.2')
         m = s1.nfourier
         for n in range(2, 7):
-            s2 = Qsc.from_paper('r2 section 5.2')
+            s2 = Qic.from_paper('r2 section 5.2')
             s2.change_nfourier(n)
             if n <= m:
                 # We lowered nfourier

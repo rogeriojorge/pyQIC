@@ -122,9 +122,10 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
     """
     Function to convert the near-axis coordinate system to
     a cylindrical one for a surface at a particular radius,
-    outputing the following arrays: R(theta,varphi),
-    phi(theta,varphi) and Z(theta,varphi) with R,phi,Z cylindrical
-    coordinates and theta and varphi Boozer coordinates
+    outputing the following arrays: R(theta,phi),
+    phi0(theta,phi) and Z(theta,phi) with R,phi, Z cylindrical
+    coordinates and theta Boozer coordinate and phi0 the 
+    cylindrical coordinate on axis.
 
     Args:
         r:  near-axis radius r of the desired boundary surface

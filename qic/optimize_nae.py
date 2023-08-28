@@ -55,7 +55,8 @@ def opt_fun_stel(x_iter, stel, x_param_label, fun_opt, info = {'Nfeval':0}, res_
     if verbose:
         print(f"{info['Nfeval']} -", x_iter)
         if stel.order == 'r2':
-            print(f"\N{GREEK CAPITAL LETTER DELTA}B2c = {stel.B2cQI_deviation_max:.4f},",
+            print(
+                f"\N{GREEK CAPITAL LETTER DELTA}B2c = {stel.B2cQI_deviation_max:.4f},",
                 # f"1/rc = {1/stel.r_singularity:.2f},",
                 # f"1/L\N{GREEK CAPITAL LETTER DELTA}B = {np.max(stel.inv_L_grad_B):.2f},",
                 f"Residual = {res:.4f}")
@@ -131,6 +132,7 @@ def min_geo_qi_consistency(stel, order = 1):
             der_cond = np.matmul(d_d_varphi,der_cond)
             der_cond_eval = fourier_interpolation(der_cond, pos-stel.phi_shift*stel.d_phi*stel.nfp)
             res_add = np.sum(der_cond_eval*der_cond_eval)
+            print(res_add)
             res += res_add
 
     # Return the mismatch
@@ -198,11 +200,15 @@ def optimise_params(stel, x_param_label, fun_opt = fun, verbose = 0, maxiter = 2
     
     # Plot the residual history if verbose
     if verbose:
-        print(opt.x)
+        print('####################')
+        print('Optimised parameters')
+        print('####################')
+        print('[',','.join(opt.x.astype(str).tolist()),']')
         plt.plot(res_history)
         plt.xlabel('Nb. Iterations')
         plt.ylabel('Objective function')
+        plt.yscale('log')
         plt.show()
     
-    # Returns the residual in the optimisation
-    return opt.fun
+    # Returns the optimisation state message
+    return opt.message

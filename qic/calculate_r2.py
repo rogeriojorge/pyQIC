@@ -44,7 +44,10 @@ def calculate_r2(self):
 
     if self.omn:
         # If in QI, the magnetic field is specified in terms of varphi instead of phi
-        integral_one_over_B0_squared_over_varphi = np.sum(1 / (B0 * B0)) / nphi
+        # This was wrong!!! Everything is defined in the cylindrical grid phi (varphi
+        # is constructed thereof)
+        integral_one_over_B0_squared_over_varphi = np.sum(self.d_l_d_phi / (abs(G0) * B0)) / nphi
+        # integral_one_over_B0_squared_over_varphi = np.sum(1 / (B0 * B0)) / nphi
         # B2 in QI has an alpha and theta instead of vartheta
         B2cPlunk = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))]))
         B2cPlunk = B2cPlunk + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
@@ -70,8 +73,11 @@ def calculate_r2(self):
     if np.all(rhs_beta_0_equation == np.zeros((1,nphi))[0]):
         beta_0 = np.zeros((1,nphi))[0]
     else:
-        beta_0 = np.linalg.solve(d_d_varphi, rhs_beta_0_equation)
-        beta_0 = beta_0 - beta_0[0] # Fix to be zero at origin
+        DMred = d_d_varphi[1:,1:]   # The differentiation matrix has a linearly dependent row, focus on submatrix
+        beta_0 = np.linalg.solve(DMred,rhs_beta_0_equation[1:])   # Invert differentiation matrix: as if first entry a zero, need to add it later
+        beta_0 = np.insert(beta_0,0,0)  # Fix to be zero at origin (add entry)
+        # beta_0 = np.linalg.solve(d_d_varphi, rhs_beta_0_equation)
+        # beta_0 = beta_0 - beta_0[0] # Fix to be zero at origin
 
     ## Calculate beta_1
     # beta_1c = 0
@@ -155,9 +161,9 @@ def calculate_r2(self):
             X2c = X2c + np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))]))
         # X2c = np.array(sum([self.B2c_cvals[i]*np.cos(self.nfp*i*self.varphi) for i in range(len(self.B2c_cvals))])) \
         #     + np.array(sum([self.B2c_svals[i]*np.sin(self.nfp*i*self.varphi) for i in range(len(self.B2c_svals))]))
-        # self.B2c_array = X2c * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * ( \
-        #     + 3 * G0 * G0 * (B1c*B1c-B1s*B1s)/(4*B0**4) - (X1c*X1c - X1s*X1s)/4*(curvature*abs_G0_over_B0)**2 \
-        #     - (qc * qc - qs * qs + rc * rc - rs * rs)/4))
+        self.B2c_array_alt = X2c * curvature * B0 - B0 * B0_over_abs_G0 * (np.matmul(d_d_varphi,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * ( \
+            + 3 * G0 * G0 * (B1c*B1c-B1s*B1s)/(4*B0**4) - (X1c*X1c - X1s*X1s)/4*(curvature*abs_G0_over_B0)**2 \
+            - (qc * qc - qs * qs + rc * rc - rs * rs)/4))
         self.B2c_array = (1/(4*B0)) * (3 * B1c * B1c - 3 * B1s * B1s + B0_over_abs_G0 * B0_over_abs_G0 \
                                       * ( B0 * B0 * (-qc * qc + qs * qs - rc * rc + rs * rs) \
                                         + G0 * G0 * curvature * (curvature * (-X1c * X1c + X1s * X1s) + 4 * X2c)
@@ -373,6 +379,8 @@ def calculate_r2(self):
     self.beta_1s = beta_1s
     self.beta_1c = beta_1c
     self.B20 = B20
+    # self.B2c = self.B2c_array
+    # self.B2s = self.B2s_array
     self.B20_spline = self.convert_to_spline(self.B20)
     self.B2c_spline = self.convert_to_spline(self.B2c_array)
     self.B2s_spline = self.convert_to_spline(self.B2s_array)
@@ -481,13 +489,13 @@ def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", 
 
     # Optimisation is performed
     self.order = "r1" # To leave unnecessary computations out (the way the code is written it does unnecessary things anyway)
-    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 1000, maxfev = 1000, extras = order) # Order is passed to the function
+    self.optimise_params(params, fun_opt = fun_opt, scale = 0, method = method, verbose = verbose, maxiter = 4000, maxfev = 4000, extras = order) # Order is passed to the function
 
     # Find the X2s and X2c necessary
     X2c, X2s = evaluate_X2c_X2s_QI(self, X2s_in)
 
     # Redefine the configuration (not sure why this is needed; when I try to change X2c and X2s only, and then run stel.calculate() with order 'r2', the solution for alpha is different, any clue?)
-    self.__init__(omn_method = self.omn_method, delta=self.delta, p_buffer=self.p_buffer, k_buffer=self.k_buffer, rc=self.rc,zs=self.zs, nfp=self.nfp, B0_vals=self.B0_vals, nphi=self.nphi, omn=True, order='r2', d_over_curvature_cvals=self.d_over_curvature_cvals, B2c_svals=X2c, B2s_cvals=X2s)
+    self.__init__(omn_method = self.omn_method, delta=self.delta, p_buffer=self.p_buffer, k_buffer=self.k_buffer, rc=self.rc,zs=self.zs, nfp=self.nfp, B0_vals=self.B0_vals, nphi=self.nphi, omn=True, order='r2', d_over_curvature_cvals=self.d_over_curvature_cvals,d_over_curvature_spline=self.d_over_curvature_spline, B2c_svals=X2c, B2s_cvals=X2s)
 
     return self.B2cQI_deviation_max
 

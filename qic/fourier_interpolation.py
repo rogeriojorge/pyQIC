@@ -29,7 +29,7 @@ def fourier_interpolation(fk, x):
     """
 
     N = len(fk)
-    M = len(x)
+    M = len(x)  
 
     # Compute equidistant points
     #xk = np.linspace(0.0, 2 * np.pi, N, endpoint=False)

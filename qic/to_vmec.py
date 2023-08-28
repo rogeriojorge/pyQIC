@@ -33,6 +33,14 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14,firstOrd
         ntor = int(min(self.nphi / 2, ntord))
     else:
         ntor = int(params["ntor"])
+    if "mpol_vmec" not in params.keys():
+        mpol_vmec = mpol
+    else:
+        mpol_vmec = int(params["mpol_vmec"])
+    if "ntor_vmec" not in params.keys():
+        ntor_vmec = ntor
+    else:
+        ntor_vmec = int(params["ntor_vmec"])
     if "delt" not in params.keys():
         params["delt"] = 0.9
     if "nstep" not in params.keys():
@@ -153,15 +161,15 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14,firstOrd
     file_object.write('!----- Grid Parameters -----\n')
     file_object.write('  LASYM = '+str(self.lasym)+'\n')
     file_object.write('  NFP = '+str(self.nfp)+'\n')
-    file_object.write('  MPOL = '+str(mpol)+'\n')
-    file_object.write('  NTOR = '+str(min(ntor,ntorMax))+'\n')
+    file_object.write('  MPOL = '+str(mpol_vmec)+'\n')
+    file_object.write('  NTOR = '+str(min(ntor_vmec,ntorMax))+'\n')
     file_object.write('  PHIEDGE = '+str(phiedge)+'\n')
     file_object.write('!----- Pressure Parameters -----\n')
     file_object.write('  PRES_SCALE = '+str(pres_scale)+'\n')
     file_object.write("  PMASS_TYPE = '"+pmass_type+"'\n")
     file_object.write('  AM = '+str(am)[1:-1]+'\n')
     file_object.write('!----- Free Boundary Parameters -----\n')
-    file_object.write('  LFREEB = F')
+    file_object.write('  LFREEB = F\n')
     file_object.write('!----- Current/Iota Parameters -----\n')
     file_object.write('  CURTOR = '+str(curtor)+'\n')
     file_object.write('  NCURR = '+str(ncurr)+'\n')
