@@ -28,7 +28,7 @@ def Frenet_to_cylindrical_residual_func(phi0, phi_target, qic):
     normal_phi   = qic.normal_phi_spline(phi0)
     binormal_R   = qic.binormal_R_spline(phi0)
     binormal_phi = qic.binormal_phi_spline(phi0)
-    half_helicity = True
+    half_helicity = qic.half_helicity # False
     if half_helicity == True :
         normal_R     = qic.normal_R_spline_tripled(phi0)
         normal_phi   = qic.normal_phi_spline_tripled(phi0)
@@ -82,7 +82,7 @@ def Frenet_to_cylindrical_1_point(phi0, qic):
     binormal_R   = qic.binormal_R_spline(phi0)
     binormal_phi = qic.binormal_phi_spline(phi0)
     binormal_z   = qic.binormal_z_spline(phi0)
-    half_helicity = True
+    half_helicity = qic.half_helicity #False
     if half_helicity == True:
         normal_R     = qic.normal_R_spline_tripled(phi0)
         normal_phi   = qic.normal_phi_spline_tripled(phi0)
@@ -131,7 +131,7 @@ def Frenet_to_cylindrical(self, r, ntheta=20):
         r:  near-axis radius r of the desired boundary surface
         ntheta: resolution in the poloidal angle theta
     """
-    half_helicity=True
+    half_helicity= self.half_helicity #False
     if half_helicity == True:
         nphi_conversion = self.nphi 
         theta = np.linspace(0,2*np.pi,ntheta,endpoint=False)

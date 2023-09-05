@@ -37,7 +37,7 @@ def init_axis(self):
     nfp = self.nfp
     zs  = self.zs
     zc  = self.zc
-    half_helicity = True #self.half_helicity 
+    half_helicity = self.half_helicity #  False #self.half_helicity 
     if omn:
         ### Setting higher order rc to make sure kappa has first order zeros
         ###  at phi=0 and phi=pi/nfp
@@ -222,7 +222,7 @@ def init_axis(self):
         B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.B0_svals))]))
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
-        dproptoB = True # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
+        dproptoB = False # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
 
         self.d = np.zeros(nphi)
         if not self.d_over_curvature == 0:
