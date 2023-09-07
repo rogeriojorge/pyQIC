@@ -222,7 +222,7 @@ def init_axis(self):
         B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.B0_svals))]))
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
-        dproptoB = False # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
+        dproptoB = True # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
 
         self.d = np.zeros(nphi)
         if not self.d_over_curvature == 0:
@@ -248,7 +248,7 @@ def init_axis(self):
 
         self.d -= self.k_second_order_SS * nfp * self.B0_vals[1] * np.sin(nfp * varphi) / B0
         self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi)*curvature for i in range(len(self.d_cvals))]))
-        self.d += np.array(sum([-self.d_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_svals))]))
+        self.d += np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_svals))]))
 
     self.d_l_d_varphi = self.sG * G0 / self.B0   
     self.d_d_varphi = np.zeros((nphi, nphi))
