@@ -67,21 +67,34 @@ def init_axis(self):
         if half_helicity == True:
             if len(zs) == 3:
                 zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))
-            elif len(rc) == 4:
+            elif len(zs) == 4:
+                #if zs[2]==0:    ### zs(2)=0 seems to cause problems
+                #    zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))        
                 zs[3] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp)) / (3.0*( 2.0 + 9.0* nfp * nfp))
-            elif len(rc) == 5:
+            elif len(zs) == 5:
                 zs[4] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) ) / (8.0*( 1.0 + 8.0* nfp * nfp))
-            elif len(rc) == 6:
+            elif len(zs) == 6:
                 zs[5] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) ) / (5.0*( 2.0 + 25.0* nfp * nfp))
-            elif len(rc) == 7:
+            elif len(zs) == 7:
                 zs[6] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) ) / (12.0*( 1.0 + 18.0* nfp * nfp))
-            elif len(rc) == 8:
+            elif len(zs) == 8:
                 zs[7] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp)   ) / (7.0*( 2.0 + 49.0* nfp * nfp))
             else:
                 zs[8] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp) + 7.0*zs[7]*( 2.0 + 49.0* nfp * nfp)  ) / (16.0*( 1.0 + 32.0* nfp * nfp))
             #zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
         #+ zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp))
 
+    temp2 = np.zeros(self.nfourier)
+    temp2[:len(zs)] = zs
+    zs = temp2
+
+    temp3 = np.zeros(self.nfourier)
+    temp3[:len(rc)] = rc
+    rc = temp3
+
+    self.rc = rc
+    self.zs = zs     
+            
     # Shorthand:
     nphi = self.nphi
     nfp = self.nfp
