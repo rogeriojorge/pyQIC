@@ -38,52 +38,69 @@ def init_axis(self):
     zs  = self.zs
     zc  = self.zc
     half_helicity = self.half_helicity #  False #self.half_helicity 
-    if omn:
-        ### Setting higher order rc to make sure kappa has first order zeros
-        ###  at phi=0 and phi=pi/nfp
-        if len(rc) == 3:
-            rc[1] = 0.0
-            rc[2] = -1 / (1.0 + 4 * nfp * nfp)
-        elif len(rc) == 4:
-            rc[2] = -1.0 / (1.0 + 4.0 * nfp * nfp)
-            rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9.0 * nfp * nfp)
-        elif len(rc) == 5:
-            rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9 * nfp * nfp)
-            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
-        elif len(rc) == 6:
-            rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
-            rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
-        elif len(rc) == 7:
-            rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
-            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
-        elif len(rc) == 8:
-            rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
-            rc[7] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp + rc[5] +  25*rc[5] * nfp * nfp) / (1.0 + 49 * nfp * nfp)
-        else:
-            rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1.0 + 49*nfp*nfp))
-            rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1.0+64*nfp*nfp))
-    ### Conditions on rc and zs for half-helicity magnetic axis:
-    ###
-        if half_helicity == True:
-            if len(zs) == 3:
-                zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))
-            elif len(zs) == 4:
-                #if zs[2]==0:    ### zs(2)=0 seems to cause problems
-                #    zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))        
-                zs[3] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp)) / (3.0*( 2.0 + 9.0* nfp * nfp))
-            elif len(zs) == 5:
-                zs[4] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) ) / (8.0*( 1.0 + 8.0* nfp * nfp))
-            elif len(zs) == 6:
-                zs[5] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) ) / (5.0*( 2.0 + 25.0* nfp * nfp))
-            elif len(zs) == 7:
-                zs[6] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) ) / (12.0*( 1.0 + 18.0* nfp * nfp))
-            elif len(zs) == 8:
-                zs[7] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp)   ) / (7.0*( 2.0 + 49.0* nfp * nfp))
-            else:
-                zs[8] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp) + 7.0*zs[7]*( 2.0 + 49.0* nfp * nfp)  ) / (16.0*( 1.0 + 32.0* nfp * nfp))
-            #zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
-        #+ zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp))
+    
+    rc[4] = -((45 + 1449*nfp*nfp + 8100*nfp*nfp*nfp*nfp - 30 *rc[1] - 1236*nfp*nfp*rc[1] - 5766*(nfp*nfp*nfp*nfp)*rc[1] - 5400*(nfp*nfp*nfp*nfp*nfp*nfp)*rc[1] + 40 *rc[2] \
+               + 1320 *nfp*nfp*rc[2] + 9152 *nfp*nfp*nfp*nfp *rc[2] + 28800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2]- 20 *rc[3] - 856 *nfp*nfp*rc[3] - 5796* nfp*nfp*nfp*nfp *rc[3] \
+                - 32400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177*nfp*nfp + 1876*nfp*nfp*nfp*nfp + 14400*nfp*nfp*nfp*nfp*nfp*nfp)))
 
+    rc[5] = -((rc[1] + nfp*nfp*rc[1] + rc[3]+ 9*nfp*nfp *rc[3])/(1 + 25*nfp*nfp))
+
+    rc[6] = -((-20 - 564*nfp*nfp - 1600*nfp*nfp*nfp*nfp + 30*rc[1] + 636*nfp*nfp *rc[1]+ 2646 *nfp*nfp*nfp*nfp *rc[1] \
+               + 2400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[1] - 15 *rc[2] - 435 *nfp*nfp *rc[2] - 1692 *nfp*nfp*nfp*nfp *rc[2] \
+                - 4800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2] + 20 *rc[3]+ 456 *nfp*nfp *rc[3]+ 3076 *nfp*nfp*nfp*nfp *rc[3] \
+                + 14400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177 *nfp*nfp + 1876 *nfp*nfp*nfp*nfp \
+                + 14400 *nfp*nfp*nfp*nfp*nfp*nfp)))
+
+    zs[5] = -((2*zs[1] + nfp*nfp*zs[1] + 6 *zs[3] + 27*nfp*nfp*zs[3])/(5*(2 + 25*nfp*nfp)))
+
+    zs[6] = -((zs[2] + 2*nfp*nfp *zs[2] + 2 *zs[4] + 16*nfp*nfp *zs[4])/(3*(1 + 18*nfp*nfp)))
+
+    # if omn:
+    #     ### Setting higher order rc to make sure kappa has first order zeros
+    #     ###  at phi=0 and phi=pi/nfp
+    #     if len(rc) == 3:
+    #         rc[1] = 0.0
+    #         rc[2] = -1 / (1.0 + 4 * nfp * nfp)
+    #     elif len(rc) == 4:
+    #         rc[2] = -1.0 / (1.0 + 4.0 * nfp * nfp)
+    #         rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9.0 * nfp * nfp)
+    #     elif len(rc) == 5:
+    #         rc[3] = -( rc[1] +  rc[1] * nfp * nfp) / (1.0 + 9 * nfp * nfp)
+    #         rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
+    #     elif len(rc) == 6:
+    #         rc[4]=-(1 + rc[2] + 4 * rc[2] * nfp * nfp) / (1.0 + 16 * nfp * nfp)
+    #         rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
+    #     elif len(rc) == 7:
+    #         rc[5] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp) / (1.0 + 25 * nfp * nfp)
+    #         rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
+    #     elif len(rc) == 8:
+    #         rc[6]=-(1 + rc[2] + rc[4] + (rc[2] + 4 * rc[4]) * 4 * nfp * nfp) / (1.0 + 36 * nfp * nfp)
+    #         rc[7] = -( rc[1] +  rc[1] * nfp * nfp + rc[3] +  9*rc[3] * nfp * nfp + rc[5] +  25*rc[5] * nfp * nfp) / (1.0 + 49 * nfp * nfp)
+    #     else:
+    #         rc[7] = -((rc[1] + nfp*nfp*rc[1] + rc[3] + 9*nfp*nfp*rc[3] + rc[5] + 25*nfp*nfp*rc[5])/(1.0 + 49*nfp*nfp))
+    #         rc[8] = -((1 + rc[2] + 4*nfp*nfp*rc[2] + rc[4] + 16*nfp*nfp*rc[4] + rc[6] + 36*nfp*nfp*rc[6])/(1.0+64*nfp*nfp))
+    # ### Conditions on rc and zs for half-helicity magnetic axis:
+    # ###
+    #     if half_helicity == True:
+    #         if len(zs) == 3:
+    #             zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))
+    #         elif len(zs) == 4:
+    #             #if zs[2]==0:    ### zs(2)=0 seems to cause problems
+    #             #    zs[2] = -(zs[1]*(2+nfp*nfp)) / (4.0*( 1.0 + 2.0* nfp * nfp))        
+    #             zs[3] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp)) / (3.0*( 2.0 + 9.0* nfp * nfp))
+    #         elif len(zs) == 5:
+    #             zs[4] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) ) / (8.0*( 1.0 + 8.0* nfp * nfp))
+    #         elif len(zs) == 6:
+    #             zs[5] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) ) / (5.0*( 2.0 + 25.0* nfp * nfp))
+    #         elif len(zs) == 7:
+    #             zs[6] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) ) / (12.0*( 1.0 + 18.0* nfp * nfp))
+    #         elif len(zs) == 8:
+    #             zs[7] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp)   ) / (7.0*( 2.0 + 49.0* nfp * nfp))
+    #         else:
+    #             zs[8] = -(zs[1]*(2+nfp*nfp) + 4*zs[2]*(1.0+2.0*nfp*nfp) + 3*zs[3]*(2.0 +9.0*nfp*nfp) + 8*zs[4]*(1.0 +8.0*nfp*nfp) + 5*zs[5]*( 2.0 + 25.0* nfp * nfp) +12.0*zs[6]*( 1.0 + 18.0* nfp * nfp) + 7.0*zs[7]*( 2.0 + 49.0* nfp * nfp)  ) / (16.0*( 1.0 + 32.0* nfp * nfp))
+    #         #zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
+    #     #+ zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp)) 
+    
     temp2 = np.zeros(self.nfourier)
     temp2[:len(zs)] = zs
     zs = temp2
@@ -137,6 +154,7 @@ def init_axis(self):
 
     tangent_cylindrical = np.zeros((nphi, 3))
     d_tangent_d_l_cylindrical = np.zeros((nphi, 3))
+    d2_tangent_d_l2_cylindrical = np.zeros((nphi, 3))
     for j in range(3):
         tangent_cylindrical[:,j] = d_r_d_phi_cylindrical[:,j] / d_l_d_phi
         d_tangent_d_l_cylindrical[:,j] = (-d_r_d_phi_cylindrical[:,j] * d2_l_d_phi2 / d_l_d_phi \
@@ -145,7 +163,7 @@ def init_axis(self):
     curvature = np.sqrt(d_tangent_d_l_cylindrical[:,0] * d_tangent_d_l_cylindrical[:,0] + \
                         d_tangent_d_l_cylindrical[:,1] * d_tangent_d_l_cylindrical[:,1] + \
                         d_tangent_d_l_cylindrical[:,2] * d_tangent_d_l_cylindrical[:,2])
-
+ 
     axis_length = np.sum(d_l_d_phi) * d_phi * nfp
     rms_curvature = np.sqrt((np.sum(curvature * curvature * d_l_d_phi) * d_phi * nfp) / axis_length)
     mean_of_R = np.sum(R0 * d_l_d_phi) * d_phi * nfp / axis_length
@@ -177,7 +195,8 @@ def init_axis(self):
 
     self._determine_helicity()
     if half_helicity == True:  ### Half helicity conditions are enforced on the axis so we know helicity is 1/2
-        self.helicity = 0.5
+        sign_halfhelicity = np.sign(self.helicity)
+        self.helicity = 0.5*sign_halfhelicity
         #self.N_helicity =  -self.helicity * self.nfp
     self.N_helicity =  -self.helicity * self.nfp
     # We use the same sign convention for torsion as the
@@ -235,19 +254,19 @@ def init_axis(self):
         B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.B0_svals))]))
         self.B0 = B0
         G0 = self.sG * np.sum(self.B0 * d_l_d_phi) / nphi
-        dproptoB = True # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
+        #d_proptoB = False # makes d= sqrt(d_over_curvature/B0)*curvature, this is sometimes useful for half-helicity
 
         self.d = np.zeros(nphi)
         if not self.d_over_curvature == 0:
-            if dproptoB == True: 
+            if self.d_proptoB == True: 
                 self.d = np.sqrt(self.d_over_curvature/B0) * curvature
             else:
-                self.d =self.d_over_curvature* curvature
-        elif not self.d_over_curvature_cvals == []:
-            if np.size(self.d_over_curvature_cvals) == self.nphi:
-                self.d = self.d_over_curvature_cvals * curvature
-            else:
-                self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
+                self.d =self.d_over_curvature *curvature
+#        elif not self.d_over_curvature_cvals == []:
+#            if np.size(self.d_over_curvature_cvals) == self.nphi:
+#                self.d = self.d_over_curvature_cvals * curvature
+#            else:
+#                self.d = np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi) * curvature for i in range(len(self.d_over_curvature_cvals))]))
         elif not len(self.d_over_curvature_spline)==0:
             N_points = len(self.d_over_curvature_spline)
             x_in = np.linspace(0,1,N_points)*np.pi/self.nfp
@@ -260,8 +279,10 @@ def init_axis(self):
             self.d = temp_d_over_curv * curvature
 
         self.d -= self.k_second_order_SS * nfp * self.B0_vals[1] * np.sin(nfp * varphi) / B0
-        self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi)*curvature for i in range(len(self.d_cvals))]))
-        self.d += np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_svals))]))
+        self.d += np.array(sum([self.d_over_curvature_cvals[i]*np.cos(nfp*i*varphi)*curvature for i in range(len(self.d_over_curvature_cvals))]))
+        self.d += np.array(sum([self.d_over_curvature_svals[i]*np.sin(nfp*i*varphi) *curvature*sign_curvature_change  for i in range(len(self.d_over_curvature_svals))]))
+        self.d += np.array(sum([self.d_cvals[i]*np.cos(nfp*i*varphi) for i in range(len(self.d_cvals))]))
+        self.d += np.array(sum([self.d_svals[i]*np.sin(nfp*i*varphi) for i in range(len(self.d_svals))]))
 
     self.d_l_d_varphi = self.sG * G0 / self.B0   
     self.d_d_varphi = np.zeros((nphi, nphi))

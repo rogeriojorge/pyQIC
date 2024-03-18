@@ -39,7 +39,8 @@ class Qic():
     def __init__(self, rc, zs, rs=[], zc=[], nfp=1, etabar=1., sigma0=0., B0=1.,
                  B0_vals=[], B0_svals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
                  omn = False, omn_method='buffer', k_buffer=1, p_buffer=0, delta  = np.pi/5, k_second_order_SS = 0.0, I2=0., sG=1, spsi=1, nphi=31,
-                 B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = [], d_over_curvature_spline = [],half_helicity=True):
+                 B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = [],\
+                 d_over_curvature_svals = [],d_over_curvature_spline = [], d_propToB = False, half_helicity=True):
         """
         Create a near-axis stellarator.
         """
@@ -48,6 +49,7 @@ class Qic():
         nfourier = np.max([len(rc), len(zs), len(rs), len(zc)])
         self.nfourier = nfourier
         self.half_helicity = half_helicity
+        self.d_proptoB = d_propToB
         #nmaxsizeR = np.max([nfourier,10])
         #self.rc = np.zeros(nfourier)
         # self.zs = np.zeros(nfourier)
@@ -69,6 +71,7 @@ class Qic():
         self.k_second_order_SS = k_second_order_SS
         self.d_over_curvature = d_over_curvature
         self.d_over_curvature_cvals = d_over_curvature_cvals
+        self.d_over_curvature_svals = d_over_curvature_svals
         self.d_over_curvature_spline = d_over_curvature_spline
 
         # Force nphi to be odd:
