@@ -205,7 +205,7 @@ class Qic():
         dofs = np.concatenate((self.rc, self.zs, self.rs, self.zc,
                                np.array([self.etabar, self.sigma0, self.B2s, self.B2c, self.p2, self.I2, self.delta]),
                                self.B0_vals, self.B0_svals, self.d_cvals, self.d_svals, self.alpha_cvals, self.alpha_svals,
-                               self.B2c_cvals, self.B2c_svals, self.B2s_cvals, self.B2s_svals, self.d_over_curvature_cvals, self.d_over_curvature_spline, np.array([self.k_second_order_SS,self.d_over_curvature])))
+                               self.B2c_cvals, self.B2c_svals, self.B2s_cvals, self.B2s_svals, self.d_over_curvature_cvals,self.d_over_curvature_svals, self.d_over_curvature_spline, np.array([self.k_second_order_SS,self.d_over_curvature])))
         assert dofs.ndim == 1 and dofs.size != 1
         return dofs
 
@@ -293,6 +293,7 @@ class Qic():
         names += ['B2sc({})'.format(j) for j in range(len(self.B2s_cvals))]
         names += ['B2ss({})'.format(j) for j in range(len(self.B2s_svals))]
         names += ['d_over_curvaturec({})'.format(j) for j in range(len(self.d_over_curvature_cvals))]
+        names += ['d_over_curvatures({})'.format(j) for j in range(len(self.d_over_curvature_svals))]
         names += ['d_over_curvature_spline({})'.format(j) for j in range(len(self.d_over_curvature_spline))]
         names += ['k_second_order_SS','d_over_curvature']
         self.names = names
