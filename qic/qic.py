@@ -217,7 +217,7 @@ class Qic():
         assert len(x) == self.nfourier * 4 + 7 + len(self.B0_vals) + len(self.B0_svals) + len(self.d_cvals) + len(self.d_svals)\
                        + len(self.alpha_cvals) + len(self.alpha_svals)\
                        + len(self.B2c_cvals) + len(self.B2c_svals) + len(self.B2s_cvals) + len(self.B2s_svals)\
-                       + len(self.d_over_curvature_cvals) + len(self.d_over_curvature_spline) + 2
+                       + len(self.d_over_curvature_cvals) + len(self.d_over_curvature_svals)+ len(self.d_over_curvature_spline) + 2
         self.rc = x[self.nfourier * 0 : self.nfourier * 1]
         self.zs = x[self.nfourier * 1 : self.nfourier * 2]
         self.rs = x[self.nfourier * 2 : self.nfourier * 3]
