@@ -251,8 +251,9 @@ class Qic():
         self.B2s_svals               = x[sz_params + 1 : sz_params + len(self.B2s_svals) + 1]
         sz_params += len(self.B2s_svals)
         self.d_over_curvature_cvals  = x[sz_params + 1 : sz_params + len(self.d_over_curvature_cvals) + 1]
-        self.d_over_curvature_svals  = x[sz_params + 1 : sz_params + len(self.d_over_curvature_svals) + 1]
         sz_params += len(self.d_over_curvature_cvals)
+        self.d_over_curvature_svals  = x[sz_params + 1 : sz_params + len(self.d_over_curvature_svals) + 1]
+        sz_params += len(self.d_over_curvature_svals)
         self.d_over_curvature_spline = x[sz_params + 1 : sz_params + len(self.d_over_curvature_spline) + 1]
         sz_params += len(self.d_over_curvature_spline)
         self.k_second_order_SS       = x[sz_params + 1]

@@ -196,6 +196,7 @@ def init_axis(self):
     self._determine_helicity()
     if half_helicity == True:  ### Half helicity conditions are enforced on the axis so we know helicity is 1/2
         sign_halfhelicity = np.sign(self.helicity)
+        if sign_halfhelicity==0: sign_halfhelicity =1
         self.helicity = 0.5*sign_halfhelicity
         #self.N_helicity =  -self.helicity * self.nfp
     self.N_helicity =  -self.helicity * self.nfp
