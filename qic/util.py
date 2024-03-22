@@ -138,7 +138,12 @@ def B_mag(self, r, theta, phi, Boozer_toroidal = False, B0=1):
     thetaN = theta-self.N_helicity*varphi
 
     if self.order == 'r1':
-        return B0*self.B0_spline(phi) + r * (self.B1c_spline(phi) * np.cos(thetaN) + self.B1s_spline(phi) * np.sin(thetaN))
+        if self.half_helicity == True:
+            return B0*self.B0_spline_tripled(phi) + r * (self.B1c_tripled_spline(phi) * np.cos(thetaN) + self.B1s_tripled_spline(phi) * np.sin(thetaN))
+        else:
+            return B0*self.B0_spline(phi) + r * (self.B1c_spline(phi) * np.cos(thetaN) + self.B1s_spline(phi) * np.sin(thetaN))
+    
     else:
         return B0*self.B0_spline(phi) + r * (self.B1c_spline(phi) * np.cos(thetaN) + self.B1s_spline(phi) * np.sin(thetaN)) \
                                    + r * r * (self.B20_spline(phi) + self.B2c_spline(phi) * np.cos(2*thetaN) + self.B2s_spline(phi) * np.sin(2*thetaN))
+

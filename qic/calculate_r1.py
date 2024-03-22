@@ -242,6 +242,14 @@ def r1_diagnostics(self):
 
     self.B1c_spline = self.convert_to_spline(self.B1c)
     self.B1s_spline = self.convert_to_spline(self.B1s)
+
+    if self.half_helicity==True:
+        self.B1c_tripled = np.append(-self.B1c,self.B1c,axis=0)
+        self.B1c_tripled = np.append(self.B1c_tripled,-self.B1c,axis=0)
+        self.B1s_tripled = np.append(-self.B1s,self.B1s,axis=0)
+        self.B1s_tripled = np.append(self.B1s_tripled,-self.B1s,axis=0)
+        self.B1c_tripled_spline = self.convert_to_spline_tripled(self.B1c_tripled)
+        self.B1s_tripled_spline = self.convert_to_spline_tripled(self.B1s_tripled)    
     # X = X1c*cos(theta-N*varphi)+X1s*sin(theta-N*varphi)
     # theta=0 -> X(theta=0)=X1c*cos(N*varphi)-X1s*sin(N*varphi)
     # theta=0 -> Y(theta=0)=Y1c*cos(N*varphi)-Y1s*sin(N*varphi)

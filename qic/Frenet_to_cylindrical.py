@@ -246,7 +246,7 @@ def Frenet_to_cylindrical_1stOrder(self, r, ntheta=20):
     R1c = (-self.binormal_cylindrical[:,2] * self.X1c_untwisted + self.normal_cylindrical[:,2] * self.Y1c_untwisted) * self.d_l_d_phi / self.R0
     R1s = (-self.binormal_cylindrical[:,2] * self.X1s_untwisted + self.normal_cylindrical[:,2]*self.Y1s_untwisted)*self.d_l_d_phi/self.R0
     Z1c = (self.binormal_cylindrical[:,0] * self.X1c_untwisted - self.normal_cylindrical[:,0]*self.Y1c_untwisted)*self.d_l_d_phi/self.R0
-    Z1s = (self.binormal_cylindrical[:,0]*self.X1s_untwisted - self.normal_cylindrical[:,0]*self.Y1s_untwisted)*self.d_l_d_phi/self.R0
+    Z1s = (self.binormal_cylindrical[:,0]* self.X1s_untwisted - self.normal_cylindrical[:,0]*self.Y1s_untwisted)*self.d_l_d_phi/self.R0
     
     return R1c, R1s, Z1c, Z1s
 

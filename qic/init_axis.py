@@ -366,7 +366,9 @@ def init_axis(self):
         self.binormal_R_spline_tripled    = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,0])
         self.binormal_phi_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,1])
         self.binormal_z_spline_tripled  = self.convert_to_spline_tripled(self.binormal_cylindrical_tripled[:,2])
-
+        self.B0_tripled = np.append(self.B0,self.B0,axis=0)
+        self.B0_tripled = np.append(self.B0_tripled,self.B0,axis=0)
+        self.B0_spline_tripled = self.convert_to_spline_tripled(self.B0_tripled)         
     # Spline interpolant for the magnetic field on-axis as a function of phi (not varphi)
     self.B0_spline = self.convert_to_spline(self.B0)
 
