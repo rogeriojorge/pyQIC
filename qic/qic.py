@@ -40,7 +40,7 @@ class Qic():
                  B0_vals=[], B0_svals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
                  omn = False, omn_method='buffer', k_buffer=1, p_buffer=0, delta  = np.pi/5, k_second_order_SS = 0.0, I2=0., sG=1, spsi=1, nphi=31,
                  B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = [],\
-                 d_over_curvature_svals = [],d_over_curvature_spline = [], d_propToB = False, half_helicity=True):
+                 d_over_curvature_svals = [],d_over_curvature_spline = [], d_propToB = False, half_helicity=False):
         """
         Create a near-axis stellarator.
         """
@@ -49,7 +49,7 @@ class Qic():
         nfourier = np.max([len(rc), len(zs), len(rs), len(zc)])
         self.nfourier = nfourier
         self.half_helicity = half_helicity
-        self.d_proptoB = d_propToB
+        self.d_propToB = d_propToB
         #nmaxsizeR = np.max([nfourier,10])
         #self.rc = np.zeros(nfourier)
         # self.zs = np.zeros(nfourier)
@@ -515,6 +515,7 @@ class Qic():
                              nphi=99,
                              order='r3')
         elif name == "QI NFP2 Katia" or name == "QI NFP2 DirectConstruction":
+            "2FP configuration of Camacho, Plunk, Jorge (2022)"
             rc      = [ 1.0,0.0,-1/17 ]
             zs      = [ 0.0,0.8/2.04,0.01/2.04 ]
             rs      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
@@ -531,6 +532,7 @@ class Qic():
             add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature)
         
         elif name == "QI NFP3 Katia" or name == "QI NFP3 DirectConstruction":
+            "3FP configuration of Camacho, Plunk, Jorge (2022)"
             rc      = [ 1.0,  9.075485257221899e-02, -2.058279495912439e-02, -1.106766494783158e-02, -1.644390251809640e-03 ]
             zs      = [ 0.0,0.36,0.02,0.01 ]
             rs      = [ 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0 ]
@@ -545,7 +547,69 @@ class Qic():
             nfp     = 3
             nphi    = 201
             add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature)
-       
+        
+        elif name == "QI NFP2 Half-helicity" or name == "QI NFP2 HH Katia":
+            "2FP half-helicity configuration of Camacho, Plunk (2023)"
+            rc      = [ 1.0, -0.074,-1/17,0.01]
+            zs      = [ 0.0,-0.474,0.06,0.006]
+            rs      = [ 0.0,0.0]
+            zc      = [ 0.0,0.0]
+            sigma0  =  0.0
+            B0_vals = [1,0.165]
+            omn_method ='non-zone'
+            k_buffer = 2
+            d_over_curvature   = 0.4
+            d_svals = [ 0.0,0.0,0.0,0.0 ]
+            delta   = 0.0
+            nfp     = 2
+            nphi    = 201
+            half_helicity =True
+            d_propToB = True
+            add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature, half_helicity =half_helicity, d_propToB=d_propToB)
+ 
+        elif name == "QI NFP5 Half-helicity" or name == "QI NFP5 HH Katia":
+            "5FP half-helicity configuration of Camacho, Plunk (2023)"
+            rc      = [ 1.0,0.2260/26,-1/101,-1e-3]
+            zs      = [ 0.0,-3.1986/27,0.007,0.0026]
+            rs      = [ 0.0,0.0]
+            zc      = [ 0.0,0.0]
+            sigma0  =  0.0
+            B0_vals = [1,0.12,-0.002]
+            omn_method ='non-zone'
+            k_buffer = 2
+            d_over_curvature   = 0.28
+            d_over_curvature_svals = [ 0.0,0.04,0.0,0.0 ]
+            d_over_curvature_cvals = [ 0.0,-0.065,0.0,0.0 ]
+            d_svals = [0.0,0.0]
+            delta   = 0.0
+            nfp     = 5
+            nphi    = 201
+            half_helicity =True
+            d_propToB = True
+            add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals,d_over_curvature_svals=d_over_curvature_svals, d_over_curvature_cvals=d_over_curvature_cvals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature, half_helicity =half_helicity, d_propToB=d_propToB)
+
+        elif name == "QI NFP5 Half-helicity constant elongation" or name == "QI NFP5 HH Katia const elong":
+            "5FP half-helicity configuration of Camacho, Plunk (2023)"
+            rc      = [ 1.0,0.2260/26,-1/101,-1e-3]
+            zs      = [ 0.0,-3.1986/27,0.007,0.0026]
+            rs      = [ 0.0,0.0]
+            zc      = [ 0.0,0.0]
+            sigma0  =  0.0
+            B0_vals = [1,0.12,-0.002]
+            omn_method ='non-zone'
+            k_buffer = 2
+            d_over_curvature   = 0.4
+            d_over_curvature_svals = [ 0.0,0.0,0.0,0.0 ]
+            d_over_curvature_cvals = [0.0,0.0591,-0.0282,-0.0157,-0.0038]
+            d_svals = [0.0,0.0]
+            delta   = 0.0
+            nfp     = 5
+            nphi    = 201
+            half_helicity =True
+            d_propToB = True
+            add_default_args(kwargs, sigma0 = sigma0, omn_method = omn_method, k_buffer=k_buffer, rs=rs,zc=zc, rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals,d_over_curvature_svals=d_over_curvature_svals, d_over_curvature_cvals=d_over_curvature_cvals, nphi=nphi, omn=True, delta=delta, d_over_curvature=d_over_curvature, half_helicity =half_helicity, d_propToB=d_propToB)
+                
+              
         else:
             raise ValueError('Unrecognized configuration name')
 

@@ -198,7 +198,7 @@ def _determine_helicity(self):
                 quadrant[j] = 2
             else:
                 quadrant[j] = 3
-    quadrant[self.nphi] = quadrant[0] ### commenting this sets half-helicity properly
+    if self.half_helicity==False: quadrant[self.nphi] = quadrant[0] ### commenting this sets half-helicity properly
 
     counter = 0
     for j in range(self.nphi):
