@@ -38,7 +38,7 @@ def init_axis(self):
     zs  = self.zs
     zc  = self.zc
     half_helicity = self.half_helicity #  False #self.half_helicity 
-    curvature_zero_order = 1
+    curvature_zero_order = self.curvature_zero_order
 
     if omn:
         ### Setting higher order rc to make sure kappa has first order zeros

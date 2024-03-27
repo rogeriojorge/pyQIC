@@ -40,7 +40,7 @@ class Qic():
                  B0_vals=[], B0_svals=[], d_cvals=[], d_svals=[], alpha_cvals=[0.], alpha_svals=[0.], phi_shift=0,
                  omn = False, omn_method='buffer', k_buffer=1, p_buffer=0, delta  = np.pi/5, k_second_order_SS = 0.0, I2=0., sG=1, spsi=1, nphi=31,
                  B2s=0., B2c=0., B2s_cvals=[], B2s_svals=[], B2c_cvals=[], B2c_svals=[], p2=0., order="r1", d_over_curvature=0, d_over_curvature_cvals = [],\
-                 d_over_curvature_svals = [],d_over_curvature_spline = [], d_propToB = False, half_helicity=False):
+                 d_over_curvature_svals = [],d_over_curvature_spline = [], d_propToB = False, half_helicity=False, curvature_zero_order = 1):
         """
         Create a near-axis stellarator.
         """
@@ -50,6 +50,10 @@ class Qic():
         self.nfourier = nfourier
         self.half_helicity = half_helicity
         self.d_propToB = d_propToB
+        if curvature_zero_order== 1 or curvature_zero_order==3:
+            self.curvature_zero_order = curvature_zero_order #order of curvature zeros at Bmin for half-helicity curves. Only 1 and 3 implemented 
+        else:     
+            raise ValueError('curvature_zero_order must be 1 or 3')
         #nmaxsizeR = np.max([nfourier,10])
         #self.rc = np.zeros(nfourier)
         # self.zs = np.zeros(nfourier)
