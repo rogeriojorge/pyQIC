@@ -290,6 +290,8 @@ def r1_diagnostics(self):
     # or use (X,Y) for elongation in the plane perpendicular to the magnetic axis.
     p = self.X1s * self.X1s + self.X1c * self.X1c + self.Y1s * self.Y1s + self.Y1c * self.Y1c
     q = self.X1s * self.Y1c - self.X1c * self.Y1s
+    #p = self.R1s * self.R1s + self.R1c * self.R1c + self.Z1s * self.Z1s + self.Z1c * self.Z1c
+    #q = self.R1s * self.Z1c - self.R1c * self.Z1s
     self.elongation = (p + np.sqrt(p * p - 4 * q * q)) / (2 * np.abs(q))
     self.mean_elongation = np.sum(self.elongation * self.d_l_d_phi) / np.sum(self.d_l_d_phi)
     index = np.argmax(self.elongation)

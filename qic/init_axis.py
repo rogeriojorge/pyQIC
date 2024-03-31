@@ -87,21 +87,105 @@ def init_axis(self):
                 #zs[10] = -(zs[1]*(2+nfp*nfp) + zs[2]*(4+8*nfp*nfp) + zs[3]*(6+27*nfp*nfp) + zs[4]*(8+64*nfp*nfp) + zs[5]*(10+125*nfp*nfp) \
                 #+ zs[6]*(12+216*nfp*nfp) + zs[7]*(14+343*nfp*nfp) + zs[8]*(16+ 512*nfp*nfp) + zs[9]*(18+729*nfp*nfp)) / (20*(1+50*nfp*nfp)) 
             elif curvature_zero_order == 3:
-                rc[4] = -((45 + 1449*nfp*nfp + 8100*nfp*nfp*nfp*nfp - 30 *rc[1] - 1236*nfp*nfp*rc[1] - 5766*(nfp*nfp*nfp*nfp)*rc[1] - 5400*(nfp*nfp*nfp*nfp*nfp*nfp)*rc[1] + 40 *rc[2] \
-               + 1320 *nfp*nfp*rc[2] + 9152 *nfp*nfp*nfp*nfp *rc[2] + 28800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2]- 20 *rc[3] - 856 *nfp*nfp*rc[3] - 5796* nfp*nfp*nfp*nfp *rc[3] \
-                - 32400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177*nfp*nfp + 1876*nfp*nfp*nfp*nfp + 14400*nfp*nfp*nfp*nfp*nfp*nfp)))
+                if len(zs) == 4:
+                    rc[1] =  ((5 + 4*nfp**2)*(1 + 9*nfp**2))/( 2*(5 + 30*nfp**2 + 49*nfp**4 + 36*nfp**6))
+                    rc[2] = -1.0 / (1.0 + 4.0 * nfp * nfp)
+                    rc[3] =  -(((1 +nfp**2)*(5 + 4*nfp**2))/(2*(5 + 30*nfp**2 + 49*nfp**4 + 36*nfp**6)))
+                    zs[2] = 0
+                    zs[3] = -(zs[1]*(2+nfp*nfp)) / (3.0*( 2.0 + 9.0*nfp * nfp))
+                
+                elif len(zs) == 5:
+                    rc[2] = (2*(-10 - 122*nfp**2 - 288*nfp**4 + 5*rc[1] + 90*nfp**2*rc[1] + \
+                                169*nfp**4*rc[1] + 144*nfp**6*rc[1]))/(3*(5 + 65*nfp**2 + 244*nfp**4 + 576*nfp**6))
+                    rc[3] =  -((rc[1] +nfp**2*rc[1])/(1 + 9*nfp**2))
+                    rc[4] = -((-5 - 49*nfp**2 - 36*nfp**4 + 10*rc[1] + 60*nfp**2*rc[1] + \
+                               98*nfp**4*rc[1] + 72*nfp**6*rc[1])/(3*(5 + 65*nfp**2 + 244*nfp**4 + 576*nfp**6)))
+                    zs[3] = -(zs[1]*(2+nfp*nfp) ) / (3.0*( 2.0 + 9.0* nfp * nfp))
+                    zs[4] = -(((1 + 2*nfp**2)*zs[2])/(2*(1 + 8*nfp**2)))
 
-                rc[5] = -((rc[1] + nfp*nfp*rc[1] + rc[3]+ 9*nfp*nfp *rc[3])/(1 + 25*nfp*nfp))
+                elif len(zs) == 6:
+                    rc[3] = -((-20 - 564*nfp**2 - 1600*nfp**4 + 30*rc[1] + 636*(nfp**2)*rc[1] +\
+                                2646*(nfp**4)*rc[1] + 2400*(nfp**6)*rc[1] -15*rc[2] - 435*nfp**2*rc[2] - \
+                                1692*nfp**4*rc[2] - 4800*nfp**6*rc[2])/(4*(5 + 114*nfp**2 + 769*nfp**4 +\
+                                3600*nfp**6)))
+                    rc[4] = -((1 + rc[2] + 4*nfp**2*rc[2])/(1 + 16*nfp**2))
+                    rc[5] = -((20 + 244*nfp**2 + 576*nfp**4 - 10*rc[1] - 180*nfp**2*rc[1] - \
+                               338*nfp**4*rc[1] - 288*nfp**6*rc[1] + 15*rc[2] + 195*nfp**2*rc[2] +\
+                               732*nfp**4*rc[2] + 1728*nfp**6*rc[2])/(4*(5 + 114*nfp**2 + 769*nfp**4 + 3600*nfp**6)))
+                    zs[4] = -((zs[2] + 2*(nfp**2)*zs[2])/(2*(1 + 8*nfp**2))), 
+                    zs[5] = -((2*zs[1] + (nfp**2)*zs[1] + 6*zs[3] + 27*(nfp**2)*zs[3])/(5*(2 + 25*nfp**2)))               
+                
+                elif len(zs) == 7:
+                    rc[4] = -((45 + 1449 *nfp**2 + 8100 *nfp**4 - 30*rc[1] - 1236 *nfp**2*rc[1] -\
+                                5766 *nfp**4*rc[1] - 5400 *nfp**6*rc[1] + 40*rc[2] + 1320 *nfp**2*rc[2] +\
+                                9152 *nfp**4*rc[2] + 28800 *nfp**6*rc[2] - 20*rc[3] - 856 *nfp**2*rc[3] -\
+                                5796 *nfp**4*rc[3] - 32400 *nfp**6*rc[3])/(5*(5 + 177 *nfp**2 +\
+                                1876 *nfp**4 + 14400 *nfp**6)))
+                    rc[5] = -((rc[1] + nfp**2*rc[1] +rc[3] + 9*nfp**2*rc[3])/(1 + 25 *nfp**2))
+                    rc[6] = -((-20 - 564*nfp**2 - 1600*nfp**4 + 30*rc[1] + 636 *nfp**2*rc[1] +\
+                                2646*nfp**4*rc[1] + 2400*nfp**6*rc[1] - 15*rc[2] - 435*nfp**2*rc[2] -\
+                                1692*nfp**4*rc[2] - 4800*nfp**6*rc[2] + 20*rc[3] + 456*nfp**2*rc[3] +\
+                                3076*nfp**4*rc[3] + 14400*nfp**6*rc[3])/(5*(5 + 177 *nfp**2 +\
+                                1876*nfp**4 + 14400 *nfp**6)))
+                    zs[5] = -((2*zs[1] + (nfp**2)*zs[1] + 6*zs[3] + 27*(nfp**2)*zs[3])/(5*(2 + 25*nfp**2)))
+                    zs[6] = -((zs[2] + 2*(nfp**2)*zs[2] + 2*zs[4] + 16*(nfp**2)*zs[4])/(3*(1 + 18*nfp**2)))
+                
+                elif len(zs) == 8:
+                    rc[5] = -((-45 - 2529*nfp**2 - 15876*nfp**4 + 60*rc[1] + 2760*nfp**2*rc[1] +\
+                                22188*nfp**4*rc[1] + 21168*nfp**6*rc[1] - 40*rc[2] - 2280*nfp**2*rc[2] -\
+                                16832*nfp**4*rc[2] - 56448*nfp**6*rc[2] + 50*rc[3] + 2380*nfp**2*rc[3] +\
+                                25290*nfp**4*rc[3] + 158760*nfp**6*rc[3] - 25*rc[4] - 1485*nfp**2*rc[4] -\
+                                15620*nfp**4*rc[4] - 141120*nfp**6*rc[4])/(6*(5 + 254*nfp**2 + 3889*nfp**4 +\
+                                44100*nfp**6)))
+                    rc[6] = -((1 + rc[2] + 4*nfp**2*rc[2] +rc[4] + 16*nfp**2*rc[4])/(1 + 36*nfp**2))
+                    rc[7] = -((45 + 1449*nfp**2 + 8100*nfp**4 - 30*rc[1] - 1236*nfp**2*rc[1] -\
+                                5766*nfp**4*rc[1] - 5400*nfp**6*rc[1] + 40*rc[2] + 1320*nfp**2*rc[2] +\
+                                9152*nfp**4*rc[2] + 28800*nfp**6*rc[2] - 20*rc[3] - 856*nfp**2*rc[3] -\
+                                5796*nfp**4*rc[3] - 32400*nfp**6*rc[3] + 25*rc[4] + 885*nfp**2*rc[4] +\
+                                9380*nfp**4*rc[4] + 72000*nfp**6*rc[4])/(6*(5 + 254*nfp**2 + 3889*nfp**4 +\
+                                44100*nfp**6)))
+                       
+                    zs[6] = -((zs[2] + 2*(nfp**2)*zs[2] + 2*zs[4] + 16*(nfp**2)*zs[4])/(3*(1 + 18*nfp**2)))
+                    zs[7] = -((2*zs[1] + (nfp**2)*zs[1] + 6*zs[3] + 27*(nfp**2)*zs[3] + 10*zs[5] +\
+                                125*(nfp**2)*zs[5])/(7*(2 + 49*nfp**2)))
 
-                rc[6] = -((-20 - 564*nfp*nfp - 1600*nfp*nfp*nfp*nfp + 30*rc[1] + 636*nfp*nfp *rc[1]+ 2646 *nfp*nfp*nfp*nfp *rc[1] \
-               + 2400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[1] - 15 *rc[2] - 435 *nfp*nfp *rc[2] - 1692 *nfp*nfp*nfp*nfp *rc[2] \
-                - 4800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2] + 20 *rc[3]+ 456 *nfp*nfp *rc[3]+ 3076 *nfp*nfp*nfp*nfp *rc[3] \
-                + 14400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177 *nfp*nfp + 1876 *nfp*nfp*nfp*nfp \
-                + 14400 *nfp*nfp*nfp*nfp*nfp*nfp)))
+                else:
+                    rc[6] = -((80 + 4944*nfp**2 + 50176*nfp**4 - 60*rc[1] - 4440*nfp**2*rc[1] -\
+                                38988*nfp**4*rc[1] - 37632*nfp**6*rc[1] + 75*rc[2] + 4695*nfp**2*rc[2] +\
+                                53820*nfp**4*rc[2] + 188160*nfp**6*rc[2] - 50*rc[3] - 3780*nfp**2*rc[3] -\
+                                41530*nfp**4*rc[3] - 282240*nfp**6*rc[3] + 60*rc[4] + 3900*nfp**2*rc[4] +\
+                                59328*nfp**4*rc[4] + 602112*nfp**6*rc[4] - 30*rc[5] - 2364*nfp**2*rc[5] -\
+                                35766*nfp**4*rc[5] - 470400*nfp**6*rc[5])/(7*(5 + 345*nfp**2 + 7204*nfp**4 +\
+                                112896*nfp**6)))
+                    rc[7] = -((rc[1] + nfp**2*rc[1] + rc[3] + 9*nfp**2*rc[3] + rc[5] +\
+                                25*nfp**2*rc[5])/(1 + 49*nfp**2))
+                    rc[8] = -((-45 - 2529*nfp**2 - 15876*nfp**4 + 60*rc[1] + 2760*nfp**2*rc[1] +\
+                                22188*nfp**4*rc[1] + 21168*nfp**6*rc[1] - 40*rc[2] - 2280*nfp**2*rc[2] -\
+                                16832*nfp**4*rc[2] - 56448*nfp**6*rc[2] + 50*rc[3] + 2380*nfp**2*rc[3] +\
+                                25290*nfp**4*rc[3] + 158760*nfp**6*rc[3] - 25*rc[4] - 1485*nfp**2*rc[4] -\
+                                15620*nfp**4*rc[4] - 141120*nfp**6*rc[4] + 30*rc[5] + 1524*nfp**2*rc[5] +\
+                                23334*nfp**4*rc[5] + 264600*nfp**6*rc[5])/(7*(5 + 345*nfp**2 + 7204*nfp**4 +\
+                                112896*nfp**6)))
+                    zs[7] = -((2*zs[1] + (nfp**2)*zs[1] + 6*zs[3] + 27*(nfp**2)*zs[3] + 10*zs[5] +\
+                                125*(nfp**2)*zs[5])/(7*(2 + 49*nfp**2)))
+                    zs[8] = -((zs[2] + 2*(nfp**2)*zs[2] + 2*zs[4] + 16*(nfp**2)*zs[4] + 3*zs[6] +\
+                                54*(nfp**2)*zs[6])/(4*(1 + 32*nfp**2)))
 
-                zs[5] = -((2*zs[1] + nfp*nfp*zs[1] + 6 *zs[3] + 27*nfp*nfp*zs[3])/(5*(2 + 25*nfp*nfp)))
+            #     rc[4] = -((45 + 1449*nfp*nfp + 8100*nfp*nfp*nfp*nfp - 30 *rc[1] - 1236*nfp*nfp*rc[1] - 5766*(nfp*nfp*nfp*nfp)*rc[1] - 5400*(nfp*nfp*nfp*nfp*nfp*nfp)*rc[1] + 40 *rc[2] \
+            #    + 1320 *nfp*nfp*rc[2] + 9152 *nfp*nfp*nfp*nfp *rc[2] + 28800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2]- 20 *rc[3] - 856 *nfp*nfp*rc[3] - 5796* nfp*nfp*nfp*nfp *rc[3] \
+            #     - 32400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177*nfp*nfp + 1876*nfp*nfp*nfp*nfp + 14400*nfp*nfp*nfp*nfp*nfp*nfp)))
 
-                zs[6] = -((zs[2] + 2*nfp*nfp *zs[2] + 2 *zs[4] + 16*nfp*nfp *zs[4])/(3*(1 + 18*nfp*nfp)))
+            #     rc[5] = -((rc[1] + nfp*nfp*rc[1] + rc[3]+ 9*nfp*nfp *rc[3])/(1 + 25*nfp*nfp))
+
+            #     rc[6] = -((-20 - 564*nfp*nfp - 1600*nfp*nfp*nfp*nfp + 30*rc[1] + 636*nfp*nfp *rc[1]+ 2646 *nfp*nfp*nfp*nfp *rc[1] \
+            #    + 2400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[1] - 15 *rc[2] - 435 *nfp*nfp *rc[2] - 1692 *nfp*nfp*nfp*nfp *rc[2] \
+            #     - 4800 *nfp*nfp*nfp*nfp*nfp*nfp *rc[2] + 20 *rc[3]+ 456 *nfp*nfp *rc[3]+ 3076 *nfp*nfp*nfp*nfp *rc[3] \
+            #     + 14400 *nfp*nfp*nfp*nfp*nfp*nfp *rc[3])/(5*(5 + 177 *nfp*nfp + 1876 *nfp*nfp*nfp*nfp \
+            #     + 14400 *nfp*nfp*nfp*nfp*nfp*nfp)))
+
+            #     zs[5] = -((2*zs[1] + nfp*nfp*zs[1] + 6 *zs[3] + 27*nfp*nfp*zs[3])/(5*(2 + 25*nfp*nfp)))
+
+            #     zs[6] = -((zs[2] + 2*nfp*nfp *zs[2] + 2 *zs[4] + 16*nfp*nfp *zs[4])/(3*(1 + 18*nfp*nfp)))
 
     temp2 = np.zeros(self.nfourier)
     temp2[:len(zs)] = zs
