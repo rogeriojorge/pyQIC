@@ -50,10 +50,10 @@ class Qic():
         self.nfourier = nfourier
         self.half_helicity = half_helicity
         self.d_propToB = d_propToB
-        if curvature_zero_order== 1 or curvature_zero_order==3:
+        if curvature_zero_order== 1 or curvature_zero_order==3 or curvature_zero_order==5:
             self.curvature_zero_order = curvature_zero_order #order of curvature zeros at Bmin for half-helicity curves. Only 1 and 3 implemented 
         else:     
-            raise ValueError('curvature_zero_order must be 1 or 3')
+            raise ValueError('curvature_zero_order must be 1, 3 or 5')
         #nmaxsizeR = np.max([nfourier,10])
         #self.rc = np.zeros(nfourier)
         # self.zs = np.zeros(nfourier)
