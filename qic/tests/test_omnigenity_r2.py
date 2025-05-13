@@ -2,7 +2,7 @@
 
 import unittest
 import numpy as np
-from qsc.qsc import Qsc
+from qic.qic import Qic
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +36,7 @@ class NewtonTests(unittest.TestCase):
         B2s_cvals = [ -0.1318900156971933,0.5649273497420052,-0.022473047295254987,-0.08265049514305536,0.41342725761575694,-0.2931657967710277,0.31542024309141736,-0.21005748857764805,0.6787636103131851,-0.1240125056565712,0.1242848766908088,0.0 ]
         B2c_svals = [ 0.0,1.5753225284964127,-0.57516292896785,0.8948531647751348,-3.0875825530983967,-0.06329756906736621,-1.7890702692964318,1.039759175233141,-0.1690212827616995,-0.16762613422413772,0.015322897225364228,0.0,0.0 ]
         p2      =  0.0
-        stel    =  Qsc(rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, B2c_cvals=B2c_cvals, B2s_svals=B2s_svals, p2=p2, order='r3', k_second_order_SS=k_second_order_SS, B2s_cvals=B2s_cvals, B2c_svals=B2c_svals)
+        stel    =  Qic(rc=rc,zs=zs, nfp=nfp, B0_vals=B0_vals, d_svals=d_svals, nphi=nphi, omn=True, delta=delta, B2c_cvals=B2c_cvals, B2s_svals=B2s_svals, p2=p2, order='r3', k_second_order_SS=k_second_order_SS, B2s_cvals=B2s_cvals, B2c_svals=B2c_svals)
         import matplotlib.pyplot as plt
         # plt.plot(stel.X1c, label='X1c')
         # plt.plot(stel.X1s, label='X1s')
