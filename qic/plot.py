@@ -405,6 +405,20 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
     phi = np.linspace(0, 2 * np.pi, nphi)  # Endpoint = true and no nfp factor, because this is what is used in get_boundary()
     R_2D_spline = interp1d(phi, R_2D_plot, axis=1)
     z_2D_spline = interp1d(phi, z_2D_plot, axis=1)
+    
+    # Define a list of colors
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b']
+
+    # Counter to keep track of the color index
+    color_index = 0
+
+    # Function to get the next color from the list
+    def get_next_color():
+        nonlocal color_index
+        color = colors[color_index]
+        color_index = (color_index + 1) % len(colors)
+        return color
+    
     ## Poloidal plot
     phi1dplot_RZ = np.linspace(0, 2 * np.pi / self.nfp, nsections, endpoint=False)
     fig_poloidal = plt.figure(figsize=(7, 5), dpi=80)
@@ -429,7 +443,7 @@ def plot_boundary(self, r=0.1, ntheta=80, nphi=150, ntheta_fourier=20, nsections
             label = r'$\phi={7\pi}/$' + str(4 * self.nfp)
         else:
             label = '_nolegend_'
-        color = next(ax._get_lines.prop_cycler)['color']
+        color = get_next_color()
         # Plot location of the axis
         plt.plot(self.R0_func(phi), self.Z0_func(phi), marker="x", linewidth=2, label=label, color=color)
         # Plot poloidal cross-section
@@ -568,7 +582,7 @@ def B_fieldline(self, r=0.1, alpha=0, phimax=None, nphi=400, show=True, savefig=
     plt.title("r = " + str(r) + ", alpha = " + str(alpha))
     theta = alpha + self.iota * varphi_array
     plt.plot(varphi_array/np.pi, self.B_mag(r, theta, varphi_array, Boozer_toroidal=True))
-    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter(r'%g $\pi$'))
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=2))
     plt.tight_layout()
     if savefig != None:

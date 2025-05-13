@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+*input.*
+*jxbout*
+*mercier.*
+*threed1*
+*wout_*
+*parvmecinfo*
+*settings.json*
