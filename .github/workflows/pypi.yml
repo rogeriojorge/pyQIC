@@ -9,6 +9,10 @@ jobs:
   build-and-publish:
     name: Build and publish python distributions to PyPI
     runs-on: ubuntu-latest
+  
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
