@@ -1,14 +1,9 @@
-# This file is based on the instructions in
-# https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+name: Publish Python distribution to PyPI
 
-# The push to PyPI only happens for commits with a tag. This is done
-# because PyPI and TestPyPI will not let you upload files with the
-# same name as previous files. So, new files will only be accepted if
-# the version number has increased.
-
-name: Publish python distribution to PyPI
-
-on: push
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build-and-publish:
@@ -16,33 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.11
+      - uses: actions/checkout@v4
 
-    - name: Install wheel
-      run: pip install wheel
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Build a binary wheel and a source tarball
-      run: python3 setup.py sdist bdist_wheel
+      - name: Install build tools
+        run: pip install build
 
-    - name: Publish distribution to TestPyPI
-      #if: startsWith(github.ref, 'refs/tags')
-      if: "contains(github.event.head_commit.message, 'version bump')"
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.test_pypi_password }}
-        repository_url: https://test.pypi.org/legacy/
+      - name: Build package
+        run: python -m build
 
-    - name: Publish distribution to PyPI
-      #if: startsWith(github.ref, 'refs/tags')
-      if: "contains(github.event.head_commit.message, 'version bump')"
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
-
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
