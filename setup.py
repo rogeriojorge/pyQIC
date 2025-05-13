@@ -14,9 +14,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     url="https://github.com/rogeriojorge/pyQIC",
     #install_requires=['numpy', 'scipy'],
+    license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
