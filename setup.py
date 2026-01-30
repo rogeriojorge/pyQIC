@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qicna",
-    version="0.3.4",
+    version="0.3.6",
     author="Rogerio Jorge and Matt Landreman",
     author_email="rogerio.jorge@tecnico.ulisboa.pt",
     description="Quasi-isodynamic Stellarator Construction",
