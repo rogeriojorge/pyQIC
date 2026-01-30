@@ -4,7 +4,7 @@ About pyQIC
 ```pyQIC``` is a python package for generating quasi-isodynamic stellarator configurations using an expansion about magnetic axis.  pyQIC is written in pure python. This makes pyQIC user-friendly, with no need for compilation. though it is slower.
 
 This code implements the equations derived by Garren and Boozer (1991) for MHD equilibrium near the magnetic axis.
-
+It is similar to pyQSC but does not assume quasisymmetry.
 
 Requirements
 =
