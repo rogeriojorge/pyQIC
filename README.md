@@ -19,10 +19,16 @@ If you need more help regarding near-axis stellarators, you can check the docume
 
 INSTALLATION
 =
-To install the code you will need to follow the steps bellow:
+Installation from pypi can be done via
+```
+pip install qicna
+``` 
 <br>
 
-First of all you need to copy the folders and the files with the "git clone" command followed by the github repository's link.
+To install the code locally, you can run
+<br>
+
+First of all you need to copy the folders and the files with the "git clone" command, followed by the GitHub repository's link.
 Example:
 ```
 git clone https://github.com/rogeriojorge/pyQIC.git
@@ -30,14 +36,14 @@ git clone https://github.com/rogeriojorge/pyQIC.git
 <br>
 
 
-Then, install the package to your local python environment with:
+Then, install the package in your local Python environment with:
 ```
 cd pyQIC
 pip install -e .
 ```
 <br>
 
-Then you also need to install the librarys below:<br>
+Then you also need to install the libraries below:<br>
   ***numpy<br>
   scipy<br>
   matplotlib***
@@ -51,7 +57,7 @@ pip install numpy scipy matplotlib
 RUN THE CODE
 =
 
-To run this code you will need to use your Python and insert the following command:
+To run this code, you will need to use Python and insert the following command:
 
 ```
 from qic import Qic
