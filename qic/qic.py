@@ -85,7 +85,7 @@ class Qic():
             phi_shift=1/3
         self.phi_shift = phi_shift
         self.phi = phi + self.phi_shift*self.d_phi
-        if B0_vals==[]:
+        if len(B0_vals) == 0:
             self.B0_vals = [B0]
             self.B0_well_depth = 0
         else:
@@ -94,20 +94,20 @@ class Qic():
         self.B0 =  np.array(sum([self.B0_vals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.B0_vals))]))
         self.B0_svals = B0_svals
         self.B0 += np.array(sum([self.B0_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.B0_svals))]))
-        if d_cvals==[] and d_svals == [] and d_over_curvature_cvals == [] and d_over_curvature == 0:
+        if len(d_cvals) == 0 and len(d_svals) == 0 and len(d_over_curvature_cvals) == 0 and d_over_curvature == 0:
             self.d_cvals = [etabar]
             self.d_svals = d_svals
         else:
             self.d_cvals = d_cvals
             self.d_svals = d_svals
-            if self.d_cvals == []:
+            if len(self.d_cvals) == 0:
                 self.etabar = 0
                 self.d_cvals = [0]
             else:
                 self.etabar = d_cvals[0]
-        if d_over_curvature_cvals == [] and not d_over_curvature == 0:
-            self.d_over_curvature_cvals == [d_over_curvature]
-        if not d_over_curvature_cvals == [] and not d_over_curvature == 0:
+        if len(d_over_curvature_cvals) == 0 and not d_over_curvature == 0:
+            self.d_over_curvature_cvals = [d_over_curvature]
+        if len(d_over_curvature_cvals) != 0 and not d_over_curvature == 0:
             raise ValueError('Only one of d_over_curvature_cvals or d_over_curvature should be specified.')
         self.d = np.array(sum([self.d_cvals[i]*np.cos(nfp*i*self.phi) for i in range(len(self.d_cvals))]))
         self.d = self.d + np.array(sum([self.d_svals[i]*np.sin(nfp*i*self.phi) for i in range(len(self.d_svals))]))
@@ -121,26 +121,26 @@ class Qic():
         self.sG = sG
         self.spsi = spsi
         self.nphi = nphi
-        if B2c_cvals==[] and B2c_svals == []:
+        if len(B2c_cvals) == 0 and len(B2c_svals) == 0:
             self.B2c_cvals = [B2c]
             self.B2c_svals = B2c_svals
             self.B2c = B2c
         else:
             self.B2c_cvals = B2c_cvals
             self.B2c_svals = B2c_svals
-            if self.B2c_cvals == []:
+            if len(self.B2c_cvals) == 0:
                 self.B2c = 0
                 self.B2c_cvals = [0]
             else:
                 self.B2c = B2c_cvals[0]
-        if B2s_cvals==[] and B2s_svals == []:
+        if len(B2s_cvals) == 0 and len(B2s_svals) == 0:
             self.B2s_cvals = [B2s]
             self.B2s_svals = B2s_svals
             self.B2s = B2s
         else:
             self.B2s_cvals = B2s_cvals
             self.B2s_svals = B2s_svals
-            if self.B2s_cvals == []:
+            if len(self.B2s_cvals) == 0:
                 self.B2s = 0
                 self.B2s_cvals = [0]
             else:
