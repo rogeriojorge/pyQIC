@@ -449,26 +449,22 @@ def construct_qi_r2(self, order = 1, verbose = 0, params = [], method = "BFGS", 
     if not params:
         params = []
         num_param = 2*order+2
-        if self.d_over_curvature_cvals == []:
-            params += ['d_over_curvaturec({})'.format(j) for j in range(num_param)]
+        if len(self.d_over_curvature_cvals) == 0:
             d_over_curvature_cvals = np.zeros(num_param)
             if not self.d_over_curvature == 0:
                 d_over_curvature_cvals[0] = self.d_over_curvature
             else: 
                 d_over_curvature_cvals[0] = 0.5
-            self.d_over_curvature_cvals == d_over_curvature_cvals
+            self.d_over_curvature_cvals = d_over_curvature_cvals
             self._set_names()
             self.calculate()
-        if not self.d_over_curvature_cvals == []:
-            if np.size(self.d_over_curvature_cvals) >= num_param:
-                params += ['d_over_curvaturec({})'.format(j) for j in range(np.size(self.d_over_curvature_cvals))]
-            else:
-                params += ['d_over_curvaturec({})'.format(j) for j in range(num_param)]
-                d_over_curvature_cvals = np.zeros(num_param)
-                d_over_curvature_cvals[0:np.size(self.d_over_curvature_cvals)] = self.d_over_curvature_cvals
-                self.d_over_curvature_cvals == d_over_curvature_cvals
-                self._set_names()
-                self.calculate()
+        elif np.size(self.d_over_curvature_cvals) < num_param:
+            d_over_curvature_cvals = np.zeros(num_param)
+            d_over_curvature_cvals[0:np.size(self.d_over_curvature_cvals)] = self.d_over_curvature_cvals
+            self.d_over_curvature_cvals = d_over_curvature_cvals
+            self._set_names()
+            self.calculate()
+        params += ['d_over_curvaturec({})'.format(j) for j in range(np.size(self.d_over_curvature_cvals))]
     else:
         new_params = []
         for ind, label in enumerate(params):
@@ -551,6 +547,4 @@ def evaluate_X2c_X2s_QI(self, X2s_in = 0):
     X2s = X2c_tilde*s2a1 - X2s_tilde*c2a1
 
     return X2c, X2s
-
-
 
