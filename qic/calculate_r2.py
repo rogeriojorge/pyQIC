@@ -10,6 +10,20 @@ from .optimize_nae import min_geo_qi_consistency
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+def _solve_periodic_beta_0(derivative, rhs):
+    """Integrate the periodic beta_0 equation with beta_0[0] = 0.
+
+    A periodic differentiation matrix annihilates constants. Replace one
+    redundant derivative equation by the origin gauge before solving, rather
+    than solving a singular system and subtracting an arbitrary constant.
+    """
+    matrix = np.array(derivative, dtype=float, copy=True)
+    forcing = np.array(rhs, dtype=float, copy=True)
+    matrix[0, :] = 0
+    matrix[0, 0] = 1
+    forcing[0] = 0
+    return np.linalg.solve(matrix, forcing)
+
 def calculate_r2(self):
     """
     Compute the O(r^2) quantities.
@@ -70,8 +84,7 @@ def calculate_r2(self):
     if np.all(rhs_beta_0_equation == np.zeros((1,nphi))[0]):
         beta_0 = np.zeros((1,nphi))[0]
     else:
-        beta_0 = np.linalg.solve(d_d_varphi, rhs_beta_0_equation)
-        beta_0 = beta_0 - beta_0[0] # Fix to be zero at origin
+        beta_0 = _solve_periodic_beta_0(d_d_varphi, rhs_beta_0_equation)
 
     ## Calculate beta_1
     # beta_1c = 0

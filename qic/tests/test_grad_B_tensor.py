@@ -146,7 +146,9 @@ class CylindricalCartesianTensorsTests(unittest.TestCase):
         np.testing.assert_almost_equal(dBdx_cartesian, dBdx_cartesian.transpose(1, 0, 2))
 
         # Test the grad B tensor for another configuration, including symmetry in both indices
-        stel = Qic.from_paper(1)
+        # Resolve the spectral derivatives before checking roundoff-level curl.
+        # The default nphi=31 leaves an approximately 4e-5 truncation error.
+        stel = Qic.from_paper(1, nphi=101)
         dBdx_cylindrical = stel.grad_B_tensor_cylindrical
         np.testing.assert_almost_equal(dBdx_cylindrical, dBdx_cylindrical.transpose(1, 0, 2))
         dBdx_cartesian = stel.grad_B_tensor_cartesian()
