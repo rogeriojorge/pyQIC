@@ -17,6 +17,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         r:  near-axis radius r of the desired boundary surface
         params: a Python dict() instance containing one/several of the following parameters: mpol,
           delt, nstep, tcon0, ns_array, ftol_array, niter_array
+          mpol is the VMEC mode count, so the largest poloidal mode is mpol-1.
         ntheta: resolution in the poloidal angle theta for the Frenet_to_cylindrical and VMEC calculations
         ntorMax: maximum number of NTOR in the resulting VMEC input file
     """
@@ -31,6 +32,8 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         ntor = int(min(self.nphi / 2, ntord))
     else:
         ntor = int(params["ntor"])
+    # Apply the declared cap to both the transform and exported coefficients.
+    ntor = min(ntor, int(ntorMax))
     if "delt" not in params.keys():
         params["delt"] = 0.9
     if "nstep" not in params.keys():
@@ -63,7 +66,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     
     # Fourier transform the result.
     # This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
-    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol, ntor, self.lasym)
+    RBC, RBS, ZBC, ZBS = to_Fourier(R_2D, Z_2D, self.nfp, mpol-1, ntor, self.lasym)
 
     # Write to VMEC file
     file_object = open(filename,"w+")
@@ -91,7 +94,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
     file_object.write("  PMASS_TYPE = '"+pmass_type+"'\n")
     file_object.write('  AM = '+str(am)[1:-1]+'\n')
     file_object.write('!----- Free Boundary Parameters -----\n')
-    file_object.write('  LFREEB = F')
+    file_object.write('  LFREEB = F\n')
     file_object.write('!----- Current/Iota Parameters -----\n')
     file_object.write('  CURTOR = '+str(curtor)+'\n')
     file_object.write('  NCURR = '+str(ncurr)+'\n')
@@ -106,7 +109,7 @@ def to_vmec(self, filename, r=0.1, params=dict(), ntheta=20, ntorMax=14):
         file_object.write('  ZAXIS_CC = '+str(self.zc)[1:-1]+'\n')
     file_object.write('  ZAXIS_CS = '+str(-self.zs)[1:-1]+'\n')
     file_object.write('!----- Boundary Parameters -----\n')
-    for m in range(mpol+1):
+    for m in range(mpol):
         for n in range(-ntor,ntor+1):
             if RBC[n+ntor,m]!=0 or ZBS[n+ntor,m]!=0:
                 file_object.write(    '  RBC('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{RBC[n+ntor,m]:+.16e}"+',    ZBS('+f"{n:03d}"+','+f"{m:03d}"+') = '+f"{ZBS[n+ntor,m]:+.16e}"+'\n')
