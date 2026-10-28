@@ -64,10 +64,14 @@ class NewtonTests(unittest.TestCase):
         ### THIS ONE IS NOT WORKING!!!!
         # compare_field('B1c_over_B0', (stel.B1s * -np.sin(stel.varphi) + stel.B1c * np.cos(stel.varphi)) / stel.B0)
         # compare_field('B1s_over_B0', (stel.B1s *  np.cos(stel.varphi) + stel.B1c * np.sin(stel.varphi)) / stel.B0)
-        compare_field('X1s', stel.X1s_untwisted)
-        compare_field('X1c', stel.X1c_untwisted)
-        compare_field('Y1c', stel.Y1c_untwisted)
-        compare_field('Y1s', stel.Y1s_untwisted)
+        # The MATLAB reference uses an unsigned Frenet frame and the poloidal
+        # origin alpha - 3*pi above. Convert the signed frame and apply the
+        # corresponding pi shift to these first-order displacement amplitudes.
+        reference_frame = -stel.sign_curvature_change
+        compare_field('X1s', reference_frame * stel.X1s_untwisted)
+        compare_field('X1c', reference_frame * stel.X1c_untwisted)
+        compare_field('Y1c', reference_frame * stel.Y1c_untwisted)
+        compare_field('Y1s', reference_frame * stel.Y1s_untwisted)
 
     def test_multiple_NFP(self):
         """

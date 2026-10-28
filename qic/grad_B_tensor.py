@@ -1117,7 +1117,7 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     (Bbar**2*lprime)
 
     # Element 332
-    grad_grad_B[:,1,1,0] =(sG*B0**3*(X1s*Y1c -  \
+    grad_grad_B[:,2,2,1] =(sG*B0**3*(X1s*Y1c -  \
         X1c*Y1s)*curvature* \
         (sG**2*iota_N0*Y1c**2 +  \
         Y1s*(sG**2*iota_N0*Y1s +  \
@@ -1128,7 +1128,7 @@ def calculate_grad_grad_B_tensor(self, two_ways=False):
     (Bbar**2*lprime)
 
     # Element 333
-    grad_grad_B[:,1,1,1] =(sG*B0*(X1s*Y1c -  \
+    grad_grad_B[:,2,2,2] =(sG*B0*(X1s*Y1c -  \
         X1c*Y1s)* \
         (2*B0**2*lprime**2* \
         (-(X1s*Y1c) +  \
